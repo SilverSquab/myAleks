@@ -1,0 +1,205 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>新用户注册</title>
+
+  <!-- Custom fonts for this template-->
+  <link href={% static "assets/vendor/fontawesome-free/css/all.min.css" %} rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="{% static "assets/css/sb-admin-2.min.css" %}" rel="stylesheet">
+<style type="text/css">
+  #submit, #submit-info {
+    font-size: .8rem;
+    border-radius: 10rem;
+    border-top-left-radius: 10rem;
+    border-top-right-radius: 10rem;
+    border-bottom-right-radius: 10rem;
+    border-bottom-left-radius: 10rem;
+    padding: 1rem 1rem;
+  }
+</style>
+</head>
+
+<body class="bg-gradient-primary">
+
+  <div class="container">
+
+    <div class="card o-hidden border-0 shadow-lg my-5">
+      <div class="card-body p-0">
+        <!-- Nested Row within Card Body -->
+        <div class="row">
+          <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
+          <div class="col-lg-7">
+            <div class="p-5">
+              <div class="text-center">
+                <h1 class="h4 text-gray-900 mb-4">欢 迎 ！</h1>
+              </div>
+
+              <div id="register-basic">
+              <form class="user" method="post">
+                <div class="form-group row">
+                  <div class="col-sm-12 mb-3 mb-sm-0">
+                    <input type="email" class="form-control form-control-user" id="email" name="email" placeholder="邮箱">
+                  </div>
+
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-user" id="username" name="username" placeholder="用户名（英文以及数字，不超过20位）">
+                </div>
+                <div class="form-group row">
+                  <div class="col-sm-6 mb-3 mb-sm-0">
+                    <input type="password" class="form-control form-control-user" id="password" name="password" placeholder="密码">
+                  </div>
+                  <div class="col-sm-6">
+                    <input type="password" class="form-control form-control-user" id="confirm_password" name="confirm_password" placeholder="再次输入密码">
+                  </div>
+                </div>
+
+
+              </form>
+              <button id="submit" class="btn btn-primary btn-user btn-block">
+                  创建账户
+                </button>
+
+                </div>
+<!-- register basic info -->
+
+              <div id="upload-info" style="display:none;">
+              <form class="user" method="post">
+                <div class="form-group row">
+                  <div class="col-sm-12 mb-3 mb-sm-0">
+                    <input type="email" class="form-control form-control-user" id="email" name="email" placeholder="邮箱">
+                  </div>
+
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-user" id="phone" name="phone" placeholder="手机号">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-user" id="name" name="name" placeholder="姓名">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-user" id="school" name="school" placeholder="学校名称">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-user" id="grade" name="grade" placeholder="年级">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-user" id="gender" name="gender" placeholder="性别">
+                </div>
+
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-user" id="province" name="province" placeholder="省份">
+                </div>
+
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-user" id="city" name="city" placeholder="城市">
+                </div>
+
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-user" id="district" name="district" placeholder="区县">
+                </div>
+
+
+
+              </form>
+              <button id="submit-info" class="btn btn-primary btn-user btn-block">
+                  创建账户
+                </button>
+
+                </div>
+
+<!-- upload other info -->
+
+
+              <hr>
+              <div class="text-center">
+                <a class="small" href="forgot-password.html">忘记密码</a>
+              </div>
+              <div class="text-center">
+                <a class="small" href="login.html">已经有账户了？登录</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src={% static "assets/vendor/jquery/jquery.min.js" %}></script>
+   <script src={% static "assets/vendor/bootstrap/js/bootstrap.bundle.min.js" %}></script>
+
+   <!-- Core plugin JavaScript -->
+  <script src={% static "assets/vendor/jquery-easing/jquery.easing.min.js" %}></script>
+
+  <!-- Custom scripts for all pages -->
+  <script src={% static "assets/js/sb-admin-2.min.js" %}></script>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $("#submit").click(function(){
+          if($("#password").val() != $("#confirm_password").val())
+          {
+
+            alert("密码不一致，请重新输入");
+            return;
+          }
+
+          $.ajax({
+            method: "POST",
+            url: "{% url "user-register" %}",
+            data: { "username": $("#username").val(), "password":$("#password").val(), csrfmiddlewaretoken: '{{ csrf_token }}' }
+          }).done(function( data ) {
+            if(data != 'OK')
+              alert(data);
+            else{
+              $("#register-basic").css("display", "none");
+              $("#upload-info").css("display", "block");
+            }
+          });
+      })
+
+      $("#submit-info").click(function(){
+          $.ajax({
+            method: "POST",
+            url: "{% url "student-register" %}",
+            data: { 
+              "username": $("#username").val(),
+              "phone": $("#phone").val(), 
+              "name":$("#name").val(),
+              "school":$("#school").val(),
+              "grade":$("#grade").val(),
+              "gender":$("#gender").val(),
+              "province":$("#province").val(),
+              "city":$("#city").val(),
+              "district":$("#district").val(),
+              csrfmiddlewaretoken: '{{ csrf_token }}' 
+            }
+          }).done(function( data ) {
+            if(data != 'OK')
+              alert(data);
+            else
+              alert("注册成功");
+          });
+      })
+
+
+    })
+  </script>
+</body>
+
+</html>

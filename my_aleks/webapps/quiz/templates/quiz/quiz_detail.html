@@ -1,0 +1,56 @@
+{% extends 'teacher/teacher_base.html'%}
+
+{% block "stylesheets" %}
+    <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block "main_content" %}
+
+<!-- Begin Page Content -->
+
+<!-- Page Heading -->
+
+
+<!-- Page Heading -->
+<!--试卷信息-->
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">试卷详情</h1>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> 导出PDF</a>
+</div>
+<p>试卷名称:{{quizInfo.info.title}}</p>
+<p>科目：{{quizInfo.subject}}</p>
+<!--题目卡片-->
+<div class="row" id="question-container">
+    {% for q in questions %}
+    <div class="col-lg-6">
+        <!-- Default Card Example -->
+        <div class="card mb-4">
+
+            <div class="card-header">
+                <div class="custom-control custom-checkbox small">
+                    <label class="custom-control-label">
+                        <h6 class="m-0 font-weight-bold text-primary"style="line-height: 1.5rem;">
+                            知识点：{% for k in q.knowledge_nodes %} {{k}} {% endfor %}
+                        </h6>
+                    </label>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>{{q.question.body}}</p>
+                    {% if q.question.image %}
+                        <img src="http://47.110.253.251/evaluation-img/{{q.question.image}}" width="40%">
+                    {% endif %}
+                    {% for o in q.options %}
+                        <p>{{o.order}}.{{o.body}} </p>
+                        {% if o.img %}
+                            <img src="http://47.110.253.251/evaluation-img/{{o.img}}" width="40%">
+                        {% endif %}
+                    {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<!-- /.container-fluid -->
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'teacher/teacher_base.html'%}
+{% load staticfiles %}
+{% block "main_content" %}
+
+	<div class="row">
+
+
+
+	<div class="col-xl-12" style="position:relative;">
+
+	学科：
+	<input type="text" id="Subject" class="bg-light form-control" value="2">
+
+		先导知识点：
+		<input type="text" id="node1" class="nodeSearchBar form-control bg-light">
+		<div class="hint" id="hint1" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:100%;">
+			<table id="table1" style="width:100%;">
+				<tbody class="node_table" style="width:100%;">
+					<tr class="node_item" style="width:100%;"><td>hello</td></tr>
+				
+				</tbody>
+			</table>
+		</div>
+<!-- 	</div>
+
+
+	<div class="col-xl-12" style="width:300px; position:relative;">
+ -->		后继知识点：
+
+		<input type="text" id="node2" class="nodeSearchBar form-control bg-light">
+		<div class="hint" id="hint2" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:100%;">
+			<table id="table2" style="width:100%">
+				<tbody class="node_table" style="width:100%;">
+					<tr class="node_item" style="width:100%;"><td>hello</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+	权重
+	<input type="text" id="Weight" class="bg-light form-control col-xl-3 col-lg-3" value="1.0">
+	<br>
+	<br>
+		<button class="btn btn-primary" id="add"> 连边 </button>
+
+	</div>
+
+
+</div>
+
+
+{% endblock %}
+{% block "scripts" %}
+  <!-- Page level plugins -->
+  <script src={% static "assets/vendor/chart.js/Chart.min.js" %}></script>
+
+  <!-- Page level custom scripts -->
+  <script type="text/javascript">
+  	$(document).ready(function(){
+        var node1_id, node2_id;
+  		$(".nodeSearchBar").focus(function(){
+			$(this).next().css("display", "block");
+		})
+		$(".nodeSearchBar").blur(function(){
+			var t = $(this);
+			setTimeout(function(){
+				t.next().css("display", "none");
+			}, 750);
+
+			//$(this).next().css("display", "none");
+		})
+		$(".node_table").on("click", ".node_item", function(){
+			$(this).parent().parent().parent().prev().val($(this).find('td').html());
+            if($(this).parent().parent().parent().prev().attr("id") == "node1"){
+                node1_id = $(this).attr("id");
+                console.log(node1_id);
+            }
+            else {
+                node2_id = $(this).attr("id");
+                //console.log(node2_id);
+            }
+
+		})
+
+		var old_val = "";
+		$(".nodeSearchBar").on("change  input",function(){
+
+        var val = $(this).val();
+
+		if(val == old_val)
+			return;
+        var node_input = $(this);
+        //console.log(val);
+
+		setTimeout(function(){
+			if(node_input.val() == val)
+			{
+				old_val = val;
+				//console.log(old_val);
+
+				$.ajax({
+					method: "GET",
+					url: "{% url "ajax-nodes" %}",
+					data: { subject: $("#Subject").val(), text: old_val }
+				})
+				.done(function( msg ) {
+					var l = JSON.parse(msg);
+					s = "";
+
+					for(i in l){
+						var s = s + '<tr class="node_item" id="'+ l[i][0] +  '"><td>' + l[i][1] +  '</td></tr>';
+
+
+					}
+					node_input.next().find("tbody").html(s);
+
+				});
+			}
+
+		}, 750);
+// console.log(val);
+  //       if (val !== oldVal) {
+  //           oldVal = val;
+  //           checkLength(val);			
+		// }
+		
+	})
+    $("#add").click(function(){
+    	var weight = parseFloat($("#Weight").val());
+    	$.ajax({
+            method: "POST",
+            url: "{% url "ajax-upload-edge" %}",
+            data: {node1_id: node1_id, node2_id: node2_id, weight: weight}
+        }).done(function( msg ){
+            alert(msg);
+        })
+    })
+  	})
+
+  </script>
+{% endblock %}

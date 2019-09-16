@@ -1,0 +1,31 @@
+首页前端：
+    分模块显示 done
+
+学生登陆：
+    查看评估
+    查看记录
+    #练习
+    #    推题（生成题目，生成试卷）
+    #    解析（根据决策树算法，错因倒退）
+
+老师登陆：
+    组卷测试
+        需要测试模块，放在quiz里边
+        查看单次quiz总体状况和学生状况，可视化
+    查看学生学习状况
+    录入题目 done
+    查看题库 done
+
+数据库：done
+    StudentProfile
+        question_record
+        subject_teacher_pair
+    TeacherProfile
+    KnowledgeSpace
+        node
+        edge
+        graph
+    Question
+        options
+        question_stats
+

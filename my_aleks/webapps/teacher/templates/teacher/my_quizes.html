@@ -1,0 +1,41 @@
+{% extends 'teacher/teacher_base.html'%}
+{% load staticfiles %}
+{% block "main_content" %}
+
+          <!-- Page Heading -->
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">我的试卷</h1>
+          </div>
+          <div class="row">
+            <div class="col-lg-6">
+              <!-- Default Card Example -->
+			{% for quiz in quizInfo %} 
+              <div class="card mb-4" id="{{quiz.id}}" name="quiz">
+                <div class="card-header">
+                  <h6 class="m-0 font-weight-bold text-primary">试卷名称:{{quiz.info.title}}</h6>                
+                </div>
+                <div class="card-body">
+                  <p>组卷人：{{quiz.generator}}</p>
+                  <p>科目：{{quiz.subject}}</p>
+                </div>
+              </div>
+			{% endfor %}
+            </div>
+            </div>
+{% endblock %}
+{% block "scripts" %}
+	<script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
+	<script type="text/javascript">
+       /*卡片的点击事件*/
+        $("div[name='quiz']").click(function () {
+            var quizId= $(this).attr("id")
+            console.log(quizId)
+            //$(location).attr('href', 'http://47.110.253.251/abc/quiz/compose-quiz/');
+			//$.ajax({
+           // method: "GET",
+            //url: "{% url 'quiz-record' %}",
+            //data: { quizId: quizId }
+			//})
+        })
+	</script>
+{% endblock %}

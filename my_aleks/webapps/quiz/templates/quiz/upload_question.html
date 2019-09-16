@@ -1,0 +1,320 @@
+{% extends 'teacher/teacher_base.html'%}
+{% load staticfiles %}
+{% block "main_content" %}
+
+
+<p>公式录入： <span id="math-field" style="width:300px;"></span></p>
+<p>LaTeX代码(不换行)： <span id="latex"></span></p>
+<p>LaTeX代码(换行)： <span id="latexBr"></span></p>
+
+<a href="https://www.cnblogs.com/caomingpei/p/9760652.html">latex 常见公式语法查询</a>
+<form id="question_form">
+   <div class="col-xl-12" style="position:relative;">
+  {{question_form}}
+</div>
+
+  <div class="col-xl-12" style="position:relative;">
+    搜索知识点(可添加多个知识点，所有知识点会在下方列出)：
+    <input type="text" id="knowledge_node_searchbar" class="nodeSearchBar form-control bg-light">
+    <div class="hint" id="hint1" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:100%;">
+      <table id="table1" style="width:100%;">
+        <tbody class="node_table" style="width:100%;">
+          <tr class="node_item" style="width:100%;"><td></td></tr>
+        
+        </tbody>
+      </table>
+    </div>
+    <table id="nodes_table_question" style="width:100%;">
+        <tbody class="node_table_display" style="width:100%;">
+
+<!--           <tr class="node_item" style="width:100%;"><td></td></tr>
+ -->    
+        {% if knowledge_nodes %}
+        {% for l in knowledge_nodes %}  
+        <tr class="node_item" id="{{l.0}}'"><td>{{l.1}}</td></tr>
+        {% endfor %}
+        {% endif %}
+        
+        </tbody>
+      </table>
+  </div>
+   <div class="col-xl-12" style="position:relative;">
+    <h1>预览题目</h1>
+  <div id="body-preview" style="border: 1px solid #d1d3e2;"><p> </p></div>
+    <h1>预览解析</h1>
+  <div id="analysis-preview" style="border: 1px solid #d1d3e2;"><p> </p></div>
+</div>
+
+
+
+<br><br>
+</form>
+  {% for option_form in option_forms %}
+   <div class="col-xl-12" style="position:relative;">
+  <form id="option_form_{{option_form.order_of_option}}">
+    <h1>选项 {{ option_form.order_of_option }}</h1>
+    {{option_form}}
+    </form>
+  </div>
+  <div class="col-xl-12" style="position:relative;">
+    搜索知识点(可添加多个知识点，所有知识点会在下方列出)：
+    <input type="text" id="knowledge_node_searchbar_{{option_form.order_of_option}}" class="nodeSearchBar form-control bg-light">
+    <div class="hint" id="hint_{{option_form.order_of_option}}" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:100%;">
+      <table id="nodes_table_search_{{option_form.order_of_option}}" style="width:100%;">
+        <tbody class="node_table" style="width:100%;">
+<!--           <tr class="node_item" style="width:100%;"><td></td></tr>
+ -->        
+        </tbody>
+      </table>
+    </div>
+    <table id="nodes_table_{{option_form.order_of_option}}" style="width:100%;">
+        <tbody class="node_table_display" style="width:100%;">
+
+<!--           <tr class="node_item" style="width:100%;"><td></td></tr>
+ -->        
+        {% if nodes_arrs %}
+          {%if nodes_arrs|get_item:option_form.order_of_option %}
+
+            {% for l in nodes_arrs|get_item:option_form.order_of_option %}
+                <tr class="node_item" id="option_node_{{l.0}}"><td>{{l.1}}</td></tr>
+
+            {% endfor %}
+
+          {% endif %}
+        {% endif %}
+        </tbody>
+      </table>
+  </div>
+
+  <h1>预览选项</h1>
+  <div class="option-preview" style="border: 1px solid #d1d3e2;"><p> </p></div>
+  <hr>
+
+  {% endfor %}
+<br><br>
+<button id="add_question" class="btn btn-primary">添加题目</button>
+
+
+{% endblock %}
+{% block "scripts" %}
+<script type="text/javascript" async
+  src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  MathJax.Ajax.config.path["mhchem"] =
+  "https://cdnjs.cloudflare.com/ajax/libs/mathjax-mhchem/3.3.2";
+MathJax.Hub.Config({
+  TeX: {
+    extensions: ["[mhchem]/mhchem.js"]
+  }
+});
+</script>
+<script src="https://cdn.bootcss.com/jquery.form/4.2.2/jquery.form.js"></script>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+
+var question_id = -1;
+
+{% if question_id %}
+var question_id = {{question_id}};
+{% endif %}
+
+var mathFieldSpan = document.getElementById('math-field');
+var latexSpan = document.getElementById('latex');
+
+var latexBrSpan = document.getElementById('latexBr');
+
+var MQ = MathQuill.getInterface(2); // for backcompat
+var mathField = MQ.MathField(mathFieldSpan, {
+  spaceBehavesLikeTab: true, // configurable
+  handlers: {
+    edit: function() { // useful event handlers
+      latexSpan.textContent = '\\(' + mathField.latex() + '\\)'; // simple API
+
+      latexBrSpan.textContent = '\\[' + mathField.latex() + '\\]'; // simple API
+
+    }
+  }
+});
+
+    var nodes_arr = [];
+
+    {% if knowledge_nodes %}
+      {% for i in knowledge_nodes %}
+        nodes_arr.push('{{i.0}}')
+      {% endfor %}
+    {% endif %}
+
+    var nodes_arrs = {'A':[], 'B':[], 'C':[], 'D':[]};
+
+    {% if nodes_id_arrs %}
+    var nodes_arrs = {{nodes_id_arrs | safe}};
+    {% endif %}
+    
+
+
+    var q_id;
+
+
+    // searchbar focus in and out
+    $(".nodeSearchBar").focus(function(){
+      $(this).next().css("display", "block");
+    })
+
+
+    $(".nodeSearchBar").blur(function(){
+      var t = $(this);
+      setTimeout(function(){
+        t.next().css("display", "none");
+      }, 750);
+
+    })
+
+    // table item on click
+    $(".node_table").on("click", ".node_item", function(){
+      //console.log($(this).parent().parent().attr('id'));
+      $(this).parent().parent().parent().prev().val($(this).find('td').html());
+      $(this).parent().parent().parent().next().append('<tr class="node_item" style="width:100%;"><td>' + $(this).html() + '</td></tr>');
+
+      var l = $(this).parent().parent().attr("id").split('_');
+      var order = l[l.length - 1];
+
+      if(order in nodes_arrs){
+        nodes_arrs[order].push($(this).attr("id"));
+        //console.log(nodes_arrs[order]);
+      }
+      else {
+        nodes_arr.push($(this).attr("id"));
+        //console.log(nodes_arr);
+
+      }
+    })
+
+    var old_val = {};
+
+
+
+    // searchbar on text chagne
+    $(".nodeSearchBar").on("change input",function(){
+      var node_input = $(this);
+      var val = $(this).val();
+
+      if( !(node_input.attr("id") in old_val))
+      {
+        old_val[node_input.attr("id")] = ""
+      }
+
+      if(val == old_val[node_input.attr("id")])
+        return;
+
+      setTimeout(function(){
+        if(node_input.val() == val)
+        {
+          old_val[node_input.attr("id")] = val;
+
+          $.ajax({
+            method: "GET",
+            url: "{% url "ajax-nodes" %}",
+            data: { subject: $("#id_subject").val(), text: old_val[node_input.attr("id")] }
+          })
+          .done(function( msg ) {
+            var l = JSON.parse(msg);
+            s = "";
+            //console.log(l);
+            for(i in l){
+              var s = s + '<tr class="node_item" id="'+ l[i][0] +  '"><td>' + l[i][1] +  '</td></tr>';
+
+
+            }
+            node_input.next().find("tbody").html(s);
+
+          });
+        }
+
+      }, 750);
+    })
+
+
+
+
+    $("#add_question").click(function(){
+      var form = $('#question_form');
+
+      form.ajaxSubmit({
+        type:'post',
+        data: {'nodes':nodes_arr, "question_id": question_id},
+        url: '{% url "ajax-upload-question" %}',
+        enctype: 'multipart/form-data',
+        processData: false,
+        success: function(data){
+          if(data == 'failed')
+            alert("题目上传失败");
+
+          q_id = data;
+          submit_option(['A', 'B', 'C', 'D']);
+          // submit_option('B');
+          // submit_option('C');
+          // submit_option('D');
+          alert("上传完毕");
+        }
+      })
+    })
+
+
+    function submit_question(){
+      var form = $("#question_form");
+    }
+
+    function submit_option(orders){
+
+      if(orders == [])
+        return;
+      var order = orders[0];
+      var form = $("#option_form_"+String(order));
+      //console.log(form.html());
+
+      form.ajaxSubmit({
+        type:'post',
+        data: {question: q_id, order: order, nodes: nodes_arrs[order], "question_id":question_id},
+        enctype: 'multipart/form-data',
+        processData: false,
+        url: '{% url "ajax-upload-option" %}',
+        success: function(data){
+          //alert(data);
+          if(data != 'OK'){
+            alert(data);
+          }
+          setTimeout(function(){
+            submit_option(orders.slice(1));
+          }, 200);
+        }
+      })
+      
+    }
+
+
+    // mathjax reloads preview model when body is blurred
+    $("#id_question_body").blur(function(){
+      var body = $(this).val();
+      //console.log(body);
+      $("#body-preview").html(body);
+      MathJax.Hub.Typeset()
+    })
+
+    $("#id_analysis").blur(function(){
+      var body = $(this).val();
+      //console.log(body);
+      $("#analysis-preview").html(body);
+      MathJax.Hub.Typeset()
+    })
+
+    $("textarea[id^='id_option_body']").blur(function(){
+      var preview = $(this).parent().parent().nextAll(".option-preview").first();
+      var body = $(this).val();
+      preview.html(body);
+      MathJax.Hub.Typeset();
+    })
+
+
+  })
+</script>
+{% endblock %}

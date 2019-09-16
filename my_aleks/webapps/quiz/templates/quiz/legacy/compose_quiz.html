@@ -1,0 +1,59 @@
+{% extends 'quiz/base.html'%}
+{% block "sidebar" %}
+{% endblock %}
+{% block "main" %}
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+{% if not questions %}
+<form action="{% url 'compose-quiz' %}" method="get" > 
+<input name="subject" placeholder="输入科目"/>
+<input name="knowledge_node" placeholder="知识节点"/>
+<br/>
+<input type="submit" value="submit"/> 
+</form>
+    {% else %}
+    <button id="SubmitQuiz" class="btn-primary">提交</button><br/>
+    {% for question in questions %}
+    <input class="question-selector" type="checkbox" value="{{question.id}}">
+    <h4>{{question.body}}</h4>
+    {% for option in question.options.all %}
+        <p><b>{{option.order}}. </b>{{option.body}}</p>
+        {% if option.img %}
+            <img src="{{ option.img.url }}">
+        {% endif %}
+    {% endfor %}
+    {% endfor %}
+    {% endif %}
+{% endblock%}
+
+{% block "scripts" %}
+<script>
+$(document).ready(function(){
+var question_list = [];
+$(".question-selector").click(function(){
+if($(this).prop('checked'))
+{
+    question_list.push($(this).val())
+}
+else
+{
+    question_list.splice(question_list.indexOf($(this).val()), 1);
+}
+
+})
+$.ajaxSetup({
+
+    data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+
+    });
+
+$("#SubmitQuiz").click(function(){
+    //TODO: body generating
+    body = "{'32':2, '33':1}";
+    $.post("{% url 'compose-quiz' %}", {subject:3, body:body})
+})
+})
+</script>
+{% endblock %}

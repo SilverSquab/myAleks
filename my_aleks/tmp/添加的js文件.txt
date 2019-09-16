@@ -1,0 +1,14 @@
+//项目中已有的，导入就好
+<script src="vendor/jquery/jquerysession.js"></script>
+<script src="vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+
+
+//这两个是的新建的
+<script src="js/demo/datatables-demo.js"></script>
+<script src="js/statement.js" type="text/javascript"></script>
+
+
+//修改过的
+<script src="js/demo/chart-area-demo.js"></script>

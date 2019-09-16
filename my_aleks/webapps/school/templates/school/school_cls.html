@@ -1,0 +1,140 @@
+{% extends 'school/school_base.html'%}
+{% load staticfiles %}
+
+{% block "stylesheets" %}
+    <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block "main_content" %}
+
+<!-- Begin Page Content -->
+
+<!-- Page Heading -->
+
+
+<!-- Page Heading -->
+<!--班级列表-->
+<div class="col-xl-6 col-md-6 mb-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">班级管理</h1>
+    </div>
+    <!-- 添加班级按钮 -->
+    <div class="input-group-append" style="float: none;">
+        <button class="btn btn-primary" id="addCls" type="button">
+            <i>添加班级</i>
+        </button>
+    </div>
+</div>
+<!--班级卡片-->
+<div class="row" id="question-container">
+	<!-- 以卡片的形式循环显示出所有班级 -->
+    {% for c in classes %}
+        <div class="col-lg-6">
+        <!-- Default Card Example -->
+        <div class="card mb-4" id="{{c.id}}">
+            <div class="card-header">
+                
+                    <h6 class="m-0 font-weight-bold text-primary" style="line-height: 1.5rem;">班级名称：{{c.name}}</h6>
+            </div>
+            <div class="card-body" name="Cls" style="cursor:pointer">
+                <p>班级名称：{{c.name}}</p>
+                <p>学科：{{c.subject}}</p>
+                <p>年级：{{c.grade}}</p>
+                <p>授课老师：{{c.teacher__name}}</p>
+                <p>学生总数：{{c.num}}</p>
+            </div>
+        </div>
+        </div>
+    {% endfor %}
+</div>
+<!-- /.container-fluid -->
+{% endblock %}
+
+{% block "scripts" %}
+<script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
+<script src="{% static "assets/js/jquery.addClsmsgbox.js" %}" type="text/javascript"></script>
+<!-- 用于弹窗设计的js -->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var schoolId='{{schoolId}}'
+        //卡片点击事件
+        $("div[name='Cls']").click(function () {
+            var clsId = $(this).parent().attr("id")
+            $(location).attr('href', 'http://47.110.253.251/abc/school/get-class-detail/?clsId=' + clsId);
+        })
+        //添加班级事件
+        $("#addCls").click(function () {
+            $.get("http://47.110.253.251/abc/ks/ajax-subjects/",function(data,status){
+                if (status == "success"){
+                    var subject = $.parseJSON(data);
+                    $.get("http://47.110.253.251/abc/school/get-all-teachers",function(data,status){
+                        if (status == "success"){
+                            var teachers = $.parseJSON(data);
+                            console.log(subject)
+                            console.log(teachers)
+                            $.AddClsMsgBox.Confirm("添加班级",teachers,subject,function () {
+                                var name = $("input[name='name']").val();
+                                var grade = $("input[name='grade']").val();
+                                var option=$("#teacher option:selected"); //获取选中的项
+                                var teacherId = option.val(); //拿到选中项的值
+                                var options=$("#subject option:selected"); //获取选中的项
+                                var subjectId = options.val(); //拿到选中项的值
+                                $.post("http://47.110.253.251/abc/school/create-class/",JSON.stringify({
+                                    'subject':subjectId,
+                                    'grade':grade,
+                                    'name':name,
+                                    'teacherId':teacherId
+                                }),function(data,status){
+                                    if (status != "success"){
+                                        $("#mb_box,#mb_con1").remove();
+                                        func("添加失败！","#fef0f0","#f56c6c");//#f56c6c
+                                    } else {
+                                        if (data=='OK'){
+                                            $("#mb_box,#mb_con1").remove();
+                                            func("添加成功！",'#f0f9eb','#89c26b');//#89c26b
+                                            window.location.reload();
+                                        } else {
+                                            $("#mb_box,#mb_con1").remove();
+                                            func("添加失败！","#fef0f0","#f56c6c");//#f56c6c
+                                        }
+                                    }
+                                });
+                            });
+                        }   
+                    });
+                }
+            });
+        })
+
+        //消息提醒
+        var layer=document.createElement("div");
+        layer.id="layer";
+        function func(title,color,font_color)
+        {
+            var style=
+            {
+                background:"#D7ECF1",
+                position:"absolute",
+                zIndex:10,
+                width:"380px",
+                height:"48px",
+                left:"50%",
+                top:"20px",
+                textAlign:"center",
+                paddingTop:"17px",
+                paddingBottom:"17px"
+            }
+            style["background"]=color
+            for(var i in style)
+                layer.style[i]=style[i];
+            layer.innerHTML="<div style='color:"+font_color+";font-size: 14px'><b>"+title+"</b></div>"
+            if(document.getElementById("layer")==null)
+            {
+                document.body.appendChild(layer);
+                setTimeout("document.body.removeChild(layer)",2000)
+            }
+        }
+    });
+</script>
+{% endblock %}

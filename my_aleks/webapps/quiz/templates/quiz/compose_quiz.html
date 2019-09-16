@@ -1,0 +1,599 @@
+{% extends 'teacher/teacher_base.html'%}
+
+{% block "stylesheets" %}
+  <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+
+{% endblock %}
+
+{% block "main_content" %}
+
+<!-- Begin Page Content -->
+
+<!-- Page Heading -->
+
+
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800">组卷选题</h1>
+
+  <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> 保存</a>
+
+</div>
+<!-- Earnings (Monthly) Card Example -->
+<div class="col-xl-6 col-md-6 mb-4">
+<!-- <form>{{form}}</form> -->
+    <input type="text" id="subjectSearchBar" class="form-control bg-light" placeholder="学科" aria-label="Search" aria-describedby="basic-addon2">
+    
+    <div class="hint" id="subject_hint" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:100%;">
+      <table id="subject_table" style="width:100%;">
+        <tbody class="node_table" style="width:100%;">
+          <tr class="node_item" style="width:100%;"><td></td></tr>
+
+        </tbody>
+      </table>
+    </div>
+
+<br>    <input type="text" id="nodeSearchBar" class="form-control bg-light" placeholder="知识点" aria-label="Search" aria-describedby="basic-addon2">
+    <div class="hint" id="hint1" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:100%;">
+      <table id="table1" style="width:100%;">
+        <tbody class="node_table" style="width:100%;">
+          <tr class="node_item" style="width:100%;"><td></td></tr>
+
+        </tbody>
+      </table>
+    </div>
+
+  <br>
+
+  <div>
+    <input type="text" class="form-control bg-light border-1 small" placeholder="题目编号" aria-label="Search" aria-describedby="basic-addon2"><br> 
+    <div class="input-group-append">
+      <button class="btn btn-primary" id="search-btn" type="button">
+        <i class="fas fa-search fa-sm">搜索题目</i>
+      </button>
+
+      <button class="btn btn-primary" id="search-own-btn" type="button" style="margin-left: 20px;">
+        <i class="fas fa-search fa-sm">搜索个人题目</i>
+      </button>
+      &nbsp;&nbsp;&nbsp;&nbsp; 
+      <h2 id="question_counter" style="display:none;">共 <span></span> 道题</h2>
+    </div>
+  </div>
+
+  <!-- Earnings (Monthly) Card Example -->
+
+
+
+</div>
+
+
+
+
+<div class="row" id="question-container">
+
+
+
+      </div>
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">已选题目</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered" id="selected_questions" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+                  <th>题号</th>
+                  <th>题目</th>
+                  <th>知识点</th>
+                  <th><button class="pull-right btn btn-primary" id="marking-btn">启用计分</button></th>
+          
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tfoot>
+                <tr>
+                  <th>题号</th>
+                  <th>题目</th>
+                  <th>知识点</th>                  
+                  <th>总分： <span id="total_score">0</span> </th>
+                  <th>操作</th>
+                </tr>
+              </tfoot>
+              <tbody>
+                <tr id="question_1">
+                  <td>1</td>
+                  <td>（单选题）在下列太阳系行星中，距太阳最近的是：</td>
+                  <td>知识点：太阳系行星</td>
+                  <td><input type="number" class="form-control score_input" placeholder="分值" disabled></td>
+                  <td><a href="#">删除</a></td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>下图为太阳系八大行星的位置示意图.读图回答下列各题</td>
+                  <td>知识点：太阳系行星</td>
+                  <td><input type="number" class="form-control score_input" placeholder="分值" disabled></td>
+
+                  <td><a href="#">删除</a></td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>以前是九大行星，冥王星为什么被除名？</td>
+                  <td>知识点：太阳系行星</td>
+                  <td><input type="number" class="form-control score_input" placeholder="分值" disabled></td>
+                  <td><a href="#">删除</a></td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>太阳系有八大行星，根据距日远近、质量、体积差异可将它们分为三大类即类地行星、巨行星及远日行星……</td>
+                  <td>知识点：太阳系行星</td>
+                  <td><input type="number" class="form-control score_input" placeholder="分值" disabled></td>
+                  <td><a href="#">删除</a></td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-lg" id="submit-quiz">保存试卷</button>
+      <hr>
+      <!-- /.container-fluid -->
+      {% endblock %}
+
+      {% block "scripts" %}
+      <script type="text/javascript" async
+  src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  MathJax.Ajax.config.path["mhchem"] =
+  "https://cdnjs.cloudflare.com/ajax/libs/mathjax-mhchem/3.3.2";
+MathJax.Hub.Config({
+  TeX: {
+    extensions: ["[mhchem]/mhchem.js"]
+  }
+});
+</script>
+<script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
+      <script type="text/javascript">
+        $(document).ready(function(){
+
+
+
+
+    // $( ".datepicker" ).datepicker({
+    //   changeMonth: true,
+    //   changeYear: true,
+    //   yearRange: "1900:2012",
+    //   monthNamesShort: [1,2,3,4,5,6,7,8,9,10, 11, 12],
+    //   // You can put more options here.
+    // });
+          // defination of the quiz
+
+          var quiz_info = {'title': ''};
+          var quiz_body = {};
+          var quiz_subject = '';
+          var total_score = 0;
+
+          var quiz_marking = false;
+
+          var nodes_arr = '';
+          var subject = '';
+
+          var order_counter = 0;
+
+          $("#nodeSearchBar").focus(function(){
+            $(this).next().css("display", "block");
+          })
+
+
+          $("#nodeSearchBar").blur(function(){
+            var t = $(this);
+            setTimeout(function(){
+              t.next().css("display", "none");
+            }, 750);
+
+          })
+
+          $("#subjectSearchBar").focus(function(){
+            $(this).next().css("display", "block");
+          })
+
+
+          $("#subjectSearchBar").blur(function(){
+            var t = $(this);
+            setTimeout(function(){
+              t.next().css("display", "none");
+            }, 750);
+
+          })
+
+          $("#submit-quiz").click(function()
+          {
+            $.ajax({
+              method: "POST",
+              url: "{% url "compose-quiz" %}",
+              data: { marking: false, csrfmiddlewaretoken: '{{ csrf_token }}' }
+            })
+            .done(function( msg ) {
+              alert('yes');
+            });
+
+          })
+
+
+          $("#marking-btn").click(function(){
+
+            if(quiz_marking){
+              quiz_marking = false;
+              $(".score_input").each(function(){
+                $(this).attr('disabled', 'disabled');
+              })
+              $(this).html('启用计分');
+            }
+            else
+            {
+              quiz_marking = true;
+              $(".score_input").each(function(){
+                $(this).removeAttr('disabled');
+              })
+              $(this).html('关闭计分');
+
+            }
+          })
+
+
+          $(".node_table").on("click", ".node_item", function(){
+            //console.log($(this).parent().parent().attr('id'));
+            $(this).parent().parent().parent().prev().val($(this).find('td').html());
+
+
+            var parent_id = $(this).parent().parent().attr('id');
+            //subjects
+            if(parent_id == "subject_table")
+            {
+              subject = $(this).attr("id");
+              console.log(subject);
+            }
+            //knowledge node
+            else{
+              nodes_arr = $(this).attr("id");
+            }
+
+          })
+
+
+          var old_val = "";
+
+          $(".score_input").on("change", function(){
+
+
+            total_score = 0;
+
+            $(".score_input").each(function(){
+              if($(this).val() == '')
+              {
+                $(this).val(0);
+              }
+              else if($(this).val() < 0)
+              {
+                $(this).val(0);
+              }
+
+              total_score += parseInt($(this).val());
+            })
+            $("#total_score").html(total_score);
+
+          })
+
+          $(".score_input").on("click", function(){
+            $(this).val('');
+          })
+
+          $("#nodeSearchBar").on("change input",function(){
+            var node_input = $(this);
+            var val = $(this).val();
+
+            if(val == old_val)
+              return;
+
+            setTimeout(function(){
+              if(node_input.val() == val)
+              {
+                old_val = val;
+
+                $.ajax({
+                  method: "GET",
+                  url: "{% url "ajax-nodes" %}",
+                  data: { text: old_val }
+                })
+                .done(function( msg ) {
+                  var l = JSON.parse(msg);
+                  s = "";
+                  //console.log(l);
+                  for(i in l){
+                    var s = s + '<tr class="node_item" id="'+ l[i][0] +  '"><td>' + l[i][1] +  '</td></tr>';
+                  }
+
+                  node_input.next().find("tbody").html(s);
+
+                });
+
+
+              }
+
+            }, 750);
+          })
+
+          $("#subjectSearchBar").on("click",function(){
+                var t = $(this).next();
+
+            setTimeout(function(){
+
+                $.ajax({
+                  method: "GET",
+                  url: "{% url "ajax-subjects" %}",
+                  
+                })
+                .done(function( msg ) {
+                  var l = JSON.parse(msg);
+                  s = "";
+                  //console.log(l);
+                  for(i in l){
+                    var s = s + '<tr class="node_item" id="'+ l[i][0] +  '"><td>' + l[i][1] +  '</td></tr>';
+                  }
+                  
+                  //console.log($(this).next().find("tbody").html());
+                  t.find("tbody").html(s);
+
+                });
+
+
+
+            }, 750);
+          })
+
+//regex settings
+String.prototype.format = function() {
+ if(arguments.length == 0) return this;
+ var param = arguments[0];
+ var s = this;
+ if(typeof(param) == 'object') {
+  for(var key in param)
+   s = s.replace(new RegExp("\\{" + key + "\\}", "g"), param[key]);
+  return s;
+ } else {
+  for(var i = 0; i < arguments.length; i++)
+   s = s.replace(new RegExp("\\{" + i + "\\}", "g"), arguments[i]);
+  return s;
+ }
+}
+
+        function append_question(dic)
+        {
+          //console.log(dic);
+
+          // s = '<div class="col-lg-6">\
+          //   <div class="card mb-4">\
+          //     <div class="card-header">\
+          //       <div class="custom-control custom-checkbox small">\
+          //         <input type="checkbox" class="custom-control-input" id="{question_id}">\
+          //         <label class="custom-control-label" for="question_id"><h6 class="m-0 font-weight-bold text-primary" style="line-height: 1.5rem;">知识点：{nodes}</h6>  </label>\
+          //       </div>\
+          //     </div>\
+          //       <div class="card-body">\
+          //         <p>（单选题）{question_body}</p>\
+          //         <p>A. {optionA} </p>\
+          //         <p>B. {optionB}</p>\
+          //         <p>C. {optionC}</p>\
+          //         <p>D. {optionD}</p>\
+          //       </div>\
+          //     </div>\
+          //   </div>' 
+          // $("#question-container").append(s.format(dic));
+
+          //console.log(dic);
+
+          s = '<div class="col-lg-6">\
+            <div class="card mb-4">\
+              <div class="card-header">\
+                        <button class="btn btn-primary select-btn" type="button">选择题目</button>  {question_id}\
+                        <a href="/abc/quiz/upload-question/?question_id={question_id}" id="edit-{question_id}" type="button">编辑题目</a>  \
+              </div>\
+                <div class="card-body">\
+                  <p class="question-body">（单选题）{question_body}</p>\
+                  <p>A. {optionA} </p>\
+                  <p>B. {optionB}</p>\
+                  <p>C. {optionC}</p>\
+                  <p>D. {optionD}</p>\
+                  <p>{analysis}</p>\
+                </div>'
+
+            
+
+          if(dic['img_url'])
+          {
+            s += 'image: <img src="' + dic['img_url'] + '" style="width: 150px; height: 150px;">';
+          }
+          if(dic['optionAimg'])
+          {
+            s += 'option A image: <img src="' + dic['optionAimg'] + '" style="width: 150px; height: 150px;">';
+          }
+          if(dic['optionBimg'])
+          {
+            s += 'option B image: <img src="' + dic['optionBimg'] + '" style="width: 150px; height: 150px;">';
+          }
+          if(dic['optionCimg'])
+          {
+            s += 'option C image: <img src="' + dic['optionCimg'] + '" style="width: 150px; height: 150px;">';
+          }
+          if(dic['optionDimg'])
+          {
+            s += 'option D image: <img src="' + dic['optionDimg'] + '" style="width: 150px; height: 150px;">';
+          }
+          
+          s += '</div></div>';
+          $("#question-container").append(s.format(dic));
+
+          //MathJax.Hub.Typeset();
+        }
+
+
+//TODO: select question, append it to selected
+//TODO: submit a quiz
+        var questions_tbody = $("#selected_questions").find("tbody");
+
+
+        function append_selected_question(dic)
+        {
+          var tr_id = 'question_' + order_counter;
+          s = '<tr id={tr_id}>\
+                  <td>{order}</td>\
+                  <td>{body}</td>\
+                  <td>{nodes}</td>\
+                  <td><input type="number" class="form-control score_input" placeholder="分值" disabled></td>\
+                  <td><a href="#">删除</a></td>\
+                </tr>';
+          d = {};
+          d['tr_id'] = tr_id;
+          d['order'] = order_counter;
+
+          questions_tbody.append(s.format)
+
+        }
+
+
+        $(document).on('click', '.select-btn', function(){
+          append_selected_question(23);
+        })
+
+        //搜索自己的题目
+        $("#search-own-btn").click(function(){
+          $.ajax({
+            method: "GET",
+            url: "{% url "ajax-get-own-questions" %}",
+            data: { node_id: nodes_arr }
+          })
+          .done(function( msg ) {
+            var l = JSON.parse(msg);
+            s = "";
+            var counter = 0;
+
+            // console.log(l);
+            $('#question-container').html('');
+            //for(question_id in l){
+            for(i = 0; i < l.length; i++){
+              question_dic = l[i]
+              question_id = question_dic[0];
+
+              question = question_dic[1];
+
+              dic = {};
+              dic['question_id'] = question_id;
+              dic['question_body'] = question['body'];
+
+              if(question['analysis'])
+                dic['analysis'] = question['analysis'];
+              else
+                dic['analysis'] = "无解析";
+
+              if(question['img_url'])
+              {
+                dic['img_url'] = question['img_url']
+              }
+              for(key in question['options'])
+              {
+                dic['option'+key] = question['options'][key]['body'];
+                if(question['options'][key]['img_url'])
+                {
+                  dic['option'+key+'img'] = question['options'][key]['img_url'];
+                }
+              }
+              // if(question['options']['A'])
+              // {
+              //   dic['optionA'] = question['options']['A']['body'];
+              // }
+              // if(question['options']['A'])
+              // {
+              //   dic['optionA'] = question['options']['A']['body'];
+              // }
+              // if(question['options']['C'])
+              // {
+              //   dic['optionA'] = question['options']['A']['body'];
+              // }
+              // if(question['options']['D'])
+              // {
+              //   dic['optionA'] = question['options']['D']['body'];
+              // }
+              // dic['optionA'] = question['options']['A']['body'];
+              // dic['optionB'] = question['options']['B']['body'];
+              // dic['optionC'] = question['options']['C']['body'];
+              // dic['optionD'] = question['options']['D']['body'];
+              dic['nodes'] = nodes_arr;
+              append_question(dic);
+              counter++;
+            }
+
+            
+MathJax.Hub.Typeset();
+            $("#question_counter").find("span").html(counter);
+            $("#question_counter").css("display", "block");
+          });
+
+        })
+
+        //搜索题目
+        $("#search-btn").click(function(){
+          //subject = $("#subjectSearchBar").val();
+          console.log(subject);
+          $.ajax({
+            method: "GET",
+            url: "{% url "ajax-get-questions" %}",
+            data: { node_id: nodes_arr, subject: subject }
+          })
+          .done(function( msg ) {
+            console.log(msg);
+            var l = JSON.parse(msg);
+            s = "";
+            //console.log(l);
+
+            // console.log(l);
+            $('#question-container').html('');
+            for(question_id in l){
+              question = l[question_id];
+              
+              dic = {};
+              dic['question_id'] = question_id;
+              dic['question_body'] = question['body'];
+
+              if(question['analysis'])
+                dic['analysis'] = question['analysis'];
+              else
+                dic['analysis'] = "无解析";
+              if(question['img_url'])
+              {
+                dic['img_url'] = question['img_url']
+              }
+              for(key in question['options'])
+              {
+                dic['option'+key] = question['options'][key]['body'];
+              }
+              // dic['optionA'] = question['options']['A']['body'];
+              // dic['optionB'] = question['options']['B']['body'];
+              // dic['optionC'] = question['options']['C']['body'];
+              // dic['optionD'] = question['options']['D']['body'];
+              dic['nodes'] = nodes_arr;
+              append_question(dic);
+            }
+            MathJax.Hub.Typeset();
+
+          });
+
+        })
+
+
+        })
+
+
+
+      </script>
+      {% endblock %}

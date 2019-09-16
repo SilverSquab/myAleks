@@ -1,0 +1,52 @@
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdftex 2019.3.10)  4 JUL 2019 23:22
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**test.aux
+(./test.aux
+! Undefined control sequence.
+l.2 \providecommand
+                   \hyper@newdestlabel[2]{}
+? 
+! Undefined control sequence.
+l.2 \providecommand\hyper
+                         @newdestlabel[2]{}
+? 
+! Undefined control sequence.
+l.3 \providecommand
+                   \HyperFirstAtBeginDocument{\AtBeginDocument}
+? 
+! Undefined control sequence.
+l.3 \providecommand\HyperFirstAtBeginDocument
+                                             {\AtBeginDocument}
+? 
+! Undefined control sequence.
+l.3 ...\HyperFirstAtBeginDocument{\AtBeginDocument
+                                                  }
+? 
+! Undefined control sequence.
+l.4 \HyperFirstAtBeginDocument
+                              {\ifx\hyper@anchor\@undefined
+? 
+! Undefined control sequence.
+l.17 \providecommand
+                    \HyField@AuxAddToFields[1]{}
+? 
+! Undefined control sequence.
+l.17 \providecommand\HyField
+                            @AuxAddToFields[1]{}
+? 
+! Undefined control sequence.
+l.18 \providecommand
+                    \HyField@AuxAddToCoFields[2]{}
+? 
+! Undefined control sequence.
+l.18 \providecommand\HyField
+                            @AuxAddToCoFields[2]{}
+? 
+! Emergency stop.
+l.18 \providecommand\HyField
+                            @AuxAddToCoFields[2]{}
+End of file on the terminal!
+
+!  ==> Fatal error occurred, no output PDF file produced!

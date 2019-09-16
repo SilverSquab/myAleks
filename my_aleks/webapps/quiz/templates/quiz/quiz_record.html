@@ -1,0 +1,262 @@
+{% extends 'teacher/teacher_base.html'%}
+
+{% load staticfiles %}
+
+
+{% block "main_content" %}
+
+
+          <!-- Page Heading -->
+          <h1 class="h3 mb-2 text-gray-800">测试详情</h1>
+<!--           <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below. For more information about DataTables, please visit the <a target="_blank" href="https://datatables.net">official DataTables documentation</a>.</p>
+ -->
+          <!-- DataTales Example -->
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">考试名</h6>
+            </div>
+            <div style="padding-left:20px; padding-top:10px;">
+              <p>组卷人：XXX</p>
+            <p>科目：XXX</p>
+            <p>知识点范围：XXX</p>
+            <p>已考人数：XXX</p>
+            <p>平均成绩：XXX</p>
+
+            </div>
+
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th>详情</th>
+                    </tr>
+                  </thead>
+                  <tfoot>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th>详情</th>
+                    </tr>
+                  </tfoot>
+                  <tbody>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    <tr>
+                      <th>姓名</th>
+                      <th>班级</th>
+                      <th>成绩</th>
+                      <th>排名</th>
+                      <th>测试时间</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+
+        <!-- /.container-fluid -->
+{% endblock %}
+
+{% block "scripts" %}
+
+  <!-- Page level plugins -->
+  <script src="{% static "assets/vendor/datatables/jquery.dataTables.min.js" %}"></script>
+  <script src="{% static "assets/vendor/datatables/dataTables.bootstrap4.min.js" %}"></script>
+
+  <!-- Page level custom scripts -->
+  <script src="{% static "assets/js/demo/datatables-demo.js" %}"></script>
+{% endblock %}
+

@@ -1,0 +1,32 @@
+		1.1 正弦定理和余弦定理 fa660e5c17414016bedee20080de4a55							
+			d098058d0cdf		cbe7eb41a6cb		429413a2d681		
+					
+		1.2 应用举例 6d30a7f32cb441739eb6e7470ae2e449							
+			965e0fdd6229						
+															
+		2.1 数列的概念与简单表示法 91dbe91dd6464b8891b48bc1cc438d2c							
+			e48cc7f0558c		61c431ca264a			00b255a91e6a			4735875d251e			968c240696e8		9fdf99b4bc7e			930b912656dd				
+									
+		2.2 等差数列 f2b292aea00c45fea503c5b42fbd16a0							
+			a1dad758e32e		e887843b0a4b			1c74ba68186e			47190b78fb03			b4faf0016046		f2853c078979						
+									
+		2.3 等差数列的前n项和 4bb5d440c824452d874a71fff6351efb							
+				9ce8e006aa05		26af7181395b		c9d9a234a3b6			
+									
+		2.4 等比数列 89784cd023974ab3a9e2e92f51c03b9d							
+				a8a343cffd8f		1dd7de746b26		da7d666abc27		3da7732ba55d		16008f8a8c50		d70aac856f9d
+									
+		 2.5 等比数列的前n项和 368e4d6b8dfd4812a6123c1684ce2ba2							
+			24866fe77c7f		f6cda3c0929b		6505a998aa7e		d2fd232308e3	c790ae2b541b		
+									
+		3.1 不等关系与不等式 9da81fef91cd4c3db7e4dcced9306b5b							
+			fcc17418bce6		d8f5c9f94196			
+								
+		3.2 一元二次不等式及其解法 1ed6660dddd9439bafc723b88e8a9de7							
+			6810e6a13c4a		3c354763098b		18de61743ce3		c21f604566bb			
+					
+		 3.3 二元一次不等式（组）与简单的线性规划问题 0c1b4e899f8f4dd7a851ac2d46bb35d6							
+			14e6016f79cb		cf407da27b1d	96ca21bb1e59	341568fb312c					
+									
+		3.4 基本不等式 5a81cae4a0c54c4cb5e67624d64ef1c9							
+			ba9cdfe4bed1						

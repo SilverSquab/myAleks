@@ -1,0 +1,36 @@
+{% extends 'teacher/teacher_base.html'%}
+
+{% block "main_content" %}
+
+{% if not question %}
+<form action="{% url 'question-page' %}" method="get" > 
+<input name="question_id" class="bg-light form-control" placeholder="输入题目编号"/>
+<br/>
+<input type="submit" class="btn btn-primary" value="搜索题目"/> 
+</form>
+    {% else %}
+    <h4>{{question.body}}</h4>
+    {% if question.img %}
+                <img src="{{ question.img.url }}"></img>
+
+    {% endif %}
+    {% for option in question.options.all %}
+        <p><b>{{option.order}}. </b>{{option.body}}</p>
+        {% if option.img %}
+            <img src="{{ option.img.url }}"></img>
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+{% endblock %}
+ {% block "scripts" %}
+        <script type="text/javascript" async
+    src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Ajax.config.path["mhchem"] =
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjax-mhchem/3.3.2";
+  MathJax.Hub.Config({
+    TeX: {
+      extensions: ["[mhchem]/mhchem.js"]
+    }
+  });
+  </script>
+{% endblock %}

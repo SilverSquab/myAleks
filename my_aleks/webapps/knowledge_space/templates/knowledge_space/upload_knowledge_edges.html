@@ -1,0 +1,15 @@
+{% extends 'knowledge_space/base.html'%}
+{% block "sidebar" %}
+{% endblock %}
+{% block "main" %}
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+<form action="{% url 'upload-knowledge-edges' %}" method="post" enctype="multipart/form-data"> 
+    {% csrf_token %}
+<input type="file" name="edges"/>
+<br/>
+<input type="submit" value="submit"/> 
+</form>
+{% endblock%}

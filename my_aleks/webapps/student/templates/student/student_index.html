@@ -1,0 +1,110 @@
+{% extends 'student/student_base.html'%}
+{% load staticfiles %}
+{% block "main_content" %}
+          <!-- Page Heading -->
+          <h1 class="h3 mb-4 text-gray-800">我的主页</h1>
+
+          <div class="row">
+
+            <div class="col-lg-6">
+              <div class="card mb-4">
+
+                <div class="card-body bg-gradient-primary">
+                  <div class="text-center"><img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60"></div>
+
+                </div>
+                <div class="card-body">
+                  <div class="text-center">
+                    <p>姓名：周志鹏</p>
+                    <p>年级：高三</p>
+                    <p>联系方式：13801028392</p>
+                    <p>学习课程：高中 数学、高中 物理、高中 化学</p>
+                  </div>
+
+                </div>
+                <div class="card-body">
+                  <div class="text-center"><h2 class="text-primary">新的一天加油！</h2></div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="card shadow mb-4">
+                <!-- Card Header - Accordion -->
+                <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="collapseCardExample">
+                  <h6 class="m-0 font-weight-bold text-primary">数学</h6>
+                </a>
+                <!-- Card Content - Collapse -->
+                <div class="collapse show" id="collapseCardExample" style="">
+                  <div class="card-body">
+                    授课老师：张瑞 <br>最近测评成绩：85/100分 <br>成绩分布：73% <br>薄弱知识点：集合的交和并、共轭复数等11个知识点 <br>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="card shadow mb-4">
+                <!-- Card Header - Accordion -->
+                <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="collapseCardExample">
+                  <h6 class="m-0 font-weight-bold text-primary">物理</h6>
+                </a>
+                <!-- Card Content - Collapse -->
+                <div class="collapse show" id="collapseCardExample" style="">
+                  <div class="card-body">
+                    授课老师：陈春雷 <br>最近测评成绩：90/100分 <br>高于88%的同学 <br>薄弱知识点：电功率、电场线模板等5个知识点 <br>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="card shadow mb-4">
+                <!-- Card Header - Accordion -->
+                <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="collapseCardExample">
+                  <h6 class="m-0 font-weight-bold text-primary">化学</h6>
+                </a>
+                <!-- Card Content - Collapse -->
+                <div class="collapse show" id="collapseCardExample" style="">
+                  <div class="card-body">
+                    授课老师：无 <br>无评测记录
+                  </div>
+                </div>
+              </div>
+            </div>
+
+<div class="col-lg-6">
+
+              <!-- Default Card Example -->
+              <div class="card mb-4">
+                <div class="card-header">
+       
+                      <div class="custom-control custom-checkbox small">
+                        <input type="checkbox" class="custom-control-input" id="">
+                        <label class="custom-control-label" for=""><h6 class="m-0 font-weight-bold text-primary" style="line-height: 1.5rem;">知识点：XXXX</h6>  </label>
+                      </div> 
+                </div>
+                <div class="card-body">
+                  <p>木星绕太阳运行的轨道都可以看作是圆形。已知木星的轨道半径约为地球轨道半径的5.2倍，则木星与地球绕太阳运行的线速度之比约为</p>
+                  <p>A. 11：25 </p>
+                  <p>B. 7：9</p>
+
+                </div>
+              </div>
+              <div class="card mb-4">
+                <div class="card-header">
+                      <div class="custom-control custom-checkbox small">
+                        <input type="checkbox" class="custom-control-input" id="">
+                        <label class="custom-control-label" for=""><h6 class="m-0 font-weight-bold text-primary" style="line-height: 1.5rem;">知识点：XXXX</h6>  </label>
+                      </div>                 </div>
+                <div class="card-body">
+                  <p>木星绕太阳运行的轨道都可以看作是圆形。已知木星的轨道半径约为地球轨道半径的5.2倍，则木星与地球绕太阳运行的线速度之比约为</p>
+                  <p>A. 11：25 </p>
+                  <p>B. 7：9</p>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+{% endblock %}

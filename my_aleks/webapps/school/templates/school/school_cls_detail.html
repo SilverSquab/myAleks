@@ -1,0 +1,269 @@
+{% extends 'school/school_base.html'%}
+
+{% load staticfiles %}
+{% block "stylesheets" %}
+	<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block "main_content" %}
+
+<!-- Begin Page Content -->
+
+<!-- Page Heading -->
+
+
+<!-- Page Heading -->
+<!--试卷信息-->
+<div class="container-fluid">
+	  <!-- Page Heading -->
+	  <h1 class="h3 mb-2 text-gray-800">班级信息</h1>
+	  <!-- 班级基本信息 -->
+	  <div class="row" id="question-container">
+	      <div class="col-lg-6">
+            <p>班级名称：{{clsInfo.name}}</p>
+            <p>年级：{{clsInfo.grade}}</p>
+            <p>老师：{{clsInfo.teacher__name}}</p>
+            <p>学科：{{clsInfo.subject}}</p>
+          </div>
+          <div class="col-lg-6">
+            {% if planInfo.info %}
+                <p>套餐信息：{{planInfo.info}}</p>
+            {% else %}
+                <p>套餐信息：暂无</p>
+            {% endif %}
+            {% if planInfo.description %}
+                <p>描述：{{planInfo.description}}</p>
+            {% else %}
+                <p>描述：暂无</p>
+            {% endif %}
+            {% if planInfo.resources %}
+                <p>内容资源：{{planInfo.resources}}</p>
+            {% else %}
+                <p>内容资源：暂无</p>
+            {% endif %}
+          </div>
+	  </div>
+        <div class="input-group-append" style="float: none;">
+            <button class="btn btn-primary" id="buy" type="button">
+                <i class="fas fa-search">购买套餐</i>
+            </button>
+        </div>
+
+	  <p></p>
+	  <!-- 学生列表表格-->
+	  <div class="card shadow mb-4">
+
+	    <div class="card-header py-3">
+	      <h6 class="m-0 font-weight-bold text-primary">学生列表</h6>
+	    </div>
+
+	    <div class="card-body">
+	      <div class="table-responsive">
+
+	        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+
+	          <thead>
+	            	<tr>
+	                  <th>姓名</th>
+	                  <th>学情档案</th>
+	                  <th>支付状态</th>
+	                  <th>操作</th>
+	                </tr>
+	          </thead>
+
+	          <tbody>
+	              	{% for stu in students %}
+	                    <tr id="{{stu.id}}">
+	                      <td>{{stu.name}}</td>
+	                      <td><a href="#">查看学情档案</a></td>
+	                      <td stuPlanId="{{stu.stuPlanId}}">{% if stu.payStatus %}已支付{% else %}未支付（ <a href="#" name="pays">代支付</a>）{% endif %}</td>
+	                      <td><a href="#" name="delete">删除</a></td>
+	                    </tr>
+	                {% endfor %}
+	                <tr>
+	                    <div style="padding-bottom: 20px">
+                            学生学号：
+                            <input type="text" style="width: 10%;height:40px" fontSize="16px"; name="stuId" Placeholder="请输入学生学号"/>
+                            联系电话：
+                            <input type="telephone" style="width: 10%;height:40px" fontSize="16px"; name="stuPhone" Placeholder="请输入学生电话" pattern="[0-9]{11}" title="请填写正确的电话"/>
+                            <button class="btn btn-primary" type="button" id="addStu">
+                                <i>搜素学生</i>
+                            </button>
+                        </div>
+	                </tr>
+	          </tbody>
+	        </table>
+	      </div>
+	    </div>
+	  </div>
+</div>
+
+<!-- /.container-fluid -->
+{% endblock %}
+
+{% block "scripts" %}
+	<script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
+	<script src="{% static "assets/js/jquery.buyPlan.js" %}" type="text/javascript"></script>
+	<script src="{% static "assets/js/jquery.addStu.msgbox.js" %}" type="text/javascript"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+        var clsId = '{{clsId}}'
+        //购买套餐点击事件
+        $("#buy").click(function () {
+             $.get("http://47.110.253.251/abc/plan/ajax-get-plan-templates" ,function(data,status){
+                 if (status =="success"){
+                    //console.log(data);
+                     var planInfo = $.parseJSON(data);
+                     $.MsgBox.Confirm(planInfo,function (){
+                        $("button[name='buyPlan']").click(function () {
+                            var planId = $(this).attr("id")
+                            $.post("http://47.110.253.251/abc/plan/assign-plan-to-class/",JSON.stringify({
+                                'planTemplateId':planId,
+                                'clsId':clsId
+                            }),function(data,status){
+                                console.log(data)
+                                console.log(status)
+                                if (status != "success"){
+                                    $("#mb_box,#mb_con1").remove();
+                                    func("购买失败！","#fef0f0","#f56c6c");//#f56c6c
+                                } else {
+                                    if (data){
+                                        $("#mb_box,#mb_con1").remove();
+                                        func("购买成功！",'#f0f9eb','#89c26b');//#89c26b
+                                       // window.location.reload();
+                                    }else {
+                                        $("#mb_box,#mb_con1").remove();
+                                        func("购买失败！","#fef0f0","#f56c6c");//#f56c6c
+                                    }
+                                }
+                            });
+                        });
+                     });
+                 } else {
+                     func("获取套餐失败！","#fef0f0","#f56c6c");//#f56c6c
+                 }
+             });
+        });
+
+        //点击添加学生事件
+         $("#addStu").click(function () {
+            var stuId=$("input[name='stuId']").val()//学生id
+            var phone=$("input[name='stuPhone']").val()
+            $.get("http://47.110.253.251/abc/student/ajax-get-student-profile/?student_no="+stuId+"&phone="+phone ,function(data,status){
+                console.log("date"+data)
+                console.log("status"+status)
+                if (status != "success"){
+                    //$("#mb_box,#mb_con1").remove();
+                    func("该学生不存在！","#fef0f0","#f56c6c");//#f56c6c
+                } else {
+                    if (data=='failed') {
+                        func("学生查询失败！","#fef0f0","#f56c6c");//#f56c6c
+                    }else if (data == 'failed: user not existed') {
+                        func("学生查询失败！","#fef0f0","#f56c6c");//#f56c6c
+                    }else if(data){
+                         var studentInfo =  $.parseJSON(data);
+                         $.AddStuMsgBox.Confirm("学生信息",studentInfo,function () {
+                             $.post("http://47.110.253.251/abc/school/add-student-to-class",JSON.stringify({
+                                  'studentId':studentInfo.student_id,
+                                   'clsId':clsId
+                             }) ,function(data,status){
+                                 if (status != "success"){
+                                     $("#mb_box,#mb_con1").remove();
+                                     func("添加失败！","#fef0f0","#f56c6c");//#f56c6c
+                                 } else {
+                                     if ('OK'==data){
+                                         $("#mb_box,#mb_con1").remove();
+                                         func("添加成功！",'#f0f9eb','#89c26b');//#89c26b
+                                         window.location.reload();
+                                         $("input[name='stuId']").val("");
+                                         $("input[name='stuPhone']").val("");
+                                     }else {
+                                         $("#mb_box,#mb_con1").remove();
+                                         func("添加失败！","#fef0f0","#f56c6c");//#f56c6c
+                                     }
+                                 }
+                             });
+                         });
+                    }else {
+                        func("该学生不存在！","#fef0f0","#f56c6c");//#f56c6c
+                    }
+                }
+            });
+        })
+
+        //代支付的点击事件
+        $("a[name='pays']").click(function () {
+             var stuId = $(this).parent().parent().attr("id")
+             var stuPlanId = $(this).parent().attr("stuPlanId")
+             $.post("http://47.110.253.251/abc/school/pay-student-plan",JSON.stringify({
+                 'studentPlanId':stuPlanId,
+                 'clsId':clsId
+             }) ,function(data,status){
+                if (status != "success"){
+                   func("支付失败！","#fef0f0","#f56c6c");//#f56c6c
+                } else {
+                    if ('OK'==data){
+                        func("支付成功！",'#f0f9eb','#89c26b');//#89c26b
+                        window.location.reload();
+                    }else {
+                        func("支付失败！","#fef0f0","#f56c6c");//#f56c6c
+                    }
+                }
+            });
+         })
+
+        //删除学生的点击事件
+        $("a[name='delete']").click(function () {
+            var stuId = $(this).parent().parent().attr("id")
+            $.post("http://47.110.253.251/abc/school/remove-student-from-class/",JSON.stringify({
+                 'studentId':stuId,
+                  'clsId':clsId
+            }),function(data,status){
+                console.log(data)
+                console.log(status)
+                if (status != "success"){
+                    func("删除失败！","#fef0f0","#f56c6c");//#f56c6c
+                } else {
+                    if (data=='OK'){
+                        func("删除成功！",'#f0f9eb','#89c26b');//#89c26b
+                        window.location.reload();
+                    }else {
+                        func("删除失败！","#fef0f0","#f56c6c");//#f56c6c
+                    }
+                }
+            });
+        })
+
+        //消息提醒
+        var layer=document.createElement("div");
+        layer.id="layer";
+        function func(title,color,font_color)
+        {
+            var style=
+            {
+                background:"#D7ECF1",
+                position:"absolute",
+                zIndex:10,
+                width:"380px",
+                height:"48px",
+                left:"50%",
+                top:"20px",
+                textAlign:"center",
+                paddingTop:"17px",
+                paddingBottom:"17px"
+            }
+            var _width=(document.documentElement.clientWidth-380)/2
+            style["left"]=_width+"px"
+            style["background"]=color
+            for(var i in style)
+                layer.style[i]=style[i];
+            layer.innerHTML="<div style='color:"+font_color+";font-size: 14px'><b>"+title+"</b></div>"
+            if(document.getElementById("layer")==null)
+            {
+                document.body.appendChild(layer);
+                setTimeout("document.body.removeChild(layer)",2000)
+           }
+        }
+    });
+	</script>
+{% endblock %}

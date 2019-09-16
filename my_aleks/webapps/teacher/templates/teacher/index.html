@@ -1,0 +1,280 @@
+{% extends 'teacher/teacher_base.html'%}
+{% load staticfiles %}
+{% block "main_content" %}
+
+           <!-- Page Heading -->
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <h1 class="h3 mb-0 text-gray-800">学情报告</h1>
+                    <!--<a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>-->
+                </div>
+
+
+                <!--                <div class="row">-->
+                <!--级联选择框 -->
+                <div class="col-lg-12" style="padding:30px 10px;background: #eeeeee">
+                    <div class="input-group">
+                        <input type="text" aria-describedby="basic-addon2" readonly="readonly" id="classInput">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">选择班级 <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                {% for schoolClass in schoolClassList %}
+                                <li class="classCheckLi">
+                                    <div class="dropdown-item" style="cursor:hand" name="{{schoolClass.id}}">
+                                        {{schoolClass.name}}
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div><!-- /btn-group -->
+                        <div class="btn btn-info btn-icon-split" style="margin-left: 10px" id="checkButton">
+                            <span class="text" name="checkStudyState">查询学情状况</span>
+                        </div>
+                    </div>
+                </div>
+                <!--                </div>-->
+
+
+                {% if LearningInformation.performance %}
+                <!-- Content Row -->
+                <div class="row">
+                    <div class="col-xl-4 col-lg-5">
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-12 col-md-6 mb-4"></div>
+                        <div class="col-xl-12 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                最近一次考试最高分
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                {{LearningInformation.performance.topScore}}
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-12 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                最近一次考试最低分
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                {{LearningInformation.performance.lowestScore}}
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Requests Card Example -->
+                        <div class="col-xl-12 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                最近一次考试平均分
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                {{LearningInformation.performance.averageScore}}
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">班级学情报告列表</h6>
+                                <div id="myTableButton">
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" width="100%" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th>报告名</th>
+                                            <th>打开</th>
+                                            <th>生成PDF文档</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody  id="myTBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Content Row -->
+
+                <div class="row">
+
+                    {% if LearningInformation.lineValue %}
+                    <!-- Area Chart -->
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Dropdown -->
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">测试情况</h6>
+                                <div class="dropdown no-arrow">
+                                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                         aria-labelledby="dropdownMenuLink">
+                                        <div class="dropdown-header">Dropdown Header:</div>
+                                        <a class="dropdown-item" href="#">Action</a>
+                                        <a class="dropdown-item" href="#">Another action</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#">Something else here</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="card-body">
+                                <div class="chart-area">
+                                    <canvas id="myAreaChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <!-- Pie Chart -->
+                    {% if LearningInformation.weaknessList %}
+                    <div class="col-xl-4 col-lg-5">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">弱点知识统计</h6>
+                            </div>
+                            <div class="card-body">
+                                {% for weakness in LearningInformation.weaknessList %}
+                                <h4 class="small font-weight-bold">{{weakness.knowledgeName}} <span class="float-right">{{weakness.ration}}%</span>
+                                </h4>
+                                <div class="progress mb-4">
+                                    <div class="progress-bar bg-danger" role="progressbar"
+                                         style="width: {{weakness.ration}}%" aria-valuenow="{{weakness.ration}}"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if LearningInformation.reportList or LearningInformation.studentList %}
+                <!-- Content Row -->
+                <div class="row">
+                    <!-- Content Column -->
+                    <div class="col-lg-12">
+                        <!-- DataTales Example -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">学生学情报告列表</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                        {% if LearningInformation.reportList %}
+                                        <thead>
+                                        <tr>
+                                            <th>报告名</th>
+                                            <th>生成时间</th>
+                                            <th>打开</th>
+                                            <th>生成PDF文档</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for report in LearningInformation.reportList %}
+                                        <tr>
+                                            <td>{{report.name}}</td>
+                                            <td>{{report.datetime}}</td>
+                                            <td class="tdOnReport">
+                                                <div class="btn btn-info btn-icon-split">
+                                                    <span class="text" name="{{report.id}}">查看报告</span>
+                                                </div>
+                                            </td>
+                                            <td class="tdOnDownload">
+                                                <div class="btn btn-info btn-icon-split">
+                                                    <span class="text" name="{{report.name}}">导出PDF文件</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                        {% endif %}
+                                        <!--根据对象不同展示不同数据 -->
+                                        {% if LearningInformation.studentList %}
+                                        <thead>
+                                        <tr>
+                                            <th>学生学号</th>
+                                            <th>学生姓名</th>
+                                            <th>操作</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for student in LearningInformation.studentList %}
+                                        <tr>
+                                            <td>{{student.id}}</td>
+                                            <td>{{student.name}}</td>
+                                            <td class="tdOnStudent">
+                                                <div class="btn btn-info btn-icon-split">
+                                                    <span class="text" name="{{student.id}}">查看学情报表</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                        {% endif %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+
+         
+
+{% endblock %}
+{% block "scripts" %}
+  <!-- Page level plugins -->
+  <script src={% static "assets/vendor/chart.js/Chart.min.js" %}></script>
+  <script src={% static "assets/vendor/bootstrap/js/bootstrap.bundle.min.js" %}></script>
+  <script src={% static "assets/vendor/jquery-easing/jquery.easing.min.js" %}></script>
+  <script src={% static "assets/js/sb-admin-2.min.js" %}></script>
+  <script src={% static "assets/vendor/datatables/jquery.dataTables.min.js" %}></script>
+  <script src={% static "assets/vendor/datatables/dataTables.bootstrap4.min.js" %}></script>
+  <script src={% static "assets/js/demo/datatables-demo.js" %}></script>
+  <script src={% static "assets/vendor/teacherReport/jquerysession.js" %}></script>
+  <script src={% static "assets/vendor/teacherReport/statement.js" %}></script>
+{% endblock %}

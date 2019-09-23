@@ -46,23 +46,34 @@ def quiz_page(request):
         quiz = Quiz.objects.get(pk=quiz_id)
     except:
         return HttpResponse('quiz not exsited')
-    quiz.subject = Subject.objects.get(name=quiz.subject).chinese_name
+    try:
+        quiz.subject = Subject.objects.get(name=quiz.subject).chinese_name
+    except:
+        pass
     quiz.info=json.loads(quiz.info)
-
+    quiz_paper_url=''
+    try:
+        quiz_paper_url=quiz.quizpaper_set.all()[0].pdf_uri
+    except:
+        pass
     #print(quiz)
     quiz_body = json.loads(quiz.body)
     questions =[]
     #print(quiz_body)
     for body in quiz_body:
-        print(quiz_body[body][0])
+        # print(quiz_body[body][0])
         try:
             question = Question.objects.get(pk = quiz_body[body][0])
         except:
-            return HttpResponse('question ont exsited')
-        options = question.options.all()
+            return HttpResponse('question not exsited')
+        try:
+            options = question.options.all().order_by('order')
+        except:
+            return HttpResponse('options not exsited')
         options_dicts = list(options.values('body','order','img'))
-        questions.append({'question':question,'options':options})
-    return render(request, 'quiz/quiz_detail.html',{"quizInfo":quiz,'questions':questions})
+        knowledge_node = KnowledgeNode.objects.filter(question=question)
+        questions.append({'question':question,'options':options,"knowledge_nodes":knowledge_node})
+    return render(request, 'quiz/quiz_detail.html',{"quizInfo":quiz,'questions':questions,'quiz_paper_url':quiz_paper_url})
 
 @login_required
 def quiz_records(request):
@@ -81,6 +92,7 @@ def quiz_record(request):
     return render(request, 'quiz/quiz_record.html')
 
 @staff_member_required
+@csrf_exempt
 def compose_quiz(request):
     if request.method == 'GET':
         subject = request.GET.get('subject', '')
@@ -122,7 +134,7 @@ def compose_quiz(request):
     body = request.POST.get('body', '')
     marking = request.POST.get('marking', '')
     public = request.POST.get('public', '')
-
+    quiz_type = request.POST.get('quiz_type','')
     if not body:
         return HttpResponse('quiz body not found')
 
@@ -141,7 +153,7 @@ def compose_quiz(request):
         public = False
 
     try:
-        quiz = Quiz(marking = marking, info = info, body = body, subject = subject, public = public, generator = request.user)
+        quiz = Quiz(marking = marking, info = info, body = body, subject = subject, public = public,quiz_type=quiz_type,generator = request.user)
         #print(quiz)
         quiz.save()
     except Exception as e:
@@ -376,15 +388,50 @@ def mark_quiz(request):
         if quiz_id == '':
             return render(request, 'quiz/mark_quiz.html')
         else:
+            try:
+                quiz_record=QuizRecord.objects.get(pk=quiz_id)
+            except:
+                return HttpResponse('quizRecord not exsited')
+            quiz=quiz_record.quiz
+            cls=quiz_record.cls.name
+            title=json.loads(quiz.info)['title']
+            quiz_body = json.loads(quiz.body)
+            questions =[]
+            #print(quiz_body)
+            for body in quiz_body:
+                # print(quiz_body[body][0])
+                try:
+                    question = Question.objects.get(pk = quiz_body[body][0])
+                    print(str(question.img))
+                    question_info={"body":question.body,"image":question.img,"score":quiz_body[body][1],"order":body}
+                    question_infos={"body":question.body,"score":quiz_body[body][1],"order":body}
+                except:
+                    return HttpResponse('question not exsited')
+                try:
+                    options = question.options.all().order_by('order')
+                except:
+                    return HttpResponse('options not exsited')
+                options_dicts = list(options.values('body','order','img','is_correct'))
+                option_dicts=[]
+                for option in  options_dicts:
+                    option_dicts.append({"body":option["body"],"order":option["order"],"image":option["img"],"is_correct":option["is_correct"]})
+                knowledge_node = KnowledgeNode.objects.filter(question=question)
+                knowledge_nodes = []
+                for kn in knowledge_node:
+                    knowledge_nodes.append(kn.title)
+                questions.append({"question_id":question.id,"question":question_infos,"options":option_dicts,"knowledge_nodes":knowledge_nodes})
+            quiz_info={"cls":cls,"title":title,"quizRecordId":quiz_id,"questions":questions}
+            json_data=json.dumps(quiz_info)
+            #print(json_data)
+            return render(request, 'quiz/mark_quiz.html', {'quizInfo': quiz_info, 'json_data':json_data})
+            '''
             test_data = '{"cls": "\\u9ad8\\u4e09\\u5730\\u7406", "questions": [{"knowledge_nodes": ["node1", "node2"], "question": {"body": "\\u4ee5\\u4e0b\\u5730\\u7406\\u73b0\\u8c61\\u4e2d\\uff0c\\u4e0d\\u662f\\u7531\\u4e8e\\u5730\\u7403\\u81ea\\u8f6c\\u4ea7\\u751f\\u7684\\u662f(    )", "image": "", "score": 2, "order": "2"}, "options": [{"body": "\\u663c\\u591c\\u73b0\\u8c61", "is_correct": "False", "image": "", "order": "A"}, {"body": "\\u663c\\u591c\\u4ea4\\u66ff\\u73b0\\u8c61", "is_correct": "False", "image": "", "order": "B"}, {"body": "\\u65f6\\u5dee\\u7684\\u4ea7\\u751f", "is_correct": "False", "image": "", "order": "C"}, {"body": "\\u5730\\u8868\\u6c34\\u5e73\\u8fd0\\u52a8\\u7684\\u7269\\u4f53\\u65b9\\u5411\\u53d1\\u751f\\u504f\\u8f6c", "is_correct": "True", "image": "", "order": "D"}], "question_id": 102}, {"knowledge_nodes": ["node1", "node2"], "question": {"body": "\\u5317\\u4eac\\u65f6\\u95f42010\\u5e7410\\u67081\\u65e518\\u65f659\\u520657\\u79d2\\uff0c\\u201c\\u5ae6\\u5a25\\u4e8c\\u53f7\\u201d\\u63a2\\u6708\\u536b\\u661f\\u6210\\u529f\\u53d1\\u5c04\\uff0c\\u4f4d\\u4e8e\\u592a\\u5e73\\u6d0b\\u4e0a\\u7684\\u8fdc\\u671b\\u4e94\\u53f7\\u6d4b\\u91cf\\u8239\\uff08\\u7ea6150\\u00b0E\\uff09\\u5bf9\\u5176\\u8fdb\\u884c\\u540c\\u6b65\\u76d1\\u6d4b\\u3002\\u636e\\u6b64\\u5b8c\\u62101\\uff5e3\\u9898\\u3002\\r\\n3\\uff0e\\u4e0e\\u6708\\u7403\\u76f8\\u6bd4\\uff0c\\u5730\\u7403\\u7684\\u7279\\u6b8a\\u6027\\u5728\\u4e8e", "image": "", "score": 2, "order": "1"}, "options": [{"body": "\\u663c\\u591c\\u73b0\\u8c61", "is_correct": "False", "image": "", "order": "A"}, {"body": "\\u663c\\u591c\\u4ea4\\u66ff\\u73b0\\u8c61", "is_correct": "False", "image": "", "order": "B"}, {"body": "\\u65f6\\u5dee\\u7684\\u4ea7\\u751f", "is_correct": "False", "image": "", "order": "C"}, {"body": "\\u5730\\u8868\\u6c34\\u5e73\\u8fd0\\u52a8\\u7684\\u7269\\u4f53\\u65b9\\u5411\\u53d1\\u751f\\u504f\\u8f6c", "is_correct": "True", "image": "", "order": "D"}], "question_id": 103}], "quizRecordId": "1", "title": "4\\u670815\\u65e5\\u5730\\u7406\\u7b2c\\u4e00\\u6b21\\u8003\\u8bd5"}'
             quiz_info = json.loads(test_data)
             json_data = json.dumps(quiz_info)
-            #print(json_data)
+            print(json_data)
             return render(request, 'quiz/mark_quiz.html', {'quizInfo': quiz_info, 'json_data': json_data})
-
+            '''
     request_dic = json.loads(request.body.decode('utf-8'))
-    
-
     #student_id = request.POST.get('student_id', '')
     try:
         student_id = request_dic['studentId']
@@ -552,6 +599,23 @@ def upload_quiz_question_answer(request):
         return HttpResponse('go to next question')
     
 
+@login_required
+def get_next_question(request):
+    user = request.user
+    if not user.groups.filter(name='STUDENT').exists():
+        return HttpResponse('failed: user is not a student')
+
+    subject = request.GET.get('subject', '')
+    if not subject:
+        return HttpResponse('failed: no subject')
+    
+    questions = Question.objects.filter(subject = subject)
+
+    if len(questions) == 0:
+        return HttpResponse('failed: no question available')
+
+    #TODO: add an algo
+    return HttpResponse(questions[len(questions)/2].pk)
 
 @login_required
 def upload_quiz_answer_sheet(request):

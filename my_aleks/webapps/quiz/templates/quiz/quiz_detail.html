@@ -2,6 +2,15 @@
 
 {% block "stylesheets" %}
     <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+    <script type="text/javascript"
+        src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    <script type="text/x-mathjax-config">
+	    MathJax.Hub.Config({
+	        tex2jax: {inlineMath: [['$', '$'], ['/[', '/]'], ['\ce{', '\}']]},
+	        messageStyle: "none"
+	    });
+	</script>
 {% endblock %}
 
 {% block "main_content" %}
@@ -16,7 +25,7 @@
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">试卷详情</h1>
-    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> 导出PDF</a>
+    <a href="http://47.110.253.251/templates-static/templates/pdf/{{quiz_paper_url}}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> 导出PDF</a>
 </div>
 <p>试卷名称:{{quizInfo.info.title}}</p>
 <p>科目：{{quizInfo.subject}}</p>
@@ -26,15 +35,10 @@
     <div class="col-lg-6">
         <!-- Default Card Example -->
         <div class="card mb-4">
-
-            <div class="card-header">
-                <div class="custom-control custom-checkbox small">
-                    <label class="custom-control-label">
-                        <h6 class="m-0 font-weight-bold text-primary"style="line-height: 1.5rem;">
-                            知识点：{% for k in q.knowledge_nodes %} {{k}} {% endfor %}
-                        </h6>
-                    </label>
-                </div>
+            <div class="card-header">                              
+                <h6 class="m-0 font-weight-bold text-primary"style="line-height: 1.5rem;">
+                    知识点：{% for k in q.knowledge_nodes %} {{k.title}} {% endfor %}
+                </h6>                            
             </div>
             <div class="card-body">
                 <p>{{q.question.body}}</p>
@@ -53,4 +57,23 @@
     {% endfor %}
 </div>
 <!-- /.container-fluid -->
+{% endblock %}
+{% block "scripts" %}
+<script type="text/javascript" async src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Ajax.config.path["mhchem"] = "https://cdnjs.cloudflare.com/ajax/libs/mathjax-mhchem/3.3.2";
+    MathJax.Hub.Config({
+        TeX: {
+            extensions: ["[mhchem]/mhchem.js"],
+        }
+    });
+</script>
+
+
+<!--<script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>-->
+<script type="text/javascript">
+	window.onload=function(){
+        MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("question-container")]);
+        // MathJax.Hub.Typeset();
+	}
+</script>
 {% endblock %}

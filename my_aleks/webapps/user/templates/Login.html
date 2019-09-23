@@ -18,7 +18,7 @@
 	<!-- ICONS -->
 	<style type="text/css">
 		.auth-box{
-			width: 30%;
+			width: 500px;
 		}
 		.form-group input,.auth-box button,.clearfix{
 			width:70%;
@@ -36,27 +36,27 @@
 					<!-- <div class="left"> -->
 						<div class="content">
 							<div class="header">
-								<p class="lead">Login to your account</p>
+								<p class="lead">指针教育教师登录</p>
 							</div>
 							<form class="form-auth-small" action="/abc/login/{{next}}" method="post">
                                 {% csrf_token %}
                                 <div class="form-group">
 									<label for="Username" class="control-label sr-only">Username</label>
-									<input type="text" class="form-control" id="Username" value="zhou" placeholder="Username" name="username">
+									<input type="text" class="form-control" id="Username" value="" placeholder="账号/用户名" name="username"><!--zhou zzpzzp123-->
 								</div>
 								<div class="form-group">
 									<label for="Password" class="control-label sr-only">Password</label>
-									<input type="password" class="form-control" id="Password" value="zzpzzp123" placeholder="Password" name="password">
+									<input type="password" class="form-control" id="Password" value="" placeholder="密码" name="password">
 								</div>
 								<div class="form-group clearfix">
 									<label class="fancy-checkbox element-left">
 										<input type="checkbox">
-										<span>Remember me</span>
+										<span>记住密码</span>
 								</div>
-								<button type="submit" class="btn btn-primary btn-lg btn-block">LOGIN</button>
-								<div class="bottom">
-									<span class="helper-text"><i class="fa fa-lock"></i> <a href="#">Forgot password?</a></span>
-								</div>
+								<button type="submit" class="btn btn-primary btn-lg btn-block">登录</button>
+								<!--<div class="bottom">
+									<span class="helper-text"><i class="fa fa-lock"></i> <a href="#">忘记密码?</a></span>
+								</div>-->
 							</form>
 						</div>
 					<div class="clearfix"></div>

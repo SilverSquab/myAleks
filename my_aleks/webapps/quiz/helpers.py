@@ -6,6 +6,7 @@ import json
 from .models import Question, Option
 
 # return file name and dir
+'''
 def generate_pdf(quiz_id, template_name=''):
     if template_name == '':
         template_name = 'standard.tex'
@@ -31,6 +32,7 @@ def generate_pdf(quiz_id, template_name=''):
             continue
     
     print(template.render(questions=questions))
+'''
 
 def mark_question(question_id, option_id, student_id):
     try:

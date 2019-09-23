@@ -1,4 +1,4 @@
-{% extends 'teacher/teacher_base.html'%}
+{% extends base_template %}
 {% load staticfiles %}
 {% block "main_content" %}
 
@@ -8,31 +8,34 @@
                     <!--<a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>-->
                 </div>
 
-
+                
                 <!--                <div class="row">-->
                 <!--级联选择框 -->
+                {% if  base_template == 'teacher/teacher_base.html' %}
                 <div class="col-lg-12" style="padding:30px 10px;background: #eeeeee">
                     <div class="input-group">
-                        <input type="text" aria-describedby="basic-addon2" readonly="readonly" id="classInput">
+                        <input type="text" style="text-align: left;" readonly="readonly" id="classInput" >
                         <div class="input-group-btn">
                             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">选择班级 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right">
-                                {% for schoolClass in schoolClassList %}
+                                {% for schoolClass in classes %}
                                 <li class="classCheckLi">
-                                    <div class="dropdown-item" style="cursor:hand" name="{{schoolClass.id}}">
-                                        {{schoolClass.name}}
-                                    </div>
+                                    <div class="dropdown-item" style="cursor:hand" name="{{schoolClass.id}}">{{schoolClass.name}}</div>
                                 </li>
                                 {% endfor %}
                             </ul>
                         </div><!-- /btn-group -->
                         <div class="btn btn-info btn-icon-split" style="margin-left: 10px" id="checkButton">
-                            <span class="text" name="checkStudyState">查询学情状况</span>
+                            <span class="text" id="query_learning" name="checkStudyState">查询学情状况</span>
                         </div>
                     </div>
+                    <!--<button id="testButton">查询报告</button>-->
                 </div>
+                {% endif %}
+
+
                 <!--                </div>-->
 
 
@@ -136,7 +139,7 @@
 
                 <div class="row">
 
-                    {% if LearningInformation.lineValue %}
+                    {% if LearningInformation %}
                     <!-- Area Chart -->
                     <div class="col-xl-8 col-lg-7">
                         <div class="card shadow mb-4">
@@ -146,16 +149,9 @@
                                 <div class="dropdown no-arrow">
                                     <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                       <!-- <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>-->
                                     </a>
-                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                                         aria-labelledby="dropdownMenuLink">
-                                        <div class="dropdown-header">Dropdown Header:</div>
-                                        <a class="dropdown-item" href="#">Action</a>
-                                        <a class="dropdown-item" href="#">Another action</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#">Something else here</a>
-                                    </div>
+
                                 </div>
                             </div>
                             <!-- Card Body -->
@@ -166,7 +162,8 @@
                             </div>
                         </div>
                     </div>
-                    {% endif %}
+                   {% endif %}
+
                     <!-- Pie Chart -->
                     {% if LearningInformation.weaknessList %}
                     <div class="col-xl-4 col-lg-5">
@@ -215,16 +212,16 @@
                                         <tbody>
                                         {% for report in LearningInformation.reportList %}
                                         <tr>
-                                            <td>{{report.name}}</td>
+                                            <td>{{report.pdf_uri|cut:".pdf"}}   </td>
                                             <td>{{report.datetime}}</td>
                                             <td class="tdOnReport">
                                                 <div class="btn btn-info btn-icon-split">
-                                                    <span class="text" name="{{report.id}}">查看报告</span>
+                                                    <span class="text" name="{{report.pdf_uri|cut:".pdf"}}">查看报告</span>
                                                 </div>
                                             </td>
                                             <td class="tdOnDownload">
                                                 <div class="btn btn-info btn-icon-split">
-                                                    <span class="text" name="{{report.name}}">导出PDF文件</span>
+                                                    <span class="text" name="{{report.pdf_uri|cut:".pdf"}}">导出PDF文件</span>
                                                 </div>
                                             </td>
                                         </tr>
@@ -261,20 +258,93 @@
                     </div>
                 </div>
                 {% endif %}
-
-
-         
-
 {% endblock %}
+
 {% block "scripts" %}
   <!-- Page level plugins -->
-  <script src={% static "assets/vendor/chart.js/Chart.min.js" %}></script>
-  <script src={% static "assets/vendor/bootstrap/js/bootstrap.bundle.min.js" %}></script>
-  <script src={% static "assets/vendor/jquery-easing/jquery.easing.min.js" %}></script>
-  <script src={% static "assets/js/sb-admin-2.min.js" %}></script>
-  <script src={% static "assets/vendor/datatables/jquery.dataTables.min.js" %}></script>
-  <script src={% static "assets/vendor/datatables/dataTables.bootstrap4.min.js" %}></script>
-  <script src={% static "assets/js/demo/datatables-demo.js" %}></script>
-  <script src={% static "assets/vendor/teacherReport/jquerysession.js" %}></script>
-  <script src={% static "assets/vendor/teacherReport/statement.js" %}></script>
+  <script src="{% static "assets/vendor/chart.js/Chart.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/bootstrap/js/bootstrap.bundle.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/jquery-easing/jquery.easing.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/js/sb-admin-2.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/datatables/jquery.dataTables.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/datatables/dataTables.bootstrap4.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/js/demo/datatables-demo.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/teacherReport/jquerysession.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/teacherReport/statement.js" %}" type="text/javascript"></script>
+
+	<script type="text/javascript">
+        //获取班级学情报告每一页数据
+        var getClassReportByClassId = function(classId,page,size){
+            $.post("http://47.110.253.251/abc/teacher/ajax-get-class-report-by-class-id/",JSON.stringify({
+                'classId':classId,
+                'page':page,
+                'size':size,
+            }),function(data,status){
+                var htmlString = '';
+                var json = JSON.parse(data)
+                for(var i in json.quiz_record){
+                    var name = json.quiz_record[i].pdf_uri.split('.')[0];
+                    htmlString +='<tr><td>'+name+'</td><td class="tdOnReport"><div class="btn btn-info btn-icon-split">    <span class="text" name="'+name+'">查看报告</span></div></td><td class="tdOnDownload"><div     class="btn btn-info btn-icon-split"><span class="text" name="'+name+'">导出PDF文件</span></    div></td></tr>'
+                }
+                var buttonString = '';
+                if(page > 1){
+                    buttonString += '<div class="btn btn-info btn-icon-split" style="margin: 5px float:right" id="previ    ousClassReportButton"><span class="text" name="previous">上一页</span></div>'
+                }
+                if(data.hasNext){
+                    buttonString += '<div class="btn btn-info btn-icon-split" style="float:right" id="nextClassReportBu    tton"><span class="text" name="">下一页</span></div>'
+                }
+                $('#myTableButton').html(buttonString);
+                $('#myTBody').html(htmlString);
+                $.session.set("page",page);
+            });
+        };
+
+        //跳转到班级学情报告上一页
+        $(document).on('click','#previousClassReportButton .text',function(){
+            var page = $.session.get("page") - 1;
+            var classId = $.session.get("classId");
+            getClassReportByClassId(classId,page,4);
+        });
+        //跳转到下一页
+        $(document).on('click','#nextClassReportButton .text',function(){
+            var page = $.session.get("page") + 1;
+            var classId = $.session.get("classId");
+            getClassReportByClassId(classId,page,4);
+        });
+    //获取url参数
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return (false);
+    }
+        //每次加载页面完成后执行
+        $(document).ready(function () {
+            var divBox = document.getElementById("myTBody");
+            var classId = getQueryVariable("classId");
+            var studentId = getQueryVariable("studentId");
+            if(divBox){
+                getClassDrawData(classId);
+                getClassReportByClassId(classId,1,4);
+            }else{
+                if(studentId){
+                    getStudentDrawData(classId,studentId);
+                }
+            }
+        })
+	</script>
+
+    <script type="text/javascript">
+
+
+
+    </script>
+
+
+
 {% endblock %}

@@ -25,6 +25,8 @@ def add_student_to_class(request):
         return HttpResponse('user is not a teacher')
     
     dic = json.loads(request.body.decode('utf-8'))
+
+    # student_id means profile id
     try:
         student_id = dic['studentId']
         class_id = dic['clsId']
@@ -37,11 +39,11 @@ def add_student_to_class(request):
         return HttpResponse('class not existed')
 
     try:
-        student = User.objects.get(pk=student_id)
+        student = User.objects.get(studentprofile__pk=student_id)
     except:
         return HttpResponse('student not existed')
 
-    if not cls.teacher == user:
+    if not cls.teacher.user == user:
         if not cls.school.manager == user:
             return HttpResponse('no right to add student')
     
@@ -63,6 +65,18 @@ def add_class(request):
 
     #TODO: class form
     return HttpResponse('OK')
+
+@login_required
+def get_teachers(request):
+    user = request.user
+    if not user.groups.filter(name='SCHOOL_MANAGER').exists():
+        return HttpResponse("user is not a school manager")
+    try:
+        school = user.school
+    except:
+        return HttpResponse('user has not school')
+    teachers = school.teacherprofile_set.all()
+    return render(request,'school/school_teacher.html',{'teachers':teachers})
 
 @login_required
 def get_classes(request):
@@ -120,9 +134,9 @@ def get_class_detail(request):
     
     if user.groups.filter(name='TEACHER').exists():
         try:
-            teacher = cls.teacher
+            teacher = cls.teacher.user
             if teacher == user:
-                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_profiles, 'clsInfo':class_info})
+                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_profiles, 'clsInfo':class_info,'base_template':'teacher/teacher_base.html'})
         except:
             pass
         
@@ -131,7 +145,7 @@ def get_class_detail(request):
         try:
             school = user.school
             if cls.school == school:
-                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_profiles, 'clsInfo':class_info})
+                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_profiles, 'clsInfo':class_info,'base_template':'school/school_base.html'})
         except:
             pass
 
@@ -161,7 +175,7 @@ def remove_student_from_class(request):
     except:
         return HttpResponse('student not existed')
 
-    if not cls.teacher == user:
+    if not cls.teacher.user == user:
         if not cls.school.manager == user:
             return HttpResponse('no right to add student')
     

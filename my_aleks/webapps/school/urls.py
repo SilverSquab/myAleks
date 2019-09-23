@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'pay-student-plan', views.pay_student_plan, name='pay-student-plan'),
     url(r'create-class', views.create_class, name='create-class'),
     url(r'get-all-teachers', views.get_all_teachers, name='get-all-teachers'),
+    url(r'get-teachers',views.get_teachers, name='get-teachers')
 ]

@@ -6,13 +6,72 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from webapps.school.models import Cls
 from webapps.quiz.models import Quiz
+from webapps.quiz.models import QuizRecord
+from webapps.quiz.models import QuizRecordPaper
+from django.views.decorators.csrf import csrf_exempt
 from webapps.knowledge_space.models import Subject
+from webapps.student.models import StudentProfile,StudentReportPaper,StudentQuizRecord
 # Create your views here.
 
 
 @login_required
 def index(request):
-    return render(request, 'teacher/index.html')
+    if request.method == 'GET':
+        user = request.user
+        if not user.groups.filter(name='TEACHER').exists():
+            return HttpResponse('user is not a teacher')
+        class_id = request.GET.get('classId', '')
+        student_id = request.GET.get('studentId', '')
+        try:
+            classes = user.teacherprofile.classes
+        except:
+            return HttpResponse('user has not class')
+        class_dics = list(classes.values('id', 'name'))
+        if class_id and student_id:
+            if user.groups.filter(name="TEACHER").exists():
+                base_template='teacher/teacher_base.html'
+            if user.groups.filter(name="SCHOOL_MANAGER").exists():
+                base_template='school/school_base.html'
+            student=StudentProfile.objects.get(pk=student_id)
+            student_quiz_record=student.studentreportpaper_set.all()
+            student_quiz_record_dics = list(student_quiz_record.values('id', 'pdf_uri','datetime'))
+            LearningInformation = {
+                'weaknessList': [
+                    {'knowledgeName': '一元二次方程', 'ration': 20},
+                    {'knowledgeName': '置换反应', 'ration': 30},
+                    {'knowledgeName': '牛顿第一定律', 'ration': 40},
+                    {'knowledgeName': '细胞有丝分裂', 'ration': 50},
+                    {'knowledgeName': '阅读理解', 'ration': 60}
+                ],
+                'reportList': student_quiz_record_dics,
+            }
+            return render(request, 'teacher/index.html',
+                          {'LearningInformation': LearningInformation, 'classes': class_dics,'base_template':base_template})
+        if class_id :
+            cls = Cls.objects.get(pk=class_id)
+            students = json.loads(cls.students)
+            student_profiles = StudentProfile.objects.filter(pk__in=students)
+            quizrecord = list(QuizRecord.objects.filter(cls=cls).order_by('-datetime').values('info'))
+            info = json.loads(quizrecord[0]['info'])
+            # print (json.loads(student_profiles))
+            LearningInformation = {
+                'performance': {
+                    'averageScore': info['averageScore'],
+                    'lowestScore': info['lowestScore'],
+                    'topScore': info['topScore'],
+                },
+                'weaknessList': [
+                    {'knowledgeName': '牛顿第二定理', 'ration': 20},
+                    {'knowledgeName': '加速度计算', 'ration': 30},
+                    {'knowledgeName': '自由落体定理', 'ration': 40},
+                    {'knowledgeName': '合力与分力', 'ration': 50},
+                    {'knowledgeName': '光的折射', 'ration': 60}
+                ],
+                'studentList': student_profiles
+            }
+            return render(request, 'teacher/index.html', {'LearningInformation': LearningInformation,'classes':class_dics,'base_template':'teacher/teacher_base.html'})
+        return render(request, 'teacher/index.html', {'classes':class_dics,'base_template':'teacher/teacher_base.html'})
+    return render(request, 'teacher/index.html',{'base_template':'teacher/teacher_base.html'})
 
 @login_required
 def my_quizes(request):
@@ -36,6 +95,74 @@ def my_quizes(request):
         except:
             pass
     return render(request, 'teacher/my_quizes.html',{'quizInfo':quiz_dicts})
+
+
+@login_required
+@csrf_exempt
+def ajax_get_class_report_by_class_id(request):
+    user = request.user
+    if not user.groups.filter(name='TEACHER').exists():
+        return HttpResponse('user is not a teacher')
+    dic = json.loads(request.body.decode('utf-8'))
+    class_id = dic["classId"]
+    page = dic["page"]
+    size = dic["size"]
+    cls = Cls.objects.get(pk=class_id)
+    quiz_records=cls.quizrecord_set.all()
+    quiz_record_paper_dict=[]
+    for quiz_record in quiz_records:
+        quiz_record_papers=quiz_record.quizrecordpaper_set.all()
+        for quiz_record_paper in quiz_record_papers:
+            quiz_record_paper_dict.append({"id":quiz_record_paper.id,"pdf_uri":quiz_record_paper.pdf_uri})
+    dict_length=len(quiz_record_paper_dict)
+    # 分页操作
+    hasNext=True
+    if (page-1)*size>dict_length:
+        return HttpResponse("page is error")
+    else:
+        if page*size < dict_length:
+            quiz_record_dict=quiz_record_paper_dict[(page-1)*size:page*size]
+        else:
+            hasNext=False
+            quiz_record_dict=quiz_record_paper_dict[(page-1)*size:]
+    info={"hasNext":hasNext,"quiz_record":quiz_record_dict}
+    return HttpResponse(json.dumps(info))
+
+@login_required
+@csrf_exempt
+def ajax_get_scores_student(request):
+    dic = json.loads(request.body.decode('utf-8'))
+    class_id = dic["classId"]
+    student_id = dic["studentId"]
+    cls = Cls.objects.get(pk=class_id)
+    quiz_records=cls.quizrecord_set.all()
+    student=StudentProfile.objects.get(pk=student_id)
+    student_quiz_record=list(StudentQuizRecord.objects.filter(student=student.user,quiz_record__in=quiz_records).order_by("-datetime").values("datetime","score"))
+    if len(student_quiz_record)>8:
+        student_quiz_record=student_quiz_record[0:8]
+    score=[]
+    time=[]
+    for index in student_quiz_record:
+        score.append(index['score'])
+        time.append(index['datetime'].strftime('%Y-%m-%d'))
+    return HttpResponse(json.dumps({"score":score,"time":time}))
+    #return HttpResponse(student_quiz_record)
+
+@login_required
+@csrf_exempt
+def ajax_get_scores_class(request):
+    dic =json.loads(request.body.decode('utf-8'))
+    class_id = dic['classId']
+    cls = Cls.objects.get(pk=class_id)
+    quiz_record_dics=list(cls.quizrecord_set.all().order_by('-datetime').values('datetime','info'))
+    if len(quiz_record_dics)>8:
+        quiz_record_dics=quiz_record_dics[0:8]
+    score = []
+    time = []
+    for quiz_record in quiz_record_dics:
+        score.append(json.loads(quiz_record['info'])['averageScore'])
+        time.append(quiz_record['datetime'].strftime('%Y-%m-%d'))
+    return HttpResponse(json.dumps({"score":score,"time":time}))
 
 @login_required
 def view_class(request):

@@ -150,7 +150,7 @@ def ajax_get_student_profile(request):
         except:
             return HttpResposne('failed: user not existed')
 
-    dic = {'name': p.name, 'student_id': p.user.pk, 'age': p.age, 'phone':p.phone, 'student_no': p.student_no, 'gender': p.gender}
+    dic = {'name': p.name, 'student_id': p.pk, 'age': p.age, 'phone':p.phone, 'student_no': p.student_no, 'gender': p.gender}
 
     return HttpResponse(json.dumps(dic))
 

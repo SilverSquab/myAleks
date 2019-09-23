@@ -12,10 +12,14 @@ def login_view(request):
             next_url="?next="+next_url
         return render(request, "Login.html", {"next":next_url})
     if request.method == "POST":
+        next_url = request.GET.get("next", "")
         username = request.POST.get("username", "")
         password = request.POST.get("password", "")
-        next_url = request.GET.get("next", "/student/index/")
         user = authenticate(username=username, password=password)
+        if user.groups.filter(name='TEACHER').exists():
+            next_url = request.GET.get("next", "/abc/teacher/my-classes/")
+        if user.groups.filter(name='SCHOOL_MANAGER').exists():
+            next_url = request.GET.get("next","/abc/school/get-classes/")
         if user:
             login(request, user)
             request.session['username']=username

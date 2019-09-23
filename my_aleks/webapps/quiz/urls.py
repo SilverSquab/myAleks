@@ -20,7 +20,10 @@ urlpatterns=[
     url(r'^add-question-to-favorites/$', views.add_question_to_favorites, name='add-question-to-favorites'),
 
     url(r'^compose-quizs/$', views.compose_quizs, name='compose-quizs'),
+    # get next question when practicing
+    url(r'^get-next-question/$', views.get_next_question, name='get-next-question'),
 
     url(r'^ajax-get-questions-by-section/$', views.ajax_get_questions_by_section, name='ajax-get-questions-by-section'),
     url(r'^ajax-get-page-count-by-section/$', views.ajax_get_page_count_by_section, name='ajax-get-page-count-by-section'),
+   # url(r'^ajax-get-class-report-by-class-id/$', views.ajax_get_class_report_by_class_id, name='ajax-get-class-report-by-class-id'),
 ]

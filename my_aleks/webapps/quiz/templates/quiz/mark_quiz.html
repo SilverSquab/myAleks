@@ -14,12 +14,12 @@
 	<div class="d-sm-flex align-items-center justify-content-between mb-4">
 		 <h1 class="h3 mb-0 text-gray-800">试卷判卷</h1>
 	</div>
-	<form action="{% url 'mark-quiz' %}" method="get" > 
+	<form action="{% url 'mark-quiz' %}" method="get" >
 		<div style="float: left;width: 25%">
 			<input name="quiz_id" class="bg-light form-control" placeholder="输入试卷编号"/>
 		</div>
 		<div style="float: left;width: 25%;padding-left: 20px">
-			<input type="submit" class="btn btn-primary" value="搜索试卷"/> 
+			<input type="submit" class="btn btn-primary" value="搜索试卷"/>
 		</div>
 	</form>
 {% else %}
@@ -52,9 +52,7 @@
 		    <!-- Default Card Example -->
 		        <div class="card mb-4">
 		            <div class="card-header">
-		                <div class="custom-control custom-checkbox small">
-		                    <label class="custom-control-label" ><h6 class="m-0 font-weight-bold text-primary" style="line-height: 1.5rem;">知识点：{{question.knowledge_nodes}}</h6>  </label>
-		                </div>
+		                <h6 class="m-0 font-weight-bold text-primary" style="line-height: 1.5rem;">知识点：{% for kn in question.knowledge_nodes %} {{kn}} {% endfor %}</h6>
 		            </div>
 		            <div class="card-body">
 		                <p>{{question.question.order}} {{question.question.body}}</p>
@@ -95,130 +93,139 @@
 {% endblock %}
 
 {% block "scripts" %}
+<script type="text/javascript" async
+        src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Ajax.config.path["mhchem"] =
+        "https://cdnjs.cloudflare.com/ajax/libs/mathjax-mhchem/3.3.2";
+    MathJax.Hub.Config({
+        TeX: {
+            extensions: ["[mhchem]/mhchem.js"]
+        }
+    });
+</script>
 <script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
 <script type="text/javascript">
   	$(document).ready(function(){
-	    console.log({{json_data|safe}});
-	    var quizInfo = {{json_data|safe}};
-	    //console.log(quizInfo);
-	    //console.log(typeof(quizInfo));
-	    //console.log(quizInfo);
-	    var answer={};
-	    var score = 0;
-	    var quizRecordId= quizInfo.quizRecordId;
-	    var questions = quizInfo.questions;
-	    //console.log(type(questions));
-	    //console.log(JSON.parse(questions));
-	   	/*每次输入信息后，判断答案是否正确，计算分数返回*/
-	    $("input").blur(function(){
-	    	alert("test")
-	        var id = $(this).attr("id")
-	        if (id!='studentId') {
-	          	var options = []
-	            var q_score = 0
-	            //获取对应的题目信息
-	            console.log(questions)
-	            for(q in questions) {
-	            	console.log(q)
-	                if (id==questions[q].question_id){
-	                  options=questions[q].options
-	                  q_score=questions[q].question.score
-	                  break;
-	                }
-	            }
-	            console.log(options)
-	            console.log('分值：'+q_score)
-	            //获取题目对应的正确答案
-	            var true_option=''
-	            for (option in options){
-		            if (options[option]['is_correct']) {
-		               	true_option=options[option]['order']
+		    console.log({{json_data|safe}});
+		    var quizInfo = {{json_data|safe}};
+		    //console.log(quizInfo);
+		    //console.log(typeof(quizInfo));
+		    //console.log(quizInfo);
+		    var answer={};
+		    var score = 0;
+		    var quizRecordId= quizInfo.quizRecordId;
+		    var questions = quizInfo.questions;
+		    //console.log(type(questions));
+		    //console.log(JSON.parse(questions));
+		   	/*每次输入信息后，判断答案是否正确，计算分数返回*/
+		    $("input").blur(function(){
+		    		//alert("test")
+		        var id = $(this).attr("id")
+		        if (id!='studentId') {
+		          	var options = []
+		            var q_score = 0
+		            //获取对应的题目信息
+		            //console.log('id'+id)
+		            //console.log(questions)
+		            for(q in questions) {
+		                if (id==questions[q].question_id){
+		                  options=questions[q].options
+		                  q_score=questions[q].question.score
+		                  break;
+		                }
 		            }
-	            }
-	            console.log('正确答案'+true_option)
-	            //判断答案是否正确
-	          	var value=$(this).val();
-	          	console.log('选择答案：'+value)
-	        	if (id in answer){
-	          		if (answer[id] ==true_option&&value!=true_option){
-	            		score=score-q_score
-	            		console.log('由正到错：'+score)
-	          		}else if (answer[id] !=true_option&&value==true_option) {
-	            		score=score+q_score
-	            		console.log('由错到正：'+score)
-	          		}
-	      		}else{
-	          		if (value ==true_option){
-	              		score=score+q_score
-	              		console.log('由无到有：'+score)
-	          		}
-	      		}
-	            answer[id]=value
-	          	$("#total_score").html(score);
-	        }
-	    })
-
-		// 点击提交，将answer数据发送到后台处理
-		$("#submit").click(function () {
-	  		var studentId=$("#studentId").val();
-		  	if (!studentId) {
-		    	alert('请输入学生学号')
-		  	}else{
-		    	var data={"answer":JSON.stringify(answer),"quizRecordId":quizRecordId,"studentId":studentId}
-		    	 $.ajax({
-		      		type:'POST',
-		      		url: "http://47.110.253.251/abc/quiz/mark-quiz/",
-		     		dataType:'json',
-		        	contentType:'application/json;charset=UTF-8',
-		     		data: JSON.stringify(data),
-		      		success:function(data,status){
-			        	if (data) {
-			          		$(location).attr('href', 'https://www.baidu.com/');
-			        	}else {
-			          		alert('提交失败！')
-			        	}
-		      		},error:function () {
-		       			alert('提交失败！')
+		            //console.log(options)
+		            //console.log('分值：'+q_score)
+		            //获取题目对应的正确答案
+		            var true_option=''
+		            for (option in options){
+			            if (options[option]['is_correct']) {
+			               	true_option=options[option]['order']
+			            }
+		            }
+		            //console.log('正确答案'+true_option)
+		            //判断答案是否正确
+		          	var value=$(this).val();
+		          	//console.log('选择答案：'+value)
+		        	if (id in answer){
+		          		if (answer[id] ==true_option&&value!=true_option){
+		            		score=score-q_score
+		            		//console.log('由正到错：'+score)
+		          		}else if (answer[id] !=true_option&&value==true_option) {
+		            		score=score+q_score
+		            		//console.log('由错到正：'+score)
+		          		}
+		      		}else{
+		          		if (value ==true_option){
+		              		score=score+q_score
+		              		//console.log('由无到有：'+score)
+		          		}
 		      		}
-		     	})
-			}
-		})
+		            answer[id]=value
+		          	$("#total_score").html(score);
+		        }
+		    })
 
-	//点击提交，将answer数据发送到后台处理并且清空所有输入框
-		$("#submitAndNext").click(function () {
-	  		var studentId=$("#studentId").val();
-	  		//console.log(studentId)
-	  		if (!studentId) {
-	    		alert('请输入学生学号')
-	  		}else{
-	    		var data={"answer":JSON.stringify(answer),"quizRecordId":quizRecordId,"studentId":studentId};
-	    		//console.log("下一个");
-	    		$.ajax({
-	      			type:'POST',
-	     	 		url: "http://47.110.253.251/abc/quiz/mark-quiz/",
-	      			dataType:'json',
-	      			//contentType:'application/json;charset=UTF-8',
-	      			data:JSON.stringify(data),
-	      			success:function(data,status){
-			        	if (data=='no answers') {
-			          		$("input").val("");
-			          		studentId=''
-			          		answer={}
-			          		score=0
-			        		//分数变化
-			        		$("#total_score").html(score);
-			        	}else {
-                            console.log('答案错误！')
-			         		alert('提交失败！')
-			        	}
-		      		},
-		      		error:function () {
-                        console.log('报错')
-		          		alert('提交失败！')
-		        	}
-	      		})
-	    	}
-		})	
+				// 点击提交，将answer数据发送到后台处理
+				$("#submit").click(function () {
+			  		var studentId=$("#studentId").val();
+				  	if (!studentId) {
+				    	alert('请输入学生学号')
+				  	}else{
+				    	var data={"questionAndAnswer":JSON.stringify(answer),"quizRecordId":quizRecordId,"studentId":studentId}
+				    	 $.ajax({
+				      		type:'POST',
+				      		url: "http://47.110.253.251/abc/quiz/mark-quiz/",
+				     		dataType:'json',
+				        	contentType:'application/json;charset=UTF-8',
+				     		data: JSON.stringify(data),
+				      		success:function(data,status){
+					        	if (data.isFinish) {
+					          		$(location).attr('href', 'http://47.110.253.251/abc/quiz/mark-quiz/');
+					        	}else {
+					          		alert('提交失败！')
+					        	}
+				      		},error:function () {
+				       			alert('提交失败！')
+				      		}
+				     	})
+					}
+				})
+
+				//点击提交，将answer数据发送到后台处理并且清空所有输入框
+				$("#submitAndNext").click(function () {
+			  		var studentId=$("#studentId").val();
+			  		//console.log(studentId)
+			  		if (!studentId) {
+			    		alert('请输入学生学号')
+			  		}else{
+			    		var data={"questionAndAnswer":JSON.stringify(answer),"quizRecordId":quizRecordId,"studentId":studentId};
+			    		//console.log("下一个");
+			    		$.ajax({
+			      			type:'POST',
+			     	 		url: "http://47.110.253.251/abc/quiz/mark-quiz/",
+			      			dataType:'json',
+			      			//contentType:'application/json;charset=UTF-8',
+			      			data:JSON.stringify(data),
+			      			success:function(data,status){
+			      				//console.log(data)
+					        	if (data.isFinish) {
+					          		$("input").val("");
+					          		studentId=''
+					          		answer={}
+					          		score=0
+					        		//分数变化
+					        		$("#total_score").html(score);
+					        	}else {
+					         		alert('提交失败！')
+					        	}
+				      		},
+				      		error:function () {	                      
+				          		alert('提交失败！')
+				        	}
+			      		})
+			    	}
+				})
 	})
 
 </script>

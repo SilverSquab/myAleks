@@ -35,7 +35,8 @@ class StudentProfile(models.Model):
     def __str__(self):
         return self.name
 
-class QuestionRecord(models.Model):
+class StudentQuestionRecord(models.Model):
+    student = models.ForeignKey(StudentProfile, blank=True, null=True, db_index=True)
     question = models.ForeignKey('quiz.Question')
     option = models.ForeignKey('quiz.Option')
     # a reserved field for text answer in future
@@ -48,6 +49,9 @@ class QuestionRecord(models.Model):
 
     # when the question belongs to a quiz
     student_quiz_record = models.ForeignKey('StudentQuizRecord', blank=True, null=True)
+
+    def is_correct(self):
+        return self.option.is_correct
 
 class StudentQuizRecord(models.Model):
     datetime = models.DateTimeField(auto_now_add=True)
@@ -65,13 +69,16 @@ class StudentKnowledgeAssessment(models.Model):
     learning_router_uri = models.TextField(max_length=100, blank=True, null=True)
     assessment_report_uri = models.TextField(max_length=100, blank=True, null=True)
 
-class StudentKnowledgeVector(models.Model):
+class StudentKnowledgeVectors(models.Model):
     '''
     vector should be saved in static files. 
     if graph_id is null, this Vector represents the whole picture
     '''
-    graph_id = models.CharField(max_length=50, blank=True, null=True)
-    vector_uri = models.TextField(max_length=100, blank=True, null=True)
+    #graph_id = models.CharField(max_length=50, blank=True, null=True)
+    #vector_uri = models.TextField(max_length=100, blank=True, null=True)
+    vectors = models.TextField(max_length=20000, blank=True, null=True)
+    student = models.ForeignKey(StudentProfile, blank=True, null=True, related_name='vectors')
+
 
 class StudentReportPaper(models.Model):
     pdf_uri = models.CharField(max_length=150, blank=False, null=False)

@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 # for now, we asume all questions were multi-choice questions
 # will add different logics later
 class QuestionRecord(models.Model):
-    user = models.ForeignKey(User, blank=False, null=False, related_name='question_records')
+    user = models.ForeignKey('student.StudentProfile', blank=False, null=False, related_name='question_records')
     option = models.ForeignKey('Option', blank=False, null=False, related_name='question_records')
     question = models.ForeignKey('Question', blank=False, null=False, related_name='question_records')
     datetime = models.DateTimeField(auto_now_add=True)
@@ -105,7 +105,7 @@ class Quiz(models.Model):
 # quiz record is a quiz taken by a certain class
 class QuizRecord(models.Model):
     quiz = models.ForeignKey(Quiz)
-    teacher = models.ForeignKey(User, blank=False, null=False)
+    teacher = models.ForeignKey('teacher.TeacherProfile', blank=False, null=False)
     # which class is taking this quiz? that means one quiz can be taken by several classes
     cls = models.ForeignKey('school.Cls', blank=True, null=True)
     datetime = models.DateTimeField(blank=True, null=True)

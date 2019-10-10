@@ -139,7 +139,7 @@
 
                 <div class="row">
 
-                    {% if LearningInformation %}
+                    {% if LearningInformation.reportList or LearningInformation.studentList %}
                     <!-- Area Chart -->
                     <div class="col-xl-8 col-lg-7">
                         <div class="card shadow mb-4">
@@ -165,22 +165,13 @@
                    {% endif %}
 
                     <!-- Pie Chart -->
-                    {% if LearningInformation.weaknessList %}
+                    {% if LearningInformation.reportList or LearningInformation.studentList %}
                     <div class="col-xl-4 col-lg-5">
                         <div class="card shadow mb-4">
                             <div class="card-header py-3">
                                 <h6 class="m-0 font-weight-bold text-primary">弱点知识统计</h6>
                             </div>
-                            <div class="card-body">
-                                {% for weakness in LearningInformation.weaknessList %}
-                                <h4 class="small font-weight-bold">{{weakness.knowledgeName}} <span class="float-right">{{weakness.ration}}%</span>
-                                </h4>
-                                <div class="progress mb-4">
-                                    <div class="progress-bar bg-danger" role="progressbar"
-                                         style="width: {{weakness.ration}}%" aria-valuenow="{{weakness.ration}}"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                {% endfor %}
+                            <div class="card-body" id="weaknessListBody">
                             </div>
                         </div>
                     </div>
@@ -273,9 +264,96 @@
   <script src="{% static "assets/vendor/teacherReport/statement.js" %}" type="text/javascript"></script>
 
 	<script type="text/javascript">
+        //获取该学生的知识弱点
+        var getKnowledgeList = function (studentId){
+        //获取学生最近学习的知识id
+        var graphId = '3c741c85dc27';
+        $.get("{% url "get-student-graph-vector" %}"+"?student_id="+studentId+"&graph_id="+graphId,function(data,status){
+            var jsonData = JSON.parse(data);
+            var array = [];
+            for(var key in jsonData) {
+                jsonData[key]['score'] = jsonData[key]['score'] * 100;
+                jsonData[key]['name']=key;
+                array.push(jsonData[key]);
+            }
+            array.sort(sortFun);
+            var nodeList = [];
+            if(array.length >= 5 ){
+                nodeList = array.slice(0,5)
+            }else{
+                nodeList = array.slice(0,array.length);
+            }
+            $.post("{% url "get-node-chineseName" %}",JSON.stringify(nodeList),function(data,status){
+                if(data){
+                    var dataJson = JSON.parse(data);
+                    var htmlString = "";
+                    console.info(dataJson)
+                    for(var item in dataJson){
+                        console.info(dataJson[item])
+                        htmlString += '<h4 class="small font-weight-bold">'+dataJson[item].chinese_name+'<span class="float-right">'+dataJson[item].score+'%</span>\n' +
+                            '                                </h4>\n' +
+                            '                                <div class="progress mb-4">\n' +
+                            '                                    <div class="progress-bar bg-danger" role="progressbar"\n' +
+                            '                                         style="width: '+dataJson[item].score+'%" aria-valuenow="'+dataJson[item].score+'"\n' +
+                            '                                         aria-valuemin="0" aria-valuemax="100"></div>\n' +
+                            '                                </div>';
+                    }
+                }else{
+                    alert("转换错误");
+                }
+                    $('#weaknessListBody').html(htmlString);
+            })
+        })
+    };
+    //获取班级知识弱点
+    var getClassKnowledgeList = function (clsId){
+        //获取班级最近学习的知识id
+        var graphId = '1b91efc09f85';
+        $.get("{% url "get-cls-graph-vector" %}"+"?cls_id="+clsId+"&graph_id="+graphId,function(data,status){
+            var jsonData = JSON.parse(data);
+            var array = [];
+            for(var key in jsonData) {
+                var item = {score:'',name:''}
+                item['score'] = jsonData[key] * 100;
+                item['name']=key;
+                array.push(item);
+            }
+            array.sort(sortFun);
+            var nodeList = [];
+            if(array.length >= 5 ){
+                nodeList = array.slice(0,5)
+            }else{
+                nodeList = array.slice(0,array.length);
+            }
+            $.post("{% url "get-node-chineseName" %}",JSON.stringify(nodeList),function(data,status){
+                if(data){
+                    var dataJson = JSON.parse(data);
+                    var htmlString = "";
+                    for(var item in dataJson){
+                        htmlString += '<h4 class="small font-weight-bold">'+dataJson[item].chinese_name+'<span class="float-right">'+dataJson[item].score+'%</span>\n' +
+                            '                                </h4>\n' +
+                            '                                <div class="progress mb-4">\n' +
+                            '                                    <div class="progress-bar bg-danger" role="progressbar"\n' +
+                            '                                         style="width: '+dataJson[item].score+'%" aria-valuenow="'+dataJson[item].score+'"\n' +
+                            '                                         aria-valuemin="0" aria-valuemax="100"></div>\n' +
+                            '                                </div>';
+                    }
+                }else{
+                    alert("转换错误");
+                }
+                $('#weaknessListBody').html(htmlString);
+            })
+        })
+    };
+
+    //排序方法
+    var sortFun = function(a,b){
+        return a.score - b.score;
+    };
+
         //获取班级学情报告每一页数据
         var getClassReportByClassId = function(classId,page,size){
-            $.post("http://47.110.253.251/abc/teacher/ajax-get-class-report-by-class-id/",JSON.stringify({
+            $.post("{% url "ajax-get-class-report-by-class-id" %}",JSON.stringify({
                 'classId':classId,
                 'page':page,
                 'size':size,
@@ -331,9 +409,11 @@
             if(divBox){
                 getClassDrawData(classId);
                 getClassReportByClassId(classId,1,4);
+                getClassKnowledgeList(classId);
             }else{
                 if(studentId){
                     getStudentDrawData(classId,studentId);
+                    getKnowledgeList(studentId);
                 }
             }
         })

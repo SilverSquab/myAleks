@@ -43,6 +43,11 @@ def student_login(request):
     #print(username)
     #print(password)
     if user is not None:
+        if not user.groups.filter(name='STUDENT').exists(): 
+            d['status'] = False
+            d['errorReason'] = 'user is not a student'
+            return HttpResponse(json.dumps(d))
+            
         login(request, user)
         d['status'] = True
         d['errorReason'] = ''

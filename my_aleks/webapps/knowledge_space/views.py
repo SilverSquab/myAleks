@@ -1,4 +1,8 @@
 from .batch_input import *
+from functools import reduce
+from webapps.school.models import *
+from webapps.textbook.models import *
+from .student_vector import *
 from django.views.decorators.csrf import csrf_exempt
 
 import json
@@ -6,8 +10,10 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 
+from webapps.quiz.models import Question,Option
 from django.contrib.admin.views.decorators import staff_member_required
 # Create your views here.
+
 
 @staff_member_required
 def upload_knowledge_nodes(request):
@@ -23,6 +29,26 @@ def upload_knowledge_nodes(request):
     #print(1)
     read_knowledge_nodes_from_file(f) 
     return HttpResponse('OK')
+
+@csrf_exempt
+@login_required
+def ajax_delete_edge_question(request):
+    question_id=request.GET.get("question_id",'')
+    edge_id=request.GET.get("edge_id","")
+    option_order=request.GET.get("option_order","")
+    question_id=int(question_id)
+    if option_order:
+        question=Question.objects.get(pk=question_id)
+        option = Option.objects.get(question=question,order=option_order)
+        option.knowledge_node.remove(edge_id)
+        return HttpResponse('OK')
+    try:
+        question=Question.objects.get(pk=question_id)
+    except:
+        return HttpResponse('question does not exist')
+    question.knowledge_node.remove(edge_id)
+    return HttpResponse('OK')
+
 
 @login_required
 def upload_knowledge_edges(request):
@@ -52,7 +78,21 @@ def ajax_nodes(request):
     nodes_info = nodes.values_list('id', 'description')
     nodes_info = list(nodes_info)
     return HttpResponse(json.dumps(nodes_info))
-    
+
+@csrf_exempt
+@login_required
+def get_node_chineseName(request):
+    if request.method == 'GET':
+        return HttpResposne(status=400)
+    node_list = json.loads(request.body.decode('utf-8'))
+    for index in node_list:
+        #print(index)
+        try:
+            index["chinese_name"]=KnowledgeNode.objects.get(pk=index['name']).title
+        except:
+            return HttpResponse("node does not exist")
+    return HttpResponse(json.dumps(node_list))
+
 @csrf_exempt
 @login_required
 def ajax_upload_edge(request):
@@ -100,3 +140,120 @@ def ajax_subjects(request):
     return HttpResponse(json.dumps(list(subjects_info)))
 
 
+def get_student_graph_vector(request):
+    if request.method != 'GET':
+        return HttpResponse('failed: method should be get')
+
+    student_id = request.GET.get('student_id', '')
+    graph_id = request.GET.get('graph_id', '')
+
+    if not student_id:
+        return HttpResponse('failed: student id missing')
+
+    if not graph_id:
+        return HttpResponse('failed: graph id missing')
+        
+    result = json.loads(get_or_create_graph_vector(student_id, graph_id))
+    if result['status'] == 'fail':
+        return HttpResponse('failed: ' + result['reason'])
+
+    return HttpResponse(json.dumps(result['data']))
+
+
+def get_student_section_vector(request):
+    if request.method != 'GET':
+        return HttpResponse('failed: method should be get')
+
+    student_id = request.GET.get('student_id', '')
+    section_id = request.GET.get('section_id', '')
+
+    return HttpResponse(get_student_section_vector_wrapper(student_id, section_id))
+
+
+def get_student_section_vector_wrapper(student_id, section_id):
+    try:
+        section = Section.objects.get(pk=section_id)
+    except:
+        return 'failed: section not existed'
+
+    nodes_list = KnowledgeNode.objects.filter(pk__in=json.loads(section.nodes_list))
+
+    graph_list = list(set(map(lambda x: x.graph, nodes_list)))
+
+    result = {}
+    for graph in graph_list:
+        tmp = json.loads(get_or_create_graph_vector(student_id, graph.pk))
+        if tmp['status'] == 'fail':
+            return 'failed: ' + tmp['reason']
+
+        print(tmp)
+
+        d = tmp['data'].copy()
+        nl = json.loads(section.nodes_list)
+        for key in tmp['data']:
+            if key not in nl:
+                d.pop(key)
+
+        result[graph.pk] = d
+
+    return json.dumps(result)
+    
+
+def get_student_chapter_vector_wrapper(student_id, chapter_id):
+    try:
+        chapter = Chapter.objects.get(pk=chapter_id)
+    except:
+        return 'failed: chapter not existed'
+
+    sections = chapter.sections.all()
+    
+    result = {}
+
+    for section in sections:
+        r = get_student_section_vector_wrapper(student_id, section.pk)
+        if r.startswith('failed'):
+            return HttpResponse(r)
+        d = json.loads(r)
+        result[section.pk] = d
+    
+    return json.dumps(result)
+
+def get_student_chapter_vector(request):
+    if request.method != 'GET':
+        return HttpResponse('failed: method should be get')
+
+    student_id = request.GET.get('student_id', '')
+    chapter_id = request.GET.get('chapter_id', '')
+
+    return HttpResposne(get_student_chapter_vector_wrapper(student_id, chapter_id))
+
+def get_cls_graph_vector(request):
+    if request.method != 'GET':
+        return HttpResponse('failed: method should be get')
+
+    cls_id = request.GET.get('cls_id', '')
+    graph_id = request.GET.get('graph_id', '')
+
+    if not cls_id:
+        return HttpResponse('failed: cls id missing')
+
+    if not graph_id:
+        return HttpResponse('failed: graph id missing')
+        
+    result = json.loads(get_cls_graph(cls_id, graph_id))
+    if result['status'] == 'fail':
+        return HttpResponse('failed: ' + result['reason'])
+
+    return HttpResponse(json.dumps(result['data']))
+
+def get_cls_section_vector_wrapper(cls_id, section_id):
+    pass
+
+def get_cls_section_vector(request):
+    pass
+
+def get_cls_chapter_vector_wrapper(cls_id, chapter_id):
+    pass
+
+def get_cls_chapter_vector(request):
+    pass

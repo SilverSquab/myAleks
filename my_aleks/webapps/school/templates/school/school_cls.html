@@ -61,18 +61,18 @@
         //卡片点击事件
         $("div[name='Cls']").click(function () {
             var clsId = $(this).parent().attr("id")
-            $(location).attr('href', 'http://47.110.253.251/abc/school/get-class-detail/?clsId=' + clsId);
+            $(location).attr('href', '{% url "school-get-class-detail" %}?clsId=' + clsId);
         })
         //添加班级事件
         $("#addCls").click(function () {
-            $.get("http://47.110.253.251/abc/ks/ajax-subjects/",function(data,status){
+            $.get("{% url "ajax-subjects" %}",function(data,status){
                 if (status == "success"){
                     var subject = $.parseJSON(data);
-                    $.get("http://47.110.253.251/abc/school/get-all-teachers",function(data,status){
+                    $.get("{% url "get-all-teachers" %}",function(data,status){
                         if (status == "success"){
                             var teachers = $.parseJSON(data);
-                            console.log(subject)
-                            console.log(teachers)
+                            //console.log(subject)
+                            //console.log(teachers)
                             $.AddClsMsgBox.Confirm("添加班级",teachers,subject,function () {
                                 var name = $("input[name='name']").val();
                                 var grade = $("input[name='grade']").val();
@@ -80,7 +80,7 @@
                                 var teacherId = option.val(); //拿到选中项的值
                                 var options=$("#subject option:selected"); //获取选中的项
                                 var subjectId = options.val(); //拿到选中项的值
-                                $.post("http://47.110.253.251/abc/school/create-class/",JSON.stringify({
+                                $.post("{% url "create-class" %}",JSON.stringify({
                                     'subject':subjectId,
                                     'grade':grade,
                                     'name':name,

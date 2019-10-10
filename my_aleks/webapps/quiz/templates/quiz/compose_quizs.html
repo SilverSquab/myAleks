@@ -1,4 +1,5 @@
 {% extends 'teacher/teacher_base.html'%}
+{% load staticfiles %}
 
 {% block "stylesheets" %}
 <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
@@ -138,16 +139,10 @@
         display: none;
     }
 
-    .show {
-        display: block;
-    }
-
     .infoWin {
         position: fixed;
         right: 20px;
-        bottom: 400px;
-        width: 50px;
-        height: 50px;
+        bottom: 330px;
         z-Index: 2;
     }
     #questionInput{
@@ -193,8 +188,8 @@
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">组卷选题</h1>
     <span></span>
-    <a href="javascript:void(0);" class="d-none d-sm-inline-block btn btn-default btn-sm btn-primary shadow-sm infoWin"
-       data-toggle="modal" data-target="#myModal" style="cursor: pointer;height: 80px;width:40px"> 选题篮</a>
+    <span href="javascript:void(0);" class="d-none d-sm-inline-block btn  btn-sm btn-primary shadow-sm infoWin"
+          data-toggle="modal" data-target="#myModal" style="cursor: pointer;height: 240px;width:50px"><span style="font-size: 17px">点击查看选题篮<i class="fas fa-fw fa-arrow-right"></i></span><br/><span style="font-size: 9px">已选:<span id="questionNumber">0</span></span></span>
 </div>
 
 
@@ -215,8 +210,8 @@
                         <h6 class="m-0 font-weight-bold text-primary">已选题目</h6>
                     </div>
                     <div class="card-body">
-                        测试题目:<input type="text"  id="questionInput" placeholder="请输入题目">&nbsp;&nbsp;
-                        测试类型:<select id="questionSelect"><option value="small">综合测评</option><option value="suitang">随堂测</option></select>
+                        试卷标题:<input type="text"  id="questionInput" placeholder="请输入题目">&nbsp;&nbsp;
+                        测试类型:<select id="questionSelect"><option value="full">随堂测</option><option value="small">综合测评</option></select>
                         <button class="pull-right btn btn-primary" id="submit-quiz" style="margin: 0.5rem 0 0.5rem 1rem;">保存试卷</button>
                         <div class="table-responsive">
                             <table class="table table-bordered" id="selected_questions" width="100%" cellspacing="0">
@@ -324,7 +319,7 @@
         // console.info(nowSubject);
         page = 1
         // console.log('点击事件！')
-        $.get("http://47.110.253.251/abc/quiz/ajax-get-questions-by-section/?section_id=" + section_id + "&page=" + page, function (data, status) {
+        $.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page, function (data, status) {
             if (status == "success") {
                 // console.log(data)
                 var questions = JSON.parse(data);
@@ -332,7 +327,7 @@
                 for (question_id in questions) {
                     // console.log(question_id)
                     // console.log(questions[question_id])
-                    question_body_html += '<div class="col-lg-6">'
+                    question_body_html += '<div class="col-lg-12">'
                         + '<div class="card mb-4" question-id="' + question_id + '">'
                         + '<div class="card-header">'
                         + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> ' + question_id
@@ -340,10 +335,15 @@
                         + '</div>'
                     question_body_html += '<div class="card-body">'
                         + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '}</p>'
+                        + '<div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
+                        + '</div>'
                         + '</div></div></div>'
                 }
                 // console.log(question_body_html)
@@ -351,7 +351,7 @@
                 MathJax.Hub.Typeset();
             }
         });
-        $.get("http://47.110.253.251/abc/quiz/ajax-get-page-count-by-section/?section_id=" + section_id, function (data, status) {
+        $.get("{% url "ajax-get-page-count-by-section" %}?section_id=" + section_id, function (data, status) {
             if (status == "success") {
                 maxpage = data;
             }
@@ -364,13 +364,13 @@
             page = page - 1
         }
         // console.log(page)
-        $.get("http://47.110.253.251/abc/quiz/ajax-get-questions-by-section/?section_id=" + section_id + "&page=" + page, function (data, status) {
+        $.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page, function (data, status) {
             if (status == "success") {
                 // console.log(data)
                 var questions = JSON.parse(data);
                 var question_body_html = ''
                 for (question_id in questions) {
-                    question_body_html += '<div class="col-lg-6">'
+                    question_body_html += '<div class="col-lg-12">'
                         + '<div class="card mb-4" question-id="' + question_id + '">'
                         + '<div class="card-header">'
                         + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> ' + question_id
@@ -378,16 +378,22 @@
                         + '</div>'
                     question_body_html += '<div class="card-body">'
                         + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '}</p>'
+                        + '<div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
+                        + '</div>'
                         + '</div></div></div>'
                 }
                 // console.log(question_body_html)
                 $("#question-container").html(question_body_html);
                 MathJax.Hub.Typeset();
                 $("#page").html(page);
+                $(location).attr('href', "#top");
             }
         });
     });
@@ -398,13 +404,13 @@
             page = page + 1
         }
         // console.log(page)
-        $.get("http://47.110.253.251/abc/quiz/ajax-get-questions-by-section/?section_id=" + section_id + "&page=" + page, function (data, status) {
+        $.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page, function (data, status) {
             if (status == "success") {
                 // console.log(data)
                 var questions = JSON.parse(data);
                 var question_body_html = ''
                 for (question_id in questions) {
-                    question_body_html += '<div class="col-lg-6">'
+                    question_body_html += '<div class="col-lg-12">'
                         + '<div class="card mb-4" question-id="' + question_id + '">'
                         + '<div class="card-header">'
                         + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> ' + question_id
@@ -412,16 +418,22 @@
                         + '</div>'
                     question_body_html += '<div class="card-body">'
                         + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '}</p>'
+                        + '<div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
                         + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
+                        + '</div>'
                         + '</div></div></div>'
                 }
                 // console.log(question_body_html)
                 $("#question-container").html(question_body_html);
                 $("#page").html(page);
                 MathJax.Hub.Typeset();
+                $(location).attr('href', "#top");
             }
         });
     });
@@ -429,7 +441,7 @@
     $(document).on('click', '.book-name', function () {
         var book_id = $(this).attr("book_id")
         subject=$(this).attr("subject")
-        $.get("http://47.110.253.251/abc/textbook/ajax-get-textbook-structure/?book_id=" + book_id, function (data, status) {
+        $.get("{% url "ajax-get-textbook-structure" %}?book_id=" + book_id, function (data, status) {
             if (status == "success") {
                 var book_data = JSON.parse(data);
                 // console.log(book_data)
@@ -444,7 +456,7 @@
                 );
                 for (chapter in chapters_order_by_order) {
                     tree_html += '<div style="clear: both">'
-                        + '<img src="http://47.110.253.251/evaluation-img/add.png" class="tree_img" did=' + '"' + chapters_order_by_order[chapter].id + '"' + '/><span tree_body_id=' + '"' + chapters_order_by_order[chapter].textbook + '"' + ' class="tree_body">' + chapters_order_by_order[chapter].order + '、' + chapters_order_by_order[chapter].chinese_name + '</span>'
+                        + '<img src="{% static "assets/img/add.png" %}" class="tree_img" did=' + '"' + chapters_order_by_order[chapter].id + '"' + '/><span tree_body_id=' + '"' + chapters_order_by_order[chapter].textbook + '"' + ' class="tree_body">' + chapters_order_by_order[chapter].order + '、' + chapters_order_by_order[chapter].chinese_name + '</span>'
                         + '</div>'
                         + '<div class="tree2" id=' + '"' + chapters_order_by_order[chapter].id + '"' + ' style="clear: both">'
                     //对节进行排序
@@ -458,14 +470,14 @@
                     for (section in sections_order_by_order) {
 
                         if (sections_order_by_order[section].parts.length > 0) {
-                            tree_html += '<img src="http://47.110.253.251/evaluation-img/add.png" class="tree_img" did=' + '"' + sections_order_by_order[section].id + '"' + '/><span tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body">' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
+                            tree_html += '<img src="{% static "assets/img/add.png" %}" class="tree_img" did=' + '"' + sections_order_by_order[section].id + '"' + '/><span tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body">' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
                             tree_html += '<div class="tree2" id=' + '"' + sections_order_by_order[section].id + '"' + ' style="clear: both">'
                             for (part in sections_order_by_order[section].parts) {
-                                tree_html += '<img src="http://47.110.253.251/evaluation-img/none.png" class="tree_img_none"/><span tree_body_id=' + '"' + sections_order_by_order[section].parts[part].section + '"' + ' class="tree_body">' + sections_order_by_order[section].parts[part]['chinese_name'] + '</span><br>'
+                                tree_html += '<img src="{% static "assets/img/none.png" %}" class="tree_img_none"/><span tree_body_id=' + '"' + sections_order_by_order[section].parts[part].section + '"' + ' class="tree_body">' + sections_order_by_order[section].parts[part]['chinese_name'] + '</span><br>'
                             }
                             tree_html += '</div>'
                         } else {
-                            tree_html += '<img src="http://47.110.253.251/evaluation-img/none.png" class="tree_img_none" /><span tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body">' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
+                            tree_html += '<img src="{% static "assets/img/none.png" %}" class="tree_img_none" /><span tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body">' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
                         }
                     }
                     tree_html += '</div>'
@@ -481,11 +493,14 @@
         var d1 = $(this).attr("did")
         if (document.getElementById(d1).style.display == 'none') {
             document.getElementById(d1).style.display = 'block'; //触动的层如果处于隐藏状态，即显示
-            $(this).attr('src', "http://47.110.253.251/evaluation-img/down.png")
+            $(this).attr('src', "{% static "assets/img/down.png" %}")
         } else {
             document.getElementById(d1).style.display = 'none'; //触动的层如果处于显示状态，即隐藏
-            $(this).attr('src', "http://47.110.253.251/evaluation-img/add.png")
+            $(this).attr('src', "{% static "assets/img/add.png" %}")
         }
+        $(".nav_right").addClass('hide');
+        $(".sub").addClass('hide');
+
     });
     //鼠标悬于书名上方
     $('.containor').on('mouseenter', function () {
@@ -494,19 +509,38 @@
         $(".nav_right").addClass('hide');
         $(".sub").addClass('hide');
     }).on('mouseenter', '.book-li', function (e) {
-        $.get("http://47.110.253.251/abc/textbook/ajax-get-all-textbooks", function (data, status) {
+        $.get("{% url "ajax-get-all-textbooks" %}", function (data, status) {
             if (status == "success") {
-                var book_html = ''
-                var books = JSON.parse(data)
-                for (book in books) {
-                    book_html += '<a class="book-name" book_id=' + '"' + books[book]['id'] + '"' + ' subject=' + '"' + books[book]['subject'] + '"' +'>' + books[book]['name'] + '</a>'
-                }
-                $("#book").html(book_html)
-                var li_data = $(this).attr('data-id');
-                //2取不到
-                li_data = '2'
-                $(".sub").addClass('hide');
-                $('.sub[data-id="' + li_data + '"]').removeClass('hide');
+            		$.get("{% url "ajax-subjects" %}", function (data1, status) {
+            				if (status == "success") {
+            						var subject = JSON.parse(data1);
+            						subjects={}
+            						for (index in subject){
+            								subjects[subject[index][0]]=subject[index][1]
+            						}
+            						//console.log(subject)
+				                var book_html = ''
+				                var books = JSON.parse(data)
+				                var sorted = books.sort(function(subject, grade_no) {  
+                						const first = subject.subject - grade_no.subject;
+						                if (first !== 0) {
+						                    return first;
+						                }
+														 return subject.grade_no - grade_no.grade_no;
+            						});
+            						//console.log(sorted)
+
+				                for (book in sorted) {
+				                    book_html += '<a class="book-name" book_id=' + '"' + sorted[book]['id'] + '"' + ' subject=' + '"' + sorted[book]['subject'] + '"' +'>' +subjects[sorted[book]['subject']]+ sorted[book]['name'] + '</a>'
+				                }
+				                $("#book").html(book_html)
+				                var li_data = $(this).attr('data-id');
+				                //2取不到
+				                li_data = '2'
+				                $(".sub").addClass('hide');
+				                $('.sub[data-id="' + li_data + '"]').removeClass('hide');
+		              	}
+              })
             }
         })
     });
@@ -524,11 +558,13 @@
             alert("该题已选");
             return;
         }
-        //加你过该题加入
+        //加该题
         var questionBody = $("div[question-id=" + questionId + "] .question-body").html();
         var subject = nowSubject.split('、')[1];
         var item = {'body': questionBody, 'subject': subject, 'id': questionId,'score':0};
         checkQuestionList.push(item);
+        var questionNumber = document.getElementById("questionNumber");
+        questionNumber.innerText = checkQuestionList.length + "";
     };
 
 
@@ -560,6 +596,8 @@
         for (var i = 0; i < checkQuestionList.length; i++) {
             if (checkQuestionList[i].id == questionId) {
                 checkQuestionList.splice(i, 1);
+                var questionNumber = document.getElementById("questionNumber");
+                questionNumber.innerText = checkQuestionList.length + "";
                 var html = '';
                 for (var i in checkQuestionList) {
                     html += '<tr>\n' +
@@ -611,6 +649,18 @@
         var title = $("#questionInput").val();
         var type = $("#questionSelect").val();
 
+        //判断数据是否为空
+        if(!title){
+            func("试卷标题不能为空！","#fef0f0","#f56c6c");//#f56c6c
+            return ;
+        }
+        var keys = Object.keys(body);
+        if(keys.length < 1){
+            func("试卷选题不能为空！","#fef0f0","#f56c6c");//#f56c6c
+            return ;
+        }
+
+
         var data = {
             info:JSON.stringify({"title":title}),
             body:JSON.stringify(body),
@@ -622,20 +672,60 @@
         };
         $.ajax({
             method: "POST",
-            url: "http://47.110.253.251/abc/quiz/compose-quiz/",
+            url: "{% url "compose-quiz" %}",
             data: data,
             success:function (data,status) {
-                if(data == 'OK'){
-                    alert("提交成功")
+                data=JSON.parse(data)
+                //console.log(data)
+                if(data.status == 'OK'){
+                    func("提交成功！",'#f0f9eb','#89c26b');//#89c26b
+                    quiz_id=data.quiz_id
+                    $.post("http://47.110.253.251/templates/classQuiz/pdf",{"id":data.quiz_id},function(data,status){
+                        $.post("http://47.110.253.251/templates/classQuiz/html",{"id":quiz_id},function(data,status){
+
+                        });
+                    });
                 }else{
-                    alert("提交失败");
+                    func("提交失败！","#fef0f0","#f56c6c");//#f56c6c
                 }
             }
         })
-    })
+    });
 
 
-
+    //消息提醒
+    var layer=document.createElement("div");
+    layer.id="layer";
+    function func(title,color,font_color)
+    {
+        var style=
+            {
+                background:"#D7ECF1",
+                position:"absolute",
+                zIndex:10,
+                width:"380px",
+                height:"48px",
+                left:"50%",
+                top:"20px",
+                textAlign:"center",
+                paddingTop:"17px",
+                paddingBottom:"17px"
+            };
+        var _width=(document.documentElement.clientWidth-380)/2
+        style["left"]=_width+"px"
+        style["background"]=color;
+        for(var i in style){
+            layer.style[i]=style[i];
+        }
+        layer.innerHTML="<div style='color:"+font_color+";font-size: 14px'><b>"+title+"</b></div>"
+        if(document.getElementById("layer")==null)
+        {
+            // document.body.appendChild(layer);
+            // setTimeout("document.body.removeChild(layer)",2000)
+            document.getElementById("myModal").appendChild(layer);
+            setTimeout('document.getElementById("myModal").removeChild(layer)',2000);
+        }
+    }
 
 </script>
 <script type="text/javascript">

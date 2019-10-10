@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 class StudentProfile(models.Model):
     teachers = models.ManyToManyField('teacher.TeacherProfile', blank=True)
     clss = models.ManyToManyField('school.Cls', blank=True)
+    cls_list = models.CharField(max_length=200, blank=True, null=True, default='[]')
     
     name = models.CharField(max_length=20, blank=False, null=False, db_index=True)
     phone = models.CharField(max_length=12, unique=True, blank=False, null=False, db_index=True)

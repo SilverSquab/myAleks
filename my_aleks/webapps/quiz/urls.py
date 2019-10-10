@@ -19,6 +19,10 @@ urlpatterns=[
     url(r'^ajax-get-own-questions/$', views.ajax_get_own_questions, name='ajax-get-own-questions'),
     url(r'^add-question-to-favorites/$', views.add_question_to_favorites, name='add-question-to-favorites'),
 
+    url(r'^ajax-delete-questions/$',views.ajax_delete_question, name='ajax_delete_question'),
+    url(r'^ajax-get-own-question-by-id/$',views.ajax_get_own_question_by_id,name='ajax-get-own-question-by-id'),
+
+
     url(r'^compose-quizs/$', views.compose_quizs, name='compose-quizs'),
     # get next question when practicing
     url(r'^get-next-question/$', views.get_next_question, name='get-next-question'),

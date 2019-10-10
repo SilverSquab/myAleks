@@ -37,17 +37,19 @@
                 <p>描述：暂无</p>
             {% endif %}
             {% if planInfo.resources %}
-                <p>内容资源：{{planInfo.resources}}</p>
+			  <p>内容资源：<span id="resourceList">{{planInfo.resources}}</span></p>
             {% else %}
                 <p>内容资源：暂无</p>
             {% endif %}
           </div>
 	  </div>
+	{% if  base_template == 'school/school_base.html' %}
         <div class="input-group-append" style="float: none;">
             <button class="btn btn-primary" id="buy" type="button">
                 <i class="fas fa-search">购买套餐</i>
             </button>
         </div>
+	{% endif %}
 
 	  <p></p>
 	  <!-- 学生列表表格-->
@@ -75,8 +77,8 @@
 	              	{% for stu in students %}
 	                    <tr id="{{stu.id}}">
 	                      <td>{{stu.name}}</td>
-	                      <td><a href="http://47.110.253.251/abc/teacher/index/?classId={{clsInfo.id}}&studentId={{stu.id}}">查看学情档案</a></td>
-	                      <td stuPlanId="{{stu.stuPlanId}}">{% if stu.payStatus %}已支付{% else %}未支付（ <a href="#" name="pays">代支付</a>）{% endif %}</td>
+	                      <td><a href="{% url "teacher-index" %}?classId={{clsInfo.id}}&studentId={{stu.id}}">查看学情档案</a></td>
+	                      <td stuPlanId="{{stu.stuPlanId}}">{% if stu.payStatus %}已支付{% else %}未支付{% if  base_template == 'school/school_base.html' %}（ <a href="#" name="pays">代支付</a>）{% endif %}{% endif %}</td>
 	                      <td><a href="#" name="delete">删除</a></td>
 	                    </tr>
 	                {% endfor %}
@@ -110,19 +112,19 @@
         var clsId = '{{clsInfo.id}}'
         //购买套餐点击事件
         $("#buy").click(function () {
-             $.get("http://47.110.253.251/abc/plan/ajax-get-plan-templates" ,function(data,status){
+             $.get("{% url "ajax-get-plan-templates" %}" ,function(data,status){
                  if (status =="success"){
                     //console.log(data);
                      var planInfo = $.parseJSON(data);
                      $.MsgBox.Confirm(planInfo,function (){
                         $("button[name='buyPlan']").click(function () {
                             var planId = $(this).attr("id")
-                            $.post("http://47.110.253.251/abc/plan/assign-plan-to-class/",JSON.stringify({
+                            $.post("{% url "assign-plan-to-class" %}",JSON.stringify({
                                 'planTemplateId':planId,
                                 'clsId':clsId
                             }),function(data,status){
-                                console.log(data)
-                                console.log(status)
+                                //console.log(data)
+                                //console.log(status)
                                 if (status != "success"){
                                     $("#mb_box,#mb_con1").remove();
                                     func("购买失败！","#fef0f0","#f56c6c");//#f56c6c
@@ -153,9 +155,9 @@
          $("#addStu").click(function () {
             var stuId=$("input[name='stuId']").val()//学生id
             var phone=$("input[name='stuPhone']").val()
-            $.get("http://47.110.253.251/abc/student/ajax-get-student-profile/?student_no="+stuId+"&phone="+phone ,function(data,status){
-                console.log("date"+data)
-                console.log("status"+status)
+            $.get("{% url "ajax-get-student-profile" %}?student_no="+stuId+"&phone="+phone ,function(data,status){
+                //console.log("date"+data)
+                //console.log("status"+status)
                 if (status != "success"){
                     //$("#mb_box,#mb_con1").remove();
                     func("该学生不存在！","#fef0f0","#f56c6c");//#f56c6c
@@ -167,7 +169,7 @@
                     }else if(data){
                          var studentInfo =  $.parseJSON(data);
                          $.AddStuMsgBox.Confirm("学生信息",studentInfo,function () {
-                             $.post("http://47.110.253.251/abc/school/add-student-to-class",JSON.stringify({
+                             $.post("{% url "add-student-to-class" %}",JSON.stringify({
                                   'studentId':studentInfo.student_id,
                                    'clsId':clsId
                              }) ,function(data,status){
@@ -199,7 +201,7 @@
         $("a[name='pays']").click(function () {
              var stuId = $(this).parent().parent().attr("id")
              var stuPlanId = $(this).parent().attr("stuPlanId")
-             $.post("http://47.110.253.251/abc/school/pay-student-plan",JSON.stringify({
+             $.post("{% url "pay-student-plan" %}",JSON.stringify({
                  'studentPlanId':stuPlanId,
                  'clsId':clsId
              }) ,function(data,status){
@@ -226,12 +228,12 @@
         //删除学生的点击事件
         $("a[name='delete']").click(function () {
             var stuId = $(this).parent().parent().attr("id")
-            $.post("http://47.110.253.251/abc/school/remove-student-from-class/",JSON.stringify({
+            $.post("{% url "remove-student-from-class" %}",JSON.stringify({
                  'studentId':stuId,
                   'clsId':clsId
             }),function(data,status){
-                console.log(data)
-                console.log(status)
+                //console.log(data)
+                //console.log(status)
                 if (status != "success"){
                     func("删除失败！","#fef0f0","#f56c6c");//#f56c6c
                 } else {
@@ -276,5 +278,24 @@
            }
         }
     });
+		//每次加载页面完成后执行
+		$(document).ready(function () {
+			var divBox = document.getElementById("resourceList");
+			if(divBox){
+				var textString = divBox.innerText;
+				var resourceJson = JSON.parse(textString);
+				textString = "";
+				for(var key in resourceJson){
+					switch (key) {
+						case "small": textString += "综合测试："+resourceJson[key]+"次；";break;
+						case "full": textString += "随堂测："+resourceJson[key]+"次；";break;
+					}
+				}
+				divBox.innerText = textString;
+			}
+		})
+
+
+
 	</script>
 {% endblock %}

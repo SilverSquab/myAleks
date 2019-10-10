@@ -16,13 +16,13 @@ def login_view(request):
         username = request.POST.get("username", "")
         password = request.POST.get("password", "")
         user = authenticate(username=username, password=password)
-        if user.groups.filter(name='TEACHER').exists():
-            next_url = request.GET.get("next", "/abc/teacher/my-classes/")
-        if user.groups.filter(name='SCHOOL_MANAGER').exists():
-            next_url = request.GET.get("next","/abc/school/get-classes/")
         if user:
             login(request, user)
             request.session['username']=username
+            if user.groups.filter(name='TEACHER').exists():
+                next_url = request.GET.get("next", "/abc/teacher/index/")
+            if user.groups.filter(name='SCHOOL_MANAGER').exists():
+                next_url = request.GET.get("next","/abc/school/get-classes/")
             return redirect(next_url)
         else:
             return render(request, "Login.html", {"next": next_url})

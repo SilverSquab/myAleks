@@ -31,7 +31,7 @@
  -->    
         {% if knowledge_nodes %}
         {% for l in knowledge_nodes %}  
-        <tr class="node_item" id="{{l.0}}'"><td>{{l.1}}</td></tr>
+        <tr class="node_item" id="{{l.0}}'"><td>{{l.1}}    <a edge_id="{{l.0}}" class= "question_delete">删除</a></td></tr>
         {% endfor %}
         {% endif %}
         
@@ -76,7 +76,7 @@
           {%if nodes_arrs|get_item:option_form.order_of_option %}
 
             {% for l in nodes_arrs|get_item:option_form.order_of_option %}
-                <tr class="node_item" id="option_node_{{l.0}}"><td>{{l.1}}</td></tr>
+                <tr class="node_item" id="option_node_{{l.0}}"><td>{{l.1}} <a edge_id="{{l.0}}" option_id="{{option_form.order_of_option}}" class='option_delete'>删除</a></td></tr>
 
             {% endfor %}
 
@@ -254,7 +254,7 @@ var mathField = MQ.MathField(mathFieldSpan, {
           // submit_option('B');
           // submit_option('C');
           // submit_option('D');
-          alert("上传完毕");
+          //window.location.reload();
         }
       })
     })
@@ -265,9 +265,11 @@ var mathField = MQ.MathField(mathFieldSpan, {
     }
 
     function submit_option(orders){
-
-      if(orders == [])
-        return;
+      if(orders.length == 0){
+          alert("上传完毕");
+          window.location.reload();
+          return;
+      }
       var order = orders[0];
       var form = $("#option_form_"+String(order));
       //console.log(form.html());
@@ -281,7 +283,7 @@ var mathField = MQ.MathField(mathFieldSpan, {
         success: function(data){
           //alert(data);
           if(data != 'OK'){
-            alert(data);
+            alert("上传失败");
           }
           setTimeout(function(){
             submit_option(orders.slice(1));
@@ -314,7 +316,34 @@ var mathField = MQ.MathField(mathFieldSpan, {
       MathJax.Hub.Typeset();
     })
 
-
+		 $(".question_delete").click(function () {
+		 			
+           //alert('删除')
+           var edge_id =$(this).attr('edge_id')
+           console.log(edge_id)
+           $.get("{% url "ajax-delete-edge-question" %}?question_id="+question_id+'&edge_id='+edge_id,function(data,status){
+           		if(data=="OK"){
+           				alert('删除成功')
+           		}else{
+           				alert('删除失败！')
+           		}
+           	})
+      })
+        $(".option_delete").click(function () {
+            //alert('删除')
+           var edge_id =$(this).attr('edge_id')
+           var option_order=$(this).attr('option_id')
+           //console.log(option_order)
+           //console.log(edge_id)
+           $.get("{% url "ajax-delete-edge-question" %}?question_id="+question_id+'&edge_id='+edge_id+'&option_order='+option_order,function(data,status){
+           		if(data=="OK"){
+           				alert('删除成功！')
+           				window.location.reload();
+           		}else{
+           				alert('删除失败！')
+           		}
+           	})
+        })
   })
 </script>
 {% endblock %}

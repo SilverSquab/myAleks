@@ -40,12 +40,19 @@ def quiz_page(request):
     Only exception would be that staffs can also see a quiz.
     '''
     if request.method !='GET':
-        return HttpResponse('wrong method')
+        return render(request,'teacher/errorPage.html',{"errorType":"调用方法错误","particulars":"fault:wrong method"})
     quiz_id = request.GET.get('quizId','')
+    quiz_record_id=request.GET.get('quizRecordId','')
     try:
-        quiz = Quiz.objects.get(pk=quiz_id)
+        info=''
+        if quiz_id:
+            quiz = Quiz.objects.get(pk=quiz_id)
+        if quiz_record_id:
+            quiz_record = QuizRecord.objects.get(pk=quiz_record_id)
+            quiz=quiz_record.quiz
+            info=json.loads(quiz_record.info)
     except:
-        return HttpResponse('quiz not exsited')
+        return render(request,'teacher/errorPage.html',{"errorType":"试卷查询失败","particulars":"fault:quiz not exsited"})
     try:
         quiz.subject = Subject.objects.get(name=quiz.subject).chinese_name
     except:
@@ -63,17 +70,24 @@ def quiz_page(request):
     for body in quiz_body:
         # print(quiz_body[body][0])
         try:
+            correct_rate=info['correctRate'][body]
+        except:
+            correct_rate=''
+        try:
             question = Question.objects.get(pk = quiz_body[body][0])
         except:
-            return HttpResponse('question not exsited')
+            return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:question not exsited"})
         try:
             options = question.options.all().order_by('order')
         except:
-            return HttpResponse('options not exsited')
-        options_dicts = list(options.values('body','order','img'))
+            return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
+        options_dicts = list(options.values('body','order','img','is_correct'))
+        for option in options_dicts:
+            if option["is_correct"]:
+                true_option=option['order']
         knowledge_node = KnowledgeNode.objects.filter(question=question)
-        questions.append({'question':question,'options':options,"knowledge_nodes":knowledge_node})
-    return render(request, 'quiz/quiz_detail.html',{"quizInfo":quiz,'questions':questions,'quiz_paper_url':quiz_paper_url})
+        questions.append({'question':question,'options':options,"knowledge_nodes":knowledge_node,'true_option':true_option,"correct_rate":correct_rate})
+    return render(request, 'quiz/quiz_detail.html',{"quizInfo":quiz,'questions':questions,'quiz_paper_url':quiz_paper_url,"info":info})
 
 @login_required
 def quiz_records(request):
@@ -81,7 +95,32 @@ def quiz_records(request):
     Only visited by teacher.
     See his or her quiz records.
     '''
-    return render(request, 'quiz/my_quiz_records.html')
+    user=request.user
+    if not user.groups.filter(name='TEACHER').exists():
+        return render(request,'teacher/errorPage.html',{"errorType":"用户权限不足","particulars":"fault:user is not a teacher"})
+    #teacher=user.teacher
+    #quiz_records=teacher.quizrecord_set.all()
+    quiz_records=QuizRecord.objects.filter(teacher__user=user)
+    quiz=[]
+    for quiz_record in quiz_records:
+        subject=Subject.objects.get(name=quiz_record.quiz.subject).chinese_name
+        info = json.loads(quiz_record.quiz.info)
+        generator = quiz_record.quiz.generator.username
+        quiz.append({"id":quiz_record.id,"generator":generator,"info":info,"subject":subject,"quiz":quiz_record.quiz})
+    #try:
+        #quiz = user.quiz_set.all()
+    #except:
+        #return render(request, 'teacher/my_quizes.html')
+    #quiz_dicts = list(quiz.values('id', 'info', 'subject', 'generator'))
+    #for dic in quiz_dicts:
+        #try:
+            #dic['subject'] = Subject.objects.get(name=dic['subject']).chinese_name
+            #dic['generator'] = user.username
+            #dic['info']=json.loads(dic['info'])
+       # except:
+            #pass
+    
+    return render(request, 'quiz/my_quiz_records.html',{"quizInfo":quiz})
 
 @login_required
 def quiz_record(request):
@@ -159,9 +198,8 @@ def compose_quiz(request):
     except Exception as e:
         #print(e)
         return HttpResponse('cannot create quiz')
-
-
-    return HttpResponse('OK')
+    
+    return HttpResponse(json.dumps({"status":"OK","quiz_id":quiz.id}))
 
 @login_required
 def questions_by_knowledge_node(request):
@@ -384,17 +422,20 @@ def publish_quiz(request):
 @login_required
 def mark_quiz(request):
     if request.method == 'GET':
-        quiz_id = request.GET.get('quiz_id', '')
-        if quiz_id == '':
+        quiz_record_id = request.GET.get('quiz_record_id', '')
+        if quiz_record_id == '':
             return render(request, 'quiz/mark_quiz.html')
         else:
             try:
-                quiz_record=QuizRecord.objects.get(pk=quiz_id)
+                quiz_record=QuizRecord.objects.get(pk=quiz_record_id)
             except:
-                return HttpResponse('quizRecord not exsited')
+                return render(request,'teacher/errorPage.html',{"errorType":"参数数据错误","particulars":"fault:quizRecord not exsited"})
             quiz=quiz_record.quiz
             cls=quiz_record.cls.name
-            title=json.loads(quiz.info)['title']
+            try:
+                title=json.loads(quiz.info)['title']
+            except:
+                pass
             quiz_body = json.loads(quiz.body)
             questions =[]
             #print(quiz_body)
@@ -402,15 +443,15 @@ def mark_quiz(request):
                 # print(quiz_body[body][0])
                 try:
                     question = Question.objects.get(pk = quiz_body[body][0])
-                    print(str(question.img))
+                    # print(str(question.img))
                     question_info={"body":question.body,"image":question.img,"score":quiz_body[body][1],"order":body}
                     question_infos={"body":question.body,"score":quiz_body[body][1],"order":body}
                 except:
-                    return HttpResponse('question not exsited')
+                    return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:question not exsited"})
                 try:
                     options = question.options.all().order_by('order')
                 except:
-                    return HttpResponse('options not exsited')
+                    return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
                 options_dicts = list(options.values('body','order','img','is_correct'))
                 option_dicts=[]
                 for option in  options_dicts:
@@ -420,7 +461,7 @@ def mark_quiz(request):
                 for kn in knowledge_node:
                     knowledge_nodes.append(kn.title)
                 questions.append({"question_id":question.id,"question":question_infos,"options":option_dicts,"knowledge_nodes":knowledge_nodes})
-            quiz_info={"cls":cls,"title":title,"quizRecordId":quiz_id,"questions":questions}
+            quiz_info={"cls":cls,"title":title,"quizRecordId":quiz_record_id,"questions":questions}
             json_data=json.dumps(quiz_info)
             #print(json_data)
             return render(request, 'quiz/mark_quiz.html', {'quizInfo': quiz_info, 'json_data':json_data})
@@ -465,58 +506,57 @@ def mark_quiz(request):
     d = {'isFinish': True}
     return HttpResponse(json.dumps(d))
 
-
 @login_required
 def ajax_get_questions(request):
-    #print(request.GET)
+    question_id=request.GET.get('questionId','')
     subject = request.GET.get('subject', '')
     node_id = request.GET.get('node_id', '')
     page = request.GET.get('page', '1')
     date = request.GET.get('date', '')
-    if not subject and not node_id:
-        #print(1)
-        return HttpResponse('missing subject and node_id')
-
-    if not subject:
-        try: 
-            node = KnowledgeNode.objects.get(id=node_id)
-        except:
-            return HttpResponse('knowledge node not existed', status=400)
-
-        subject = node.graph.subject
-        #print(subject)
-
-    #print(date)
-    #print(type(date))
-    
-
-    #try:
-    #    subject = Subject.objects.get(name=subject_str)
-    
-    #except:
-    #    return HttpResponse('subject not existed')
-
-    questions = Question.objects.filter(subject=subject)
-    #print(len(questions))
-
+    node=request.GET.get('node','true')
+    questions = Question.objects.all()
+    if date:
+        datetime = date.split('-')
+        questions = questions.filter(datetime__year=datetime[0],datetime__month=datetime[1],datetime__day=datetime[2])
+    if subject:
+        questions = questions.filter(subject=subject)
     if node_id:
-        try:
-            node = KnowledgeNode.objects.get(id=node_id)
-        except:
-            return HttpResponse('knowledge node not existed', status=400)
+        node = KnowledgeNode.objects.get(id=node_id)
         questions = questions.filter(knowledge_node=node)
-
-
-    # XXX: use paginator to assure only 25 results will be returned each time
+    if question_id:
+        try:
+            questions = Question.objects.filter(pk=question_id)
+        except:
+            return HttpResponse('missing question_id')
+    if node=='false':
+        questions=questions.filter(knowledge_node=None)
+        
+    #else:
+        #if not subject and not node_id:
+            #return HttpResponse('missing subject and node_id')
+        #if not subject:
+            #try:
+                #node = KnowledgeNode.objects.get(id=node_id)
+            #except:
+                #return HttpResponse('knowledge node not existed', status=400)
+            #subject = node.graph.subject
+        #questions = Question.objects.filter(subject=subject)
+        #if node_id:
+            #try:
+                #node = KnowledgeNode.objects.get(id=node_id)
+            #except:
+                #return HttpResponse('knowledge node not existed', status=400)
+            #questions = questions.filter(knowledge_node=node)
+        #if date:
+            #datetime=date.split('-')
+            #questions = questions.filter(datetime__year=datetime[0],datetime__month=datetime[1],datetime__day=datetime[2])
     page = int(page)
-    
     paginator = Paginator(questions, 25)
-
     try:
         questions = paginator.page(page)
     except:
-        questions = paginator.page(1)
-
+        #questions = paginator.page(1)
+        return HttpResponse('error')
     d = {}
     for question in questions:
         val = {}
@@ -534,12 +574,92 @@ def ajax_get_questions(request):
             options[option.order] = option_dic
         val['options'] = options
         d[question.id] = val
-        #print(d)
-    
     return HttpResponse(json.dumps(d))
-    
-    
-    #return HttpResponse('OK')
+
+def ajax_get_own_question_by_id(request):
+    question_id=request.GET.get('questionId','')
+    subject = request.GET.get('subject', '')
+    node_id = request.GET.get('node_id', '')
+    page = request.GET.get('page', '1')
+    date = request.GET.get('date', '')
+    node = request.GET.get('node','true')
+    user = request.user
+    questions = user.questions_uploaded.all().order_by('-id')
+    if date:
+        datetime = date.split('-')
+        questions = questions.filter(datetime__year=datetime[0],datetime__month=datetime[1],datetime__day=datetime[2])
+    if subject:
+        questions = questions.filter(subject=subject)
+    if node_id:
+        node = KnowledgeNode.objects.get(id=node_id)
+        questions = questions.filter(knowledge_node=node)
+    if question_id:
+        try:
+            questions = Question.objects.filter(pk=question_id)
+        except:
+            return HttpResponse('missing question_id')
+    if node=='false':
+        questions = questions.filter(knowledge_node=None)
+    #else:
+        #if not subject and not node_id:
+            #return HttpResponse('missing subject and node_id')
+        #if not subject:
+            #try:
+                #node = KnowledgeNode.objects.get(id=node_id)
+            #except:
+                #return HttpResponse('knowledge node not existed', status=400)
+            #subject = node.graph.subject
+        #questions = questions.filter(subject=subject)
+        #if node_id:
+            #try:
+                #node = KnowledgeNode.objects.get(id=node_id)
+            #except:
+                #return HttpResponse('knowledge node not existed', status=400)
+            #questions = questions.filter(knowledge_node=node)
+        #if date:
+            #datetime=date.split('-')
+            #questions = questions.filter(datetime__year=datetime[0],datetime__month=datetime[1],datetime__day=datetime[2])
+    page = int(page)
+    paginator = Paginator(questions, 25)
+    try:
+        questions = paginator.page(page)
+    except:
+        #questions = paginator.page(1)
+        return HttpResponse('error')
+    d = {}
+    for question in questions:
+        val = {}
+        val['body'] = question.body
+        val['analysis'] = question.analysis
+        if question.img:
+            val['img_url'] = question.img.url
+        options = {}
+        for option in question.options.all():
+            option_dic = {}
+            option_dic['body'] = option.body
+            option_dic['id'] = option.id
+            if option.img:
+                option_dic['img_url'] = option.img.url
+            options[option.order] = option_dic
+        val['options'] = options
+        d[question.id] = val
+    return HttpResponse(json.dumps(d))
+
+@login_required
+@csrf_exempt
+def ajax_delete_question(request):
+    question_id=request.GET.get("question_id","")
+    if question_id=='':
+        return HttpResponse('failed: missing field question id')
+    try:
+        question = Question.objects.get(pk=question_id)
+    except:
+        return HttpResponse('question not existed')
+    try:
+        question.delete()
+    except:
+        return HttpResponse('question not delete')
+    return HttpResponse('OK')
 
 @login_required
 def upload_question(request):

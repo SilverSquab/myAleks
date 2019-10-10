@@ -7,7 +7,7 @@
     </script>
     <script type="text/x-mathjax-config">
 	    MathJax.Hub.Config({
-	        tex2jax: {inlineMath: [['$', '$'], ['/[', '/]'], ['\ce{', '\}']]},
+	        tex2jax: {inlineMath: [['$', '$'], ['/[', '/]'],['\\(', '\\)'], ['\\ce{', '\}']]},
 	        messageStyle: "none"
 	    });
 	</script>
@@ -46,11 +46,21 @@
                         <img src="http://47.110.253.251/evaluation-img/{{q.question.image}}" width="40%">
                     {% endif %}
                     {% for o in q.options %}
+                    		<div style="float:left;padding-right:50px;padding-left:50p">
                         <p>{{o.order}}.{{o.body}} </p>
                         {% if o.img %}
-                            <img src="http://47.110.253.251/evaluation-img/{{o.img}}" width="40%">
+                            <img src="http://47.110.253.251/evaluation-img/{{o.img}}">
                         {% endif %}
-                    {% endfor %}
+                      </div>
+                {% endfor %}
+                <div style="width:100%;clear:both">
+                    <hr/>
+                    <p>正确答案：{{q.true_option}}</p>
+                    {% if q.correct_rate %}
+                    <P>正确率：{{q.correct_rate}}</P>
+                    {% endif %}
+                    <p>解析：{{q.question.analysis}}</p>
+                </div>
             </div>
         </div>
     </div>

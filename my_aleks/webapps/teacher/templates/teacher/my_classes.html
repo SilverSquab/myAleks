@@ -6,12 +6,12 @@
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">我的班级</h1>
 
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-target="#createClassModal" data-toggle="modal"><i class="fas fa-download fa-sm text-white-50"></i> 新建班级</a>
+           <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-target="#createClassModal" data-toggle="modal"><i class="fas fa-download fa-sm text-white-50"></i> 新建班级</a>-->
           </div>
 
           <div class="row">
           <!-- Default Card Example -->
-            {% for class in classes.all %}
+            {% for class in classes %}
               <div class="col-lg-6">
                 <div class="card mb-4">
                   <div class="card-header">
@@ -20,7 +20,8 @@
                   <div class="card-body">
                     <p>年级：{{class.grade}}</p>
                     <p>人数：{{class.num}}</p>
-                    <a href="{% url 'school-get-class-detail' %}/?clsId={{class.pk}}">查看详情</a>
+                    <p>学科：{{class.subject}}</p>
+                    <a href="{% url 'school-get-class-detail' %}/?clsId={{class.id}}">查看详情</a>
                   </div>
                 </div>
               </div>

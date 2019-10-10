@@ -2,6 +2,12 @@
 
 {% block "stylesheets" %}
   <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+  <script type="text/x-mathjax-config">
+	    MathJax.Hub.Config({
+	        tex2jax: {inlineMath: [['$', '$'], ['/[', '/]'],['\\(', '\\)'], ['\\ce{', '\}']]},
+	        messageStyle: "none"
+	    });
+	</script>
 {% endblock %}
 
 {% block "main_content" %}
@@ -16,7 +22,7 @@
 	</div>
 	<form action="{% url 'mark-quiz' %}" method="get" >
 		<div style="float: left;width: 25%">
-			<input name="quiz_id" class="bg-light form-control" placeholder="输入试卷编号"/>
+			<input name="quiz_record_id" class="bg-light form-control" placeholder="输入测评记录编号"/>
 		</div>
 		<div style="float: left;width: 25%;padding-left: 20px">
 			<input type="submit" class="btn btn-primary" value="搜索试卷"/>
@@ -60,13 +66,15 @@
 		                    <img src="{{question.image}}">
 		                {% endif %}
 		                {% for o in question.options %}
+		                		<div style="float:left;padding-right:50px;padding-left:50p">
 		                    <p>{{o.order}}.{{o.body}} </p>
 		                    {% if o.image %}
-		                        <img src="{{o.image}}">
+		                        <img src="http://47.110.253.251/evaluation-img/{{o.image}}">
 		                    {% endif %}
+		                    </div>
 		                {% endfor %}
 		                <div>
-		                    <input type="text" class="form-control bg-light border-1 small" placeholder="输入结果" id="{{question.question_id}}" aria-label="Search" aria-describedby="basic-addon2"><br>
+		                    <input type="text" style="text-transform: uppercase " maxlength="1"  class="form-control bg-light border-1 small" placeholder="输入结果" id="{{question.question_id}}" aria-label="Search" aria-describedby="basic-addon2"><br>
 		                </div>
 		            </div>
 		        </div>
@@ -106,7 +114,7 @@
 <script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
 <script type="text/javascript">
   	$(document).ready(function(){
-		    console.log({{json_data|safe}});
+		    //console.log({{json_data|safe}});
 		    var quizInfo = {{json_data|safe}};
 		    //console.log(quizInfo);
 		    //console.log(typeof(quizInfo));
@@ -146,6 +154,13 @@
 		            //console.log('正确答案'+true_option)
 		            //判断答案是否正确
 		          	var value=$(this).val();
+                    //console.log(value)
+                    var st = /^[a-dA-D]+$/
+                    if(!st.test(value)){
+                        alert("输入格式错误，请输入选项编号")
+                        $(this).val('')
+                    }
+                    value=value.toUpperCase()
 		          	//console.log('选择答案：'+value)
 		        	if (id in answer){
 		          		if (answer[id] ==true_option&&value!=true_option){
@@ -175,13 +190,13 @@
 				    	var data={"questionAndAnswer":JSON.stringify(answer),"quizRecordId":quizRecordId,"studentId":studentId}
 				    	 $.ajax({
 				      		type:'POST',
-				      		url: "http://47.110.253.251/abc/quiz/mark-quiz/",
+				      		url: "{% url "mark-quiz" %}",
 				     		dataType:'json',
 				        	contentType:'application/json;charset=UTF-8',
 				     		data: JSON.stringify(data),
 				      		success:function(data,status){
 					        	if (data.isFinish) {
-					          		$(location).attr('href', 'http://47.110.253.251/abc/quiz/mark-quiz/');
+					          		$(location).attr('href', '{% url "mark-quiz" %}');
 					        	}else {
 					          		alert('提交失败！')
 					        	}
@@ -203,7 +218,7 @@
 			    		//console.log("下一个");
 			    		$.ajax({
 			      			type:'POST',
-			     	 		url: "http://47.110.253.251/abc/quiz/mark-quiz/",
+			     	 		url: "{% url "mark-quiz" %}",
 			      			dataType:'json',
 			      			//contentType:'application/json;charset=UTF-8',
 			      			data:JSON.stringify(data),

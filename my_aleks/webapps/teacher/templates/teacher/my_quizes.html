@@ -21,7 +21,7 @@
               </div>
             </div>
            {% endfor %}
-            </div>
+          </div>
 {% endblock %}
 {% block "scripts" %}
 	<script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
@@ -29,7 +29,7 @@
        /*卡片的点击事件*/
         $("div[name='quiz']").click(function () {
             var quizId= $(this).attr("id")
-            console.log(quizId)
+            //console.log(quizId)
             $(location).attr('href', "{% url "quiz-page" %}?quizId="+quizId);
         })
 	</script>

@@ -11,8 +11,9 @@ from django.forms import DateInput, DateField, Form, Select, SelectMultiple, Mod
 from django.contrib.admin.views.decorators import staff_member_required
 from webapps.knowledge_space.models import *
 from webapps.textbook.models import *
+from webapps.school.models import Cls
 from django import forms
-
+import datetime
 # Create your views here.
 
 class QuestionQueryForm(forms.Form):
@@ -87,7 +88,7 @@ def quiz_page(request):
                 true_option=option['order']
         knowledge_node = KnowledgeNode.objects.filter(question=question)
         questions.append({'question':question,'options':options,"knowledge_nodes":knowledge_node,'true_option':true_option,"correct_rate":correct_rate})
-    return render(request, 'quiz/quiz_detail.html',{"quizInfo":quiz,'questions':questions,'quiz_paper_url':quiz_paper_url,"info":info})
+    return render(request, 'quiz/quiz_detail.html',{"quizInfo":quiz,'questions':questions,'quiz_paper_url':quiz_paper_url,"info":info,"quiz_record_id":quiz_record_id})
 
 @login_required
 def quiz_records(request):
@@ -106,7 +107,8 @@ def quiz_records(request):
         subject=Subject.objects.get(name=quiz_record.quiz.subject).chinese_name
         info = json.loads(quiz_record.quiz.info)
         generator = quiz_record.quiz.generator.username
-        quiz.append({"id":quiz_record.id,"generator":generator,"info":info,"subject":subject,"quiz":quiz_record.quiz})
+        cls = quiz_record.cls.name
+        quiz.append({"cls":cls,"id":quiz_record.id,"generator":generator,"info":info,"subject":subject,"quiz":quiz_record.quiz})
     #try:
         #quiz = user.quiz_set.all()
     #except:
@@ -430,6 +432,9 @@ def mark_quiz(request):
                 quiz_record=QuizRecord.objects.get(pk=quiz_record_id)
             except:
                 return render(request,'teacher/errorPage.html',{"errorType":"参数数据错误","particulars":"fault:quizRecord not exsited"})
+            user=request.user
+            if user!=quiz_record.teacher.user:
+                return render(request,'teacher/errorPage.html',{"errorType":"该用户没有此测评","particulars":"fault:user not having quizRecord"})
             quiz=quiz_record.quiz
             cls=quiz_record.cls.name
             try:
@@ -861,11 +866,37 @@ def add_question_to_favorites(request):
         return HttpResponse('question adding to favorites failed')
 
     return HttpResponse('OK')
+@login_required
+@csrf_exempt
+def ajax_save_quiz_record(request):
+    user=request.user
+    if request.method == "POST":
+        quiz_id=request.POST.get("quiz_id",'')
+        cls_id=request.POST.get('cls_id','')
+        try:
+            quiz=Quiz.objects.get(pk=quiz_id)
+        except:
+            return HttpResponse("quiz not having")
+        try:
+            cls=Cls.objects.get(pk=cls_id)
+        except:
+            return HttpResponse('class not having')
+        if cls.teacher.user!=user:
+            return HttpResponse("user not having this class")
+        if QuizRecord.objects.filter(quiz_id=quiz_id,cls_id=cls_id).exists():
+            return HttpResponse('quiz record is having')
+        quiz_record=QuizRecord(info="{}",quiz=quiz,teacher=user.teacherprofile,cls=cls,datetime=datetime.datetime.now())
+        try:
+            quiz_record.save()
+        except:
+            return HttpResponse("save failed")
+        return HttpResponse("OK")
+    return HttpResponse("method error")
     
 @login_required
 def ajax_get_page_count_by_section(request):
     section_id = request.GET.get('section_id', '')
-
+    selected = request.GET.get('selected','')
     if not section_id:
         return HttpResponse('failed: section_id missing')
     try:
@@ -874,13 +905,15 @@ def ajax_get_page_count_by_section(request):
         return HttpResponse('failed: section not found with this id')
 
     questions = Question.objects.filter(knowledge_node__in=json.loads(section.nodes_list))
-
+    if selected=="true":
+        questions = questions.filter(selected=True)
     return HttpResponse((len(questions.all()) + 24)/25)
 
 @login_required
 def ajax_get_questions_by_section(request):
     section_id = request.GET.get('section_id', '')
     page = request.GET.get('page', '1')
+    selected = request.GET.get('selected','')
     page = int(page)
 
     if not section_id:
@@ -891,7 +924,8 @@ def ajax_get_questions_by_section(request):
         return HttpResponse('failed: section not found with this id')
 
     questions = Question.objects.filter(knowledge_node__in=json.loads(section.nodes_list))
-    
+    if selected=="true":
+        questions = questions.filter(selected=True)
     page = int(page)
     
     paginator = Paginator(questions, 25)

@@ -32,6 +32,8 @@ class Question(models.Model):
 
     analysis = models.TextField(max_length=2000, blank=True, null=True)
 
+    selected = models.BooleanField(default=False)
+
     def student_answer_question(self, user, option):
         QuestionRecord.objects.get_or_create(user = user, option = option, question = self)
         self.stat.update_question_stat(option)

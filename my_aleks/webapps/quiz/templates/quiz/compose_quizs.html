@@ -73,13 +73,14 @@
 
     .sub {
         position: relative;
-        overflow: hidden;
-        width: 100%;
-        height: 280px;
+        overflow: auto;
+        width: 400px;
+        height: 600px;
         background: #FFFFFF;
-        padding: 10px 0px;
+        padding: 10px 10px;
         z-Index: 2;
     }
+
 
     .sub dl {
         overflow: hidden;
@@ -114,7 +115,8 @@
     }
 
     .sub dd {
-        width: 680px;
+        padding-left: 10px;
+        width: 400px;
         float: left;
         display: block;
         position: relative;
@@ -254,12 +256,7 @@
                 <hr style="height: 5px"/>
             </div>
             <div class="nav_right">
-                <div class="sub hide" data-id="2">
-                    <dl>
-                        <dt><a>教材： <i> &gt;</i></a></dt>
-                        <dd id="book">
-                        </dd>
-                    </dl>
+                <div class="sub hide overY" data-id="2" id = "bookDiv">
 
                 </div>
             </div>
@@ -272,13 +269,20 @@
     <!-- 题目页面-->
     <div class="card mb-4" style="width: 73%;float: right">
         <div class="card-body">
-            <h6>试题列表:<span style="cursor: pointer"></span></h6>
+            <!--<h6>试题列表:<span style="cursor: pointer"></span></h6>-->
+            <!--<form id="form1" >题目范围：
+                <input type="radio"  name="node" checked  value="true" />显示全部&nbsp;&nbsp;
+                <input type="radio"  name="node" value="false" />只显示优选题
+            </form>-->
+            <button class="btn btn-primary" id="questionType-btn" type="button" >
+                <i class="fas fa-search fa-sm"><span class="questionTypeButton">查询优选题</span></i>
+            </button>
             <hr style="height: 5px"/>
             <div class="row" id="question-container">
                 <div style="text-align: center;width: 100%">暂无试题！</div>
             </div>
             <div style="text-align: center">
-                <span style="padding: 10px;cursor: pointer" id="down_page">上一页</span>|<span style="padding: 10px" id="page">1</span>|<span style="padding: 10px;cursor: pointer" id="up_page">下一页</span>
+                <span style="padding: 10px;cursor: pointer" id="down_page">上一页</span>|<span style="padding-left: 10px" id="page">1</span>/<span style="padding-right:10px" id="maxpage">1</span>|<span style="padding: 10px;cursor: pointer" id="up_page">下一页</span><input style="width:30px" id="pageInput" /><a  id="jump-page" style="padding: 10px;cursor: pointer" type="button">跳转</a>
             </div>
         </div>
     </div>
@@ -312,21 +316,19 @@
     var isScore = false;
     //当前教材对应的科目
     var subject='';
+    //所有科目信息
+    var subjectList = {};
+    //是否是优选题
+    var isExcellent = false;
     //点击树中的文字进行查询题目
-    $(document).on('click', '.tree_body', function () {
-        section_id = $(this).attr('tree_body_id');
-        nowSubject = $(this).text();
-        // console.info(nowSubject);
-        page = 1
-        // console.log('点击事件！')
-        $.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page, function (data, status) {
+    // $(document).on('click', '.tree_body', function () {
+    var findQustionList = function(p){
+        page = p;
+        $.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page+"&selected="+isExcellent, function (data, status) {
             if (status == "success") {
-                // console.log(data)
                 var questions = JSON.parse(data);
                 var question_body_html = ''
                 for (question_id in questions) {
-                    // console.log(question_id)
-                    // console.log(questions[question_id])
                     question_body_html += '<div class="col-lg-12">'
                         + '<div class="card mb-4" question-id="' + question_id + '">'
                         + '<div class="card-header">'
@@ -346,25 +348,62 @@
                         + '</div>'
                         + '</div></div></div>'
                 }
-                // console.log(question_body_html)
                 $("#question-container").html(question_body_html);
                 MathJax.Hub.Typeset();
             }
         });
-        $.get("{% url "ajax-get-page-count-by-section" %}?section_id=" + section_id, function (data, status) {
+        //修改页面样式
+        $("#page").html(page);
+        $.get("{% url "ajax-get-page-count-by-section" %}?section_id=" + section_id+"&selected="+isExcellent, function (data, status) {
             if (status == "success") {
-                maxpage = data;
+                maxpage = parseInt(data);
+                $("#maxpage").html(maxpage);
             }
-        })
+        });
+    };
+    //点击章节查询
+    $(document).on('click', '.tree_body', function () {
+        section_id = $(this).attr('tree_body_id');
+        nowSubject = $(this).text();
+        //修改选中的字体样式颜色
+        $('.tree_body').css('color','');
+        $('span[tree_body_id="'+section_id+'"]').css('color','#27BFEE');
+        findQustionList(1);
     });
+    //跳页查询
+    $(document).on('click','#jump-page',function(){
+        var jumpPage = $("#pageInput").val();
+        findQustionList(parseInt(jumpPage));
+    });
+    //切换查询范围
+    $("#questionType-btn").click(function () {
+       if(!section_id || !nowSubject){
+           alert("请先选择教材章节");
+           return
+       }
+           isExcellent = !isExcellent;
+           if(isExcellent){
+               $(".questionTypeButton").text("显示全部题目");
+           }else{
+               $(".questionTypeButton").text("显示优选题");;
+           }
+           findQustionList(1);
+
+    });
+
+
+
     //点击上一页
     $('#down_page').click(function () {
         // console.log('上一页')
         if (page > 1) {
             page = page - 1
+        }else{
+            alert("已到首页")
+            return
         }
         // console.log(page)
-        $.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page, function (data, status) {
+        $.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page+"&selected="+isExcellent, function (data, status) {
             if (status == "success") {
                 // console.log(data)
                 var questions = JSON.parse(data);
@@ -402,9 +441,12 @@
         // console.log('下一页')
         if (page < maxpage) {
             page = page + 1
+        }else{
+            alert("已到尾页");
+            return
         }
         // console.log(page)
-        $.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page, function (data, status) {
+        $.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page+"&selected="+isExcellent, function (data, status) {
             if (status == "success") {
                 // console.log(data)
                 var questions = JSON.parse(data);
@@ -449,42 +491,52 @@
                 //对章进行排序
                 var chapters_order_by_order = book_data.chapters.sort(
                     function (a, b) {
-                        if (a.order < b.order) return -1;
-                        if (a.order > b.order) return 1;
-                        return 0;
+                        if (typeof a.order == "undefined" || a.order == null || a.order == "") return 1
+                        if (typeof b.order == "undefined" || b.order == null || b.order == "") return -1
+                        var aText = (a.order.split("章")[0]).substring(1);
+                        var bText = (b.order.split("章")[0]).substring(1);
+                        if (typeof aText == "undefined" || aText == null || aText == "") return 1
+                        if (typeof bText == "undefined" || bText == null || bText == "") return -1
+                        return parseFloat(aText) - parseFloat(bText);
                     }
                 );
                 for (chapter in chapters_order_by_order) {
+                    // console.info(chapters_order_by_order[chapter])
                     tree_html += '<div style="clear: both">'
-                        + '<img src="{% static "assets/img/add.png" %}" class="tree_img" did=' + '"' + chapters_order_by_order[chapter].id + '"' + '/><span tree_body_id=' + '"' + chapters_order_by_order[chapter].textbook + '"' + ' class="tree_body">' + chapters_order_by_order[chapter].order + '、' + chapters_order_by_order[chapter].chinese_name + '</span>'
+                        + '<img src="{% static "assets/img/add.png" %}" class="tree_img" did=' + '"' + chapters_order_by_order[chapter].id + '"' + '/><span tree_body_id=' + '"' + chapters_order_by_order[chapter].id + '"' + ' class="tree_body">' + chapters_order_by_order[chapter].order + '、' + chapters_order_by_order[chapter].chinese_name + '</span>'
                         + '</div>'
-                        + '<div class="tree2" id=' + '"' + chapters_order_by_order[chapter].id + '"' + ' style="clear: both">'
+                        + '<div class="tree2" id=' + '"' + chapters_order_by_order[chapter].id + '"' + ' style="clear: both;overflow：hidden;">'
                     //对节进行排序
                     var sections_order_by_order = chapters_order_by_order[chapter].sections.sort(
                         function (a, b) {
-                            if (a.order < b.order) return -1;
-                            if (a.order > b.order) return 1;
-                            return 0;
+
+                            if (typeof a.order == "undefined" || a.order == null || a.order == "") return -1
+                            if (typeof b.order == "undefined" || b.order == null || b.order == "") return 1
+                            var aText = a.order.split("、")[0];
+                            var bText = b.order.split("、")[0];
+                            if (typeof aText == "undefined" || aText == null || aText == "") return -1
+                            if (typeof bText == "undefined" || bText == null || bText == "") return 1
+                            return parseFloat(aText) - parseFloat(bText);
                         }
                     );
                     for (section in sections_order_by_order) {
 
                         if (sections_order_by_order[section].parts.length > 0) {
-                            tree_html += '<img src="{% static "assets/img/add.png" %}" class="tree_img" did=' + '"' + sections_order_by_order[section].id + '"' + '/><span tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body">' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
-                            tree_html += '<div class="tree2" id=' + '"' + sections_order_by_order[section].id + '"' + ' style="clear: both">'
+                            tree_html +='<span tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body" style="white-space: nowrap; display: inline-block;width: 350px;overflow: hidden;text-overflow: ellipsis;line-height: 0.9;">'+ '<img src="{% static "assets/img/none.png" %}" class="tree_img" did=' + '"' + sections_order_by_order[section].id + '"' + '/>&nbsp;&nbsp;' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
+                           /* tree_html += '<div class="tree2" id=' + '"' + sections_order_by_order[section].id + '"' + ' style="clear: both">'
                             for (part in sections_order_by_order[section].parts) {
                                 tree_html += '<img src="{% static "assets/img/none.png" %}" class="tree_img_none"/><span tree_body_id=' + '"' + sections_order_by_order[section].parts[part].section + '"' + ' class="tree_body">' + sections_order_by_order[section].parts[part]['chinese_name'] + '</span><br>'
                             }
-                            tree_html += '</div>'
+                            tree_html += '</div>'*/
                         } else {
-                            tree_html += '<img src="{% static "assets/img/none.png" %}" class="tree_img_none" /><span tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body">' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
+                            tree_html += '<span tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body" style="white-space: nowrap; display: inline-block;width: 350px;overflow: hidden;text-overflow: ellipsis;line-height: 0.9;"><img src="{% static "assets/img/none.png" %}" class="tree_img_none"  />&nbsp;&nbsp;' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
                         }
                     }
                     tree_html += '</div>'
                 }
                 // console.log(tree_html)
                 $("#book-tree").html(tree_html);
-                $(".book-li").html('当前课本：' + book_data.chinese_name)
+                $(".book-li").html('当前课本：' +subjectList[book_data.subject] + book_data.chinese_name)
             }
         });
     });
@@ -514,26 +566,40 @@
             		$.get("{% url "ajax-subjects" %}", function (data1, status) {
             				if (status == "success") {
             						var subject = JSON.parse(data1);
-            						subjects={}
+            						var subjects={}
             						for (index in subject){
             								subjects[subject[index][0]]=subject[index][1]
             						}
-            						//console.log(subject)
-				                var book_html = ''
 				                var books = JSON.parse(data)
-				                var sorted = books.sort(function(subject, grade_no) {  
-                						const first = subject.subject - grade_no.subject;
-						                if (first !== 0) {
-						                    return first;
-						                }
-														 return subject.grade_no - grade_no.grade_no;
-            						});
-            						//console.log(sorted)
+                                // console.info(books)
+                                var booksOnSubjectList = {}
+                                for(var item in books){
+                                    if(!booksOnSubjectList[books[item].subject]){
+                                        booksOnSubjectList[books[item].subject] = [];
+                                    }
+                                    booksOnSubjectList[books[item].subject].push(books[item]);
+                                }
 
-				                for (book in sorted) {
-				                    book_html += '<a class="book-name" book_id=' + '"' + sorted[book]['id'] + '"' + ' subject=' + '"' + sorted[book]['subject'] + '"' +'>' +subjects[sorted[book]['subject']]+ sorted[book]['name'] + '</a>'
-				                }
-				                $("#book").html(book_html)
+                                for(var key in booksOnSubjectList){
+                                    booksOnSubjectList[key] = booksOnSubjectList[key].sort(function (last,next) {
+                                        return last.name.toString() > next.name.toString()
+                                    })
+                                }
+
+                                var htmlString = "";
+                                for(var key in booksOnSubjectList){
+                                    htmlString += '<dl>\n' +
+                                        '                        <dt><a>'+subjects[key]+ '<i> &gt;</i></a></dt>\n' +
+                                        '                        <dd id="book">\n'
+                                    for(var index in booksOnSubjectList[key] ){
+                                        htmlString +=  '<a class="book-name" book_id=' + '"' + booksOnSubjectList[key][index]["id"] + '"' + ' subject=' + '"' + booksOnSubjectList[key][index]['subject'] + '"' +'>' + booksOnSubjectList[key][index]['name'] + '</a>'
+                                    }
+                                    htmlString += "</dd></dl>"
+                                }
+
+
+                                subjectList = subjects
+				                $("#bookDiv").html(htmlString)
 				                var li_data = $(this).attr('data-id');
 				                //2取不到
 				                li_data = '2'
@@ -631,6 +697,10 @@
         var value = that.value;
         for(var i = 0; i < checkQuestionList.length; i++) {
             if(checkQuestionList[i].id == questionId){
+                //默认为0
+                if(!value){
+                    value = 0;
+                }
                 checkQuestionList[i].score = value;
             }
         }

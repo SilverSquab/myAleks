@@ -34,11 +34,11 @@
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
       <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url "teacher-index" %}">
-        <div class="sidebar-brand-icon rotate-n-15">
-          <i class="fas fa-laugh-wink"></i>
-        </div>
-        <div class="sidebar-brand-text mx-3">指针AI<br/>教师版 </div>
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+        <!--<div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-laugh-wink"></i>
+        </div>-->
+        <div class="sidebar-brand-text mx-3">指针AI 教师版 </div>
       </a>
 
       <!-- Divider -->
@@ -111,6 +111,12 @@
           <i class="fas fa-fw fa-folder-open"></i>
           <span>我的试卷</span></a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url "quiz-records" %}">
+          <i class="fas fa-fw fa-file"></i>
+          <span>测评记录</span></a>
+      </li>
+
 
       <!-- Nav Item - Tables -->
       <!-- <li class="nav-item">

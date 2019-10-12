@@ -8,7 +8,7 @@
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">我的测试记录</h1>
           </div>
-					<div class="row">
+		  <div class="row">
           	{% for quiz in quizInfo %} 
             <div class="col-lg-6">
               <!-- Default Card Example -->
@@ -17,7 +17,9 @@
                   <h6 class="m-0 font-weight-bold text-primary">试卷名称:{{quiz.info.title}}</h6>                
                 </div>
                 <div class="card-body">
+                  <p>测评编号：{{quiz.id}}</p>
                   <p>组卷人：{{quiz.generator}}</p>
+                  <p>班级：{{quiz.cls}}</p>
                   <p>科目：{{quiz.subject}}</p>
                 </div>
               </div>

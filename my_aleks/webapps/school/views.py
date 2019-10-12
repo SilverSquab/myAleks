@@ -39,7 +39,7 @@ def add_student_to_class(request):
         return HttpResponse('class not existed')
 
     try:
-        student = User.objects.get(studentprofile__pk=student_id)
+        student = StudentProfile.objects.get(pk=student_id)
     except:
         return HttpResponse('student not existed')
 
@@ -54,7 +54,11 @@ def add_student_to_class(request):
     cls.num = len(students)
     cls.students = json.dumps(students)
     cls.save()
-
+    classes = json.loads(student.cls_list)
+    if not str (class_id) in classes:
+        classes.append(str(class_id))
+    student.cls_list=json.dumps(classes)
+    student.save()
     return HttpResponse('OK')
 
 @login_required
@@ -99,7 +103,21 @@ def get_classes(request):
             pass
     return render(request, 'school/school_cls.html', {'classes': classes_dicts, 'schoolId': school.pk})
 
-    
+@login_required
+@csrf_exempt
+def ajax_get_own_classes(request):
+    user = request.user
+    if not user.groups.filter(name="TEACHER").exists():
+        return HttpResponse("user is not teacher")
+    try:
+        classes=Cls.objects.filter(teacher=user.teacherprofile)
+    except:
+        return HttpResponse('cls not existed')
+    cls_dist={}
+    for cls in classes:
+        cls_dist[cls.id]=cls.name
+    return HttpResponse(json.dumps(cls_dist))
+
 @login_required
 def get_class_detail(request):
     if request.method != 'GET':
@@ -171,7 +189,7 @@ def remove_student_from_class(request):
         return HttpResponse('class not existed')
 
     try:
-        student = User.objects.get(pk=student_id)
+        student = StudentProfile.objects.get(pk=student_id)
     except:
         return HttpResponse('student not existed')
 
@@ -186,7 +204,11 @@ def remove_student_from_class(request):
     cls.num = len(students)
     cls.students = json.dumps(students)
     cls.save()
-
+    classes = json.loads(student.cls_list)
+    if str(class_id) in classes:
+        classes.remove(str(class_id))
+    student.cls_list=json.dumps(classes)
+    student.save()
     return HttpResponse('OK')
 
 @login_required

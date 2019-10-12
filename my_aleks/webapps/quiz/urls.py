@@ -21,7 +21,7 @@ urlpatterns=[
 
     url(r'^ajax-delete-questions/$',views.ajax_delete_question, name='ajax_delete_question'),
     url(r'^ajax-get-own-question-by-id/$',views.ajax_get_own_question_by_id,name='ajax-get-own-question-by-id'),
-
+    url(r'^ajax-save-quiz-record/$',views.ajax_save_quiz_record,name='ajax-save-quiz-records'),
 
     url(r'^compose-quizs/$', views.compose_quizs, name='compose-quizs'),
     # get next question when practicing

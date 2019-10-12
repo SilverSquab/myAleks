@@ -25,10 +25,27 @@
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">试卷详情</h1>
-    <a href="http://47.110.253.251/templates-static/templates/pdf/{{quiz_paper_url}}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> 导出PDF</a>
+    {% if not quiz_record_id %}
+    <a id ="pdf" href="http://47.110.253.251/templates-static/templates/pdf/{{quiz_paper_url}}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> 导出PDF</a>
+    {% endif %}
 </div>
 <p>试卷名称:{{quizInfo.info.title}}</p>
 <p>科目：{{quizInfo.subject}}</p>
+{% if not quiz_record_id %}
+<div style="height:60px;">
+    <div style="float:left"  class="input-group-btn">   
+        <input type="text"  placeholder="请选择班级" class="dropdown-toggle" data-toggle="dropdown"aria-haspopup="true" aria-expanded="false" style="text-align: left;width:160px;height:40px" readonly="readonly" id="classInput" >
+        <ul class="dropdown-menu dropdown-menu-left">
+            <li class="classCheckLi" id="select">
+                <div class="dropdown-item" style="cursor:hand" name="1">1</div>
+            </li>
+        </ul>
+    </div>
+    <div style="float:left;padding-left:20px">
+        <button type="button" class="btn btn-primary" id="publish">发布测试</button>
+    </div>
+</div>
+{% endif %}
 <!--题目卡片-->
 <div class="row" id="question-container">
     {% for q in questions %}
@@ -37,13 +54,15 @@
         <div class="card mb-4">
             <div class="card-header">                              
                 <h6 class="m-0 font-weight-bold text-primary"style="line-height: 1.5rem;">
-                    知识点：{% for k in q.knowledge_nodes %} {{k.title}} {% endfor %}
+                    知识点：{% for k in q.knowledge_nodes %} {{k.title}}； {% endfor %}
                 </h6>                            
             </div>
             <div class="card-body">
                 <p>{{q.question.body}}</p>
-                    {% if q.question.image %}
-                        <img src="http://47.110.253.251/evaluation-img/{{q.question.image}}" width="40%">
+                    {% if q.question.img %}
+                        <div>
+                        <img src="http://47.110.253.251/evaluation-img/{{q.question.img}}">
+                        </div>
                     {% endif %}
                     {% for o in q.options %}
                     		<div style="float:left;padding-right:50px;padding-left:50p">
@@ -85,5 +104,61 @@
         MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("question-container")]);
         // MathJax.Hub.Typeset();
 	}
+    var quiz_id="{{quizInfo.id}}"
+    //生成班级选择列表
+     $(document).ready(function () {
+        $.get("{% url "ajax-get-own-classes" %}",function(data,status){
+            if(data=='user is not teacher'){
+            }else if(data=="cls not existed"){
+            }else{
+                data=JSON.parse(data)
+                html=''
+                for (var key in data){
+                    html+='<div class="dropdown-item" style="cursor:hand" name="'+key+'">'+data[key]+'</div>'
+                }
+                $('#select').html(html)
+            }
+        })
+        $("#classInput").attr('name','')
+        $("#classInput").val('')
+
+     })
+     //选择班级点击事件
+     $(document).on('click','.dropdown-item',function(){
+        var id = $(this).attr('name')
+        var name = $(this).text()
+        //console.log(id)
+        //console.log(name)
+        $("#classInput").attr('name',id)
+        $("#classInput").val(name)
+     })
+     //发布测试
+     $("#publish").click(function(){
+        var id = $('#classInput').attr("name")
+        var name = $("#classInput").val()
+        if (!name){
+            alert("请选择要进行测试的班级！")
+        }else{
+             $.post("{% url "ajax-save-quiz-records" %}",{"cls_id":id,"quiz_id":quiz_id},function(data,status){
+                if (data=="OK"){
+                    alert("发布成功！")
+                    $("#classInput").val('')
+                } else if(data=='quiz not having'){
+                    alert('选择的试卷不存在！')
+                }else if(data=="class not having"){
+                    alert('选择的班级不存在！')
+                }else if (data=="user not having this class"){
+                    alert('该用户没有这个班级！')
+                }else if (data=="quiz record is having"){
+                    alert("测试记录已存在！")
+                }else{
+                    alert("发布失败！")
+                }
+             })
+        }
+     })
+     //$("#pdf").click(function(){ 
+     //})
+
 </script>
 {% endblock %}

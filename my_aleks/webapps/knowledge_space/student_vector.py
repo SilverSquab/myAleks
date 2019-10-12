@@ -65,6 +65,7 @@ def get_or_create_graph_vector(student_id, graph_id):
 
     
 def get_cls_graph(cls_id, graph_id):
+    result = {}
     try:
         cls = Cls.objects.get(pk=cls_id)
     except:
@@ -74,7 +75,11 @@ def get_cls_graph(cls_id, graph_id):
     
     def foo(student_id):
         #print(get_or_create_graph_vector(student_id, graph_id))
-        return json.loads(get_or_create_graph_vector(student_id, graph_id))['data']
+        d = json.loads(get_or_create_graph_vector(student_id, graph_id))
+        if d['status'] == 'success':
+            return d['data']
+        else:
+            return {}
 
     #print(cls.students)
     students = StudentProfile.objects.filter(pk__in=json.loads(cls.students))

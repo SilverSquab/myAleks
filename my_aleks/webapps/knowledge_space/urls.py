@@ -14,5 +14,7 @@ urlpatterns=[
     url(r'^get-student-graph-vector/$', views.get_student_graph_vector, name='get-student-graph-vector'),
     url(r'^get-cls-graph-vector/$', views.get_cls_graph_vector, name='get-cls-graph-vector'),
     url(r'^get-student-section-vector/$', views.get_student_section_vector, name='get-student-section-vector'),
+    url(r'^get-cls-section-vector/$', views.get_cls_section_vector, name='get-cls-section-vector'),
     url(r'^get-student-chapter-vector/$', views.get_student_chapter_vector, name='get-student-chapter-vector'),
+    url(r'^get-cls-chapter-vector/$', views.get_cls_chapter_vector, name='get-cls-chapter-vector'),
 ]

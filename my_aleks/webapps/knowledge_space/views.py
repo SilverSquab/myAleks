@@ -83,7 +83,7 @@ def ajax_nodes(request):
 @login_required
 def get_node_chineseName(request):
     if request.method == 'GET':
-        return HttpResposne(status=400)
+        return HttpResponse(status=400)
     node_list = json.loads(request.body.decode('utf-8'))
     for index in node_list:
         #print(index)
@@ -97,7 +97,7 @@ def get_node_chineseName(request):
 @login_required
 def ajax_upload_edge(request):
     if request.method == 'GET':
-        return HttpResposne(status=400)
+        return HttpResponse(status=400)
 
     print(request.POST)
     node1_id = request.POST.get('node1_id', '')
@@ -186,8 +186,6 @@ def get_student_section_vector_wrapper(student_id, section_id):
         if tmp['status'] == 'fail':
             return 'failed: ' + tmp['reason']
 
-        print(tmp)
-
         d = tmp['data'].copy()
         nl = json.loads(section.nodes_list)
         for key in tmp['data']:
@@ -225,7 +223,7 @@ def get_student_chapter_vector(request):
     student_id = request.GET.get('student_id', '')
     chapter_id = request.GET.get('chapter_id', '')
 
-    return HttpResposne(get_student_chapter_vector_wrapper(student_id, chapter_id))
+    return HttpResponse(get_student_chapter_vector_wrapper(student_id, chapter_id))
 
 def get_cls_graph_vector(request):
     if request.method != 'GET':
@@ -247,13 +245,64 @@ def get_cls_graph_vector(request):
     return HttpResponse(json.dumps(result['data']))
 
 def get_cls_section_vector_wrapper(cls_id, section_id):
-    pass
+    try:
+        section = Section.objects.get(pk=section_id)
+    except:
+        return 'failed: section not exised'
+
+    nodes_list = KnowledgeNode.objects.filter(pk__in=json.loads(section.nodes_list))
+
+    graph_list = list(set(map(lambda x: x.graph, nodes_list)))
+
+    result = {}
+
+    for graph in graph_list:
+        tmp = json.loads(get_cls_graph(cls_id, graph.pk))
+        if tmp['status'] == 'fail':
+            return 'failed: ' + tmp['reason']
+
+        d = tmp['data'].copy()
+        nl = json.loads(section.nodes_list)
+        for key in tmp['data']:
+            if key not in nl:
+                d.pop(key)
+
+        result[graph.pk] = d
+    return json.dumps(result)
 
 def get_cls_section_vector(request):
-    pass
+    if request.method != 'GET':
+        return HttpResponse('failed: method should be get')
+
+    cls_id = request.GET.get('cls_id', '')
+    section_id = request.GET.get('section_id', '')
+
+    return HttpResponse(get_cls_section_vector_wrapper(cls_id, section_id))
 
 def get_cls_chapter_vector_wrapper(cls_id, chapter_id):
-    pass
+    try:
+        chapter = Chapter.objects.get(pk=chapter_id)
+    except:
+        return 'failed: chapter not existed'
+
+    sections = chapter.sections.all()
+    
+    result = {}
+
+    for section in sections:
+        r = get_cls_section_vector_wrapper(cls_id, section.pk)
+        if r.startswith('failed'):
+            return HttpResponse(r)
+        d = json.loads(r)
+        result[section.pk] = d
+    
+    return json.dumps(result)
 
 def get_cls_chapter_vector(request):
-    pass
+    if request.method != 'GET':
+        return HttpResponse('failed: method should be get')
+
+    cls_id = request.GET.get('cls_id', '')
+    chapter_id = request.GET.get('chapter_id', '')
+
+    return HttpResponse(get_cls_chapter_vector_wrapper(cls_id, chapter_id))

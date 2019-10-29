@@ -22,7 +22,7 @@
                                   +' </div>'
                                   +' <div style="float: right">'
                                       +' <button class="btn btn-primary" id='+'"'+planInfo[index].id+'"'+ 'name="buyPlan" type="button">'
-                                          +' <i class="fas fa-search">购买套餐</i>'
+                                          +' <i>选择套餐</i>'
                                       +' </button>'
                                   +' </div>'
                               +' </div>'

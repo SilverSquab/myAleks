@@ -38,7 +38,6 @@
 
                 <!--                </div>-->
 
-
                 {% if LearningInformation.performance %}
                 <!-- Content Row -->
                 <div class="row">
@@ -139,7 +138,7 @@
 
                 <div class="row">
 
-                    {% if LearningInformation.reportList or LearningInformation.studentList %}
+                    {% if LearningInformation.performance or LearningInformation.reportList %}
                     <!-- Area Chart -->
                     <div class="col-xl-8 col-lg-7">
                         <div class="card shadow mb-4">
@@ -165,7 +164,7 @@
                    {% endif %}
 
                     <!-- Pie Chart -->
-                    {% if LearningInformation.reportList or LearningInformation.studentList %}
+                    {% if LearningInformation.performance or LearningInformation.reportList %}
                     <div class="col-xl-4 col-lg-5">
                         <div class="card shadow mb-4">
                             <div class="card-header py-3">
@@ -231,7 +230,7 @@
                                         <tbody>
                                         {% for student in LearningInformation.studentList %}
                                         <tr>
-                                            <td>{{student.id}}</td>
+                                            <td>{{student.student_no}}</td>
                                             <td>{{student.name}}</td>
                                             <td class="tdOnStudent">
                                                 <div class="btn btn-info btn-icon-split">
@@ -407,6 +406,7 @@
             var classId = getQueryVariable("classId");
             var studentId = getQueryVariable("studentId");
             if(divBox){
+                console.info("开始")
                 getClassDrawData(classId);
                 getClassReportByClassId(classId,1,4);
                 getClassKnowledgeList(classId);

@@ -114,6 +114,8 @@ class QuizRecord(models.Model):
 
     info = models.TextField(max_length=1000, blank=True, null=True)
 
+    stats = models.TextField(max_length=2000, default='{}')
+
 class QuizStat(models.Model):
     #quiz = models.ForeignKey(Quiz, blank=False, null=False)
 

@@ -2,6 +2,8 @@ from webapps.textbook.models import Section
 import json
 
 
+#upload nodes list to sections in a whole book
+
 def func(filename):
     f = open(filename)
     while True:

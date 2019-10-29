@@ -26,7 +26,7 @@
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">试卷详情</h1>
     {% if not quiz_record_id %}
-    <a id ="pdf" href="http://47.110.253.251/templates-static/templates/pdf/{{quiz_paper_url}}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> 导出PDF</a>
+    <a id ="pdf" style="color:white" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> 导出PDF</a>
     {% endif %}
 </div>
 <p>试卷名称:{{quizInfo.info.title}}</p>
@@ -49,7 +49,7 @@
 <!--题目卡片-->
 <div class="row" id="question-container">
     {% for q in questions %}
-    <div class="col-lg-6">
+    <div class="col-lg-12">
         <!-- Default Card Example -->
         <div class="card mb-4">
             <div class="card-header">                              
@@ -105,6 +105,7 @@
         // MathJax.Hub.Typeset();
 	}
     var quiz_id="{{quizInfo.id}}"
+    var school="{{school}}"
     //生成班级选择列表
      $(document).ready(function () {
         $.get("{% url "ajax-get-own-classes" %}",function(data,status){
@@ -157,8 +158,17 @@
              })
         }
      })
-     //$("#pdf").click(function(){ 
-     //})
+     $("#pdf").click(function(){
+        $.post("http://47.110.253.251/templates/classQuiz/pdf",{"id":quiz_id,"school":school},function(data,status){
+            var pdf = new RegExp('.pdf')
+            if(pdf.test(data)){
+                //window.open("http://47.110.253.251/templates-static/templates/pdf/"+data,'_blank'); 
+                $(location).attr('href', 'http://47.110.253.251/templates-static/templates/pdf/' + data);
+            }else{
+                alert("生成pdf失败！")
+            }
+        })
+     })
 
 </script>
 {% endblock %}

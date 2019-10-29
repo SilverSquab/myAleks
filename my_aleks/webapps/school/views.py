@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-
+from django.db import transaction
 import json
 from .models import *
 
@@ -53,12 +53,24 @@ def add_student_to_class(request):
         students.append(str(student_id))
     cls.num = len(students)
     cls.students = json.dumps(students)
-    cls.save()
+
     classes = json.loads(student.cls_list)
     if not str (class_id) in classes:
         classes.append(str(class_id))
     student.cls_list=json.dumps(classes)
-    student.save()
+
+    try:
+        plan=Plan.objects.get(cls=cls)
+    except:
+        return HttpResponse('class have not plan')
+    student_plan=StudentPlan(student=student,price=plan.price,plan=plan,payment_record="SCHOOL",paid=False,cls=cls,resources=plan.resources,remaining_resources=plan.resources,description=plan.description,subject=plan.subject,info={})
+    try:
+        with transaction.atomic():
+            student_plan.save()
+            student.save()
+            cls.save()
+    except:
+        return HttpResponse('save plan failed')
     return HttpResponse('OK')
 
 @login_required
@@ -84,6 +96,34 @@ def get_teachers(request):
 
 @login_required
 def get_classes(request):
+    teacher_id=request.GET.get('teacherId','')
+    user = request.user
+    if not user.groups.filter(name='SCHOOL_MANAGER').exists():
+        return HttpResponse('user is not a school manager')
+    '''
+    try:
+        school = user.school
+    except:
+        return HttpResponse('user has not school')
+
+    classes = school.classes.all()
+    if teacher_id:
+        classes = classes.filter(teacher__id=teacher_id)
+    
+    classes_dicts = list(classes.values('id', 'name', 'subject', 'grade', 'teacher__name', 'num'))
+    for dic in classes_dicts:
+        try:
+            dic['subject'] = Subject.objects.get(name=dic['subject']).chinese_name
+        except:
+            pass
+    '''
+    return render(request, 'school/school_cls.html',{'teacherId':teacher_id})
+
+@login_required
+@csrf_exempt
+def ajax_get_cls(request):
+    teacher_id=request.GET.get('teacherId','')
+
     user = request.user
     if not user.groups.filter(name='SCHOOL_MANAGER').exists():
         return HttpResponse('user is not a school manager')
@@ -94,6 +134,8 @@ def get_classes(request):
         return HttpResponse('user has not school')
 
     classes = school.classes.all()
+    if teacher_id:
+        classes = classes.filter(teacher__id=teacher_id)
     
     classes_dicts = list(classes.values('id', 'name', 'subject', 'grade', 'teacher__name', 'num'))
     for dic in classes_dicts:
@@ -101,7 +143,9 @@ def get_classes(request):
             dic['subject'] = Subject.objects.get(name=dic['subject']).chinese_name
         except:
             pass
-    return render(request, 'school/school_cls.html', {'classes': classes_dicts, 'schoolId': school.pk})
+    return HttpResponse(json.dumps({'classes': classes_dicts, 'schoolId': school.pk}))
+
+    #return HttpResponse("test")
 
 @login_required
 @csrf_exempt
@@ -117,7 +161,17 @@ def ajax_get_own_classes(request):
     for cls in classes:
         cls_dist[cls.id]=cls.name
     return HttpResponse(json.dumps(cls_dist))
-
+@login_required
+@csrf_exempt
+def ajax_get_school_name(request):
+    user = request.user
+    if not user.groups.filter(name="SCHOOL_MANAGER").exists():
+        return HttpResponse('user is not a school manager')
+    try:
+        school = user.school
+    except:
+        return HttpResponse('user has not school')
+    return HttpResponse(school.name)
 @login_required
 def get_class_detail(request):
     if request.method != 'GET':
@@ -135,6 +189,7 @@ def get_class_detail(request):
     
     try:
         class_info['subject'] = Subject.objects.get(name=class_info['subject']).chinese_name
+        #print(nodes_list)
     except:
         pass
     
@@ -149,12 +204,22 @@ def get_class_detail(request):
     #TODO: get students info
     students = json.loads(cls.students)
     student_profiles = StudentProfile.objects.filter(pk__in=students)
-    
+    student_list=[]
+    for student in student_profiles:
+        try:
+            student_plan = StudentPlan.objects.filter(student=student,cls=cls)[0]
+            stuPlanId=student_plan.id
+            payStatus=student_plan.paid
+        except:
+            stuPlanId=''
+            payStatus=''
+        student_list.append({'stuPlanId':stuPlanId,"payStatus":payStatus,"id":student.id,"student_no":student.student_no,"name":student.name})
+
     if user.groups.filter(name='TEACHER').exists():
         try:
             teacher = cls.teacher.user
             if teacher == user:
-                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_profiles, 'clsInfo':class_info,'base_template':'teacher/teacher_base.html'})
+                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_list, 'clsInfo':class_info,'base_template':'teacher/teacher_base.html'})
         except:
             pass
         
@@ -163,7 +228,7 @@ def get_class_detail(request):
         try:
             school = user.school
             if cls.school == school:
-                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_profiles, 'clsInfo':class_info,'base_template':'school/school_base.html'})
+                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_list, 'clsInfo':class_info,'base_template':'school/school_base.html'})
         except:
             pass
 
@@ -239,7 +304,7 @@ def pay_student_plan(request):
     except:
         return HttpResponse('student plan not created')
 
-    student_id = student_plan.student.user.pk
+    student_id = student_plan.student.pk
 
     students = json.loads(cls.students)
     if str(student_id) not in students:
@@ -301,6 +366,31 @@ def create_class(request):
         return HttpResponse('creating class failed')
 
     return HttpResponse('OK')
+@login_required
+@csrf_exempt
+def delete_class(request):
+    user = request.user
+    cls_id = request.GET.get('cls_id','')
+    with transaction.atomic():
+        try:
+            cls = Cls.objects.get(pk=cls_id)
+        except:
+            return HttpResponse('faield, class not existed')
+        students=json.loads(cls.students)
+        for student in students:
+            studentProfile=StudentProfile.objects.get(id=student)
+            classes = json.loads(studentProfile.cls_list)
+            if cls_id in classes:
+                classes.remove(cls_id)
+            studentProfile.cls_list=classes
+            studentProfile.save()
+        try:
+            cls.delete()
+        except:
+            cls.deleted=True
+            cls.save()
+    return HttpResponse('OK')
+
 
 @login_required
 @csrf_exempt

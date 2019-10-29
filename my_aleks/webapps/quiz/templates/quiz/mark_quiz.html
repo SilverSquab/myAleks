@@ -1,5 +1,6 @@
 {% extends 'teacher/teacher_base.html'%}
 
+{% load staticfiles %}
 {% block "stylesheets" %}
   <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
   <script type="text/x-mathjax-config">
@@ -16,6 +17,11 @@
 <!-- Page Heading -->
 	<!--试卷信息-->
 
+
+
+
+
+
 {% if not quizInfo %}
 	<div class="d-sm-flex align-items-center justify-content-between mb-4">
 		 <h1 class="h3 mb-0 text-gray-800">试卷判卷</h1>
@@ -29,7 +35,90 @@
 		</div>
 	</form>
 {% else %}
-	<div class="col-xl-6 col-md-6 mb-4">
+
+
+
+<div class="card shadow mb-4">
+
+	<div class="card-header py-3">
+		<h6 class="m-0 font-weight-bold text-primary">试卷批改</h6>
+	</div>
+
+	<div class="card-body">
+		<div class="table-responsive">
+
+			<table class="table table-bordered" id="dataTable" width="80%" cellspacing="0">
+				<tr>
+					<td width="50%">试卷名称:{{quizInfo.title}}</td>
+					<td width="50%">班级:{{quizInfo.cls}}</td>
+				</tr>
+				<tr>
+					<td colspan="7">
+						<div>学生信息录入:
+							<input type="text" id="studentId" class="form-control bg-light border-1 small" placeholder="学生学号" aria-label="Search" aria-describedby="basic-addon2" style="display:inline;width: 30%">
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td width="70%">试题详情</td>
+					<td width="30%">学生答案</td>
+				</tr>
+				{% for question in quizInfo.questions|dictsort:"question.order" %}
+				<tr>
+					<td>
+						<p>{{question.question.order}} {{question.question.body}}</p>
+						{% if question.question.image %}
+						<div style="margin-left: 80px">
+							<img src="http://47.110.253.251/evaluation-img/{{question.question.image}}">
+						</div>
+						{% endif %}
+						{% for o in question.options %}
+						<div style="float:left;padding-right:50px;padding-left:50px">
+							<p>{{o.order}}.{{o.body}} </p>
+							{% if o.image %}
+							<img src="http://47.110.253.251/evaluation-img/{{o.image}}">
+							{% endif %}
+						</div>
+						{% endfor %}
+
+					</td>
+					<td >
+						<div style="text-align:center;height: 100%;line-height:100px">
+							<div style="display:inline-block">
+								学生选择：<input type="text" style="text-transform: uppercase;display:inline;width: 30%" maxlength="1"  class="form-control bg-light border-1 small scoreInput" placeholder="输入结果" id="{{question.question_id}}" aria-label="Search" aria-describedby="basic-addon2"><br>
+							</div>
+						</div>
+					</td>
+				</tr>
+				{% endfor %}
+				<tr>
+					<td colspan="7">
+						<div class="d-sm-flex align-items-center justify-content-between">
+							<p>分数合计: <span id="total_score">0</span>分 </p>
+							<div class="input-group-append" style="float: none">
+								<button class="btn btn-primary" id="submit" type="button">
+									<i class="fas fa-search fa-sm">确认提交</i>
+								</button>
+								<button class="btn btn-primary" id="submitAndNext" type="button" style="margin-left: 20px;">
+									<i class="fas fa-search fa-sm">下一个</i>
+								</button>
+							</div>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+
+
+
+	<!--<div class="col-xl-6 col-md-6 mb-4">
 		<div class="d-sm-flex align-items-center justify-content-between mb-4">
 		  	<h1 class="h3 mb-0 text-gray-800">试卷判卷</h1>
 		</div>
@@ -40,7 +129,7 @@
 		  	<p>班级:{{quizInfo.cls}}</p>
 		</div>
 	</div>
-	<!-- 学生信息录入 -->
+	&lt;!&ndash; 学生信息录入 &ndash;&gt;
 	<div class="col-xl-6 col-md-6 mb-4">
 		<div class="d-sm-flex align-items-center justify-content-between mb-4">
 			<h1 class="h3 mb-0 text-gray-800">学生信息录入</h1>
@@ -51,22 +140,22 @@
 		    </div>
 	  	</div>
 	</div>
-	<!--题目卡片-->
+	&lt;!&ndash;题目卡片&ndash;&gt;
 	<div class="row" id="question-container">
 		{% for question in quizInfo.questions|dictsort:"question.order" %}
 		    <div class="col-lg-6">
-		    <!-- Default Card Example -->
+		    &lt;!&ndash; Default Card Example &ndash;&gt;
 		        <div class="card mb-4">
 		            <div class="card-header">
 		                <h6 class="m-0 font-weight-bold text-primary" style="line-height: 1.5rem;">知识点：{% for kn in question.knowledge_nodes %} {{kn}} {% endfor %}</h6>
 		            </div>
 		            <div class="card-body">
 		                <p>{{question.question.order}} {{question.question.body}}</p>
-		                {% if question.image %}
-		                    <img src="{{question.image}}">
+		                {% if question.question.image %}
+		                    <img src="http://47.110.253.251/evaluation-img/{{question.question.image}}">
 		                {% endif %}
 		                {% for o in question.options %}
-		                		<div style="float:left;padding-right:50px;padding-left:50p">
+		                		<div style="float:left;padding-right:50px;padding-left:50px">
 		                    <p>{{o.order}}.{{o.body}} </p>
 		                    {% if o.image %}
 		                        <img src="http://47.110.253.251/evaluation-img/{{o.image}}">
@@ -82,7 +171,7 @@
 		{% endfor %}
 	</div>
 
-	<!--  分数和按钮-->
+	&lt;!&ndash;  分数和按钮&ndash;&gt;
 	<div class="col-xl-6 col-md-6 mb-4">
 	    <div class="d-sm-flex align-items-center justify-content-between mb-4">
 	        <p>分数 <span id="total_score">0</span> </p>
@@ -95,7 +184,7 @@
 	            </button>
 	        </div>
 	    </div>
-	</div>
+	</div>-->
 {% endif %}
 <!-- /.container-fluid -->
 {% endblock %}
@@ -111,11 +200,13 @@
         }
     });
 </script>
+<script src="{% static "assets/js/jquery.etui.msgbox.js" %}" type="text/javascript"></script>
 <script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
 <script type="text/javascript">
   	$(document).ready(function(){
+			$("input").val("");
 		    //console.log({{json_data|safe}});
-		    var quizInfo = {{json_data|safe}};
+		    var quizInfo = {{json_data|safe}}
 		    //console.log(quizInfo);
 		    //console.log(typeof(quizInfo));
 		    //console.log(quizInfo);
@@ -126,7 +217,7 @@
 		    //console.log(type(questions));
 		    //console.log(JSON.parse(questions));
 		   	/*每次输入信息后，判断答案是否正确，计算分数返回*/
-		    $("input").blur(function(){
+		    $(".scoreInput").blur(function(){
 		    		//alert("test")
 		        var id = $(this).attr("id")
 		        if (id!='studentId') {
@@ -155,11 +246,16 @@
 		            //判断答案是否正确
 		          	var value=$(this).val();
                     //console.log(value)
-                    var st = /^[a-dA-D]+$/
-                    if(!st.test(value)){
-                        alert("输入格式错误，请输入选项编号")
-                        $(this).val('')
-                    }
+                    var st = /^[a-dA-D]+$/;
+                    if(value){
+						if(!st.test(value)){
+							alert("输入格式错误，请输入选项编号")
+							$(this).val('')
+						}
+					}else{
+                    	value = '';
+					}
+
                     value=value.toUpperCase()
 		          	//console.log('选择答案：'+value)
 		        	if (id in answer){
@@ -183,6 +279,8 @@
 
 				// 点击提交，将answer数据发送到后台处理
 				$("#submit").click(function () {
+                    var r=confirm("即将提交试卷答案，是否继续？");
+                    if (r==true){
 			  		var studentId=$("#studentId").val();
 				  	if (!studentId) {
 				    	alert('请输入学生学号')
@@ -196,16 +294,35 @@
 				     		data: JSON.stringify(data),
 				      		success:function(data,status){
 					        	if (data.isFinish) {
+					        		alert("提交成功!")
 					          		$(location).attr('href', '{% url "mark-quiz" %}');
 					        	}else {
-					          		alert('提交失败！')
+									alert("提交失败！")
 					        	}
-				      		},error:function () {
-				       			alert('提交失败！')
+				      		},error:function (data,statue) {
+								 var text = data.responseText;
+								 switch (text) {
+									 case"student not existed":{
+										 title = '提交失败！';
+										 htmlString = '<span style="color: red">该学生查询为空！</span>'
+										 $.setInformation.Confirm(title,htmlString)
+									 } break;
+									 case"subject not existed": {
+										 title = '提交失败！';
+										 htmlString = '<span style="color: red">学科不能为空！</span>'
+										 $.setInformation.Confirm(title,htmlString)
+									 } break;
+									 default:{
+										 title = '提交失败！';
+										 htmlString = '<span style="color: red">系统错误，提交失败！</span>'
+										 $.setInformation.Confirm(title,htmlString)
+									 }
+								 }
 				      		}
 				     	})
 					}
-				})
+                    }
+				});
 
 				//点击提交，将answer数据发送到后台处理并且清空所有输入框
 				$("#submitAndNext").click(function () {
@@ -223,8 +340,8 @@
 			      			//contentType:'application/json;charset=UTF-8',
 			      			data:JSON.stringify(data),
 			      			success:function(data,status){
-			      				//console.log(data)
 					        	if (data.isFinish) {
+					        		alert("提交成功！")
 					          		$("input").val("");
 					          		studentId=''
 					          		answer={}
@@ -232,11 +349,27 @@
 					        		//分数变化
 					        		$("#total_score").html(score);
 					        	}else {
-					         		alert('提交失败！')
+					        		alert("提交失败！")
 					        	}
-				      		},
-				      		error:function () {	                      
-				          		alert('提交失败！')
+				      		},error:function (data,statue) {
+			      				var text = data.responseText;
+								switch (text) {
+									case"student not existed":{
+										title = '提交失败！';
+										htmlString = '<span style="color: red">该学生查询为空！</span>'
+										$.setInformation.Confirm(title,htmlString)
+									} break;
+									case"subject not existed": {
+										title = '提交失败！';
+										htmlString = '<span style="color: red">学科不能为空！</span>'
+										$.setInformation.Confirm(title,htmlString)
+									} break;
+									default:{
+										title = '提交失败！';
+										htmlString = '<span style="color: red">系统错误，提交失败！</span>'
+										$.setInformation.Confirm(title,htmlString)
+									}
+								}
 				        	}
 			      		})
 			    	}

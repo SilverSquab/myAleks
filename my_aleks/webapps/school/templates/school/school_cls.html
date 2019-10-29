@@ -1,8 +1,74 @@
 {% extends 'school/school_base.html'%}
 {% load staticfiles %}
 
+
+
+
 {% block "stylesheets" %}
     <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+
+<style>
+    *{
+        margin:0;
+        padding:0;
+
+    }
+    html,body{
+        width:100%;
+        height:100%;
+    }
+    .myContainer{
+        width:80%;
+        margin:0 auto;
+        margin-bottom: 20px;
+        margin-top:30px;
+        /*border:1px solid #dddddd;*/
+        /*border-radius:1px;*/
+        border:5px solid #1d8ce0;
+        border-radius:30px;
+        padding: 30px 10px;
+
+    }
+    label{
+        display:block;
+        background-color: #F5F5F5;
+        width:98%;
+        height:40px;
+        margin:0 auto;
+        border-radius:5px;
+        border:1px solid #dddddd;
+        margin-top:10px;
+        line-height: 40px;
+    }
+    .gradeText{
+        margin-left: 20px;
+    }
+    .imgClass{
+        width: 15px;
+        height: 15px;
+        margin-right: 5px;
+    }
+    .context{
+        width:96%;
+        margin:0 auto;
+        border:1px solid #dddddd;
+        border-radius:2px;
+        transition:height 0.5s linear;
+        -webkit-transition:height 0.5s linear;
+        -moz-transition:height 0.5s linear;
+        -ms-transition:height 0.5s linear;
+    }
+    /*input:checked + label + .context{
+        visibility: visible;
+       !* height:150px;*!
+    }*/
+    .hide {
+        display: none;
+    }
+    .card-body{
+        cursor:pointer;
+    }
+</style>
 {% endblock %}
 
 {% block "main_content" %}
@@ -16,7 +82,7 @@
 <!--班级列表-->
 <div class="col-xl-6 col-md-6 mb-4">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">班级管理</h1>
+        <h1 class="h3 mb-0 text-gray-800">班级管理 <input id="tird" style="display: none" value="{{teacherId}}" > </h1>
     </div>
     <!-- 添加班级按钮 -->
     <div class="input-group-append" style="float: none;">
@@ -25,12 +91,17 @@
         </button>
     </div>
 </div>
+
+
+
+
+
 <!--班级卡片-->
-<div class="row" id="question-container">
-	<!-- 以卡片的形式循环显示出所有班级 -->
+<!--<div class="row" id="question-container">
+	&lt;!&ndash; 以卡片的形式循环显示出所有班级 &ndash;&gt;
     {% for c in classes %}
         <div class="col-lg-6">
-        <!-- Default Card Example -->
+        &lt;!&ndash; Default Card Example &ndash;&gt;
         <div class="card mb-4" id="{{c.id}}">
             <div class="card-header">
                 
@@ -46,7 +117,18 @@
         </div>
         </div>
     {% endfor %}
+</div>-->
+<div class="myContainer">
+
+
 </div>
+
+
+
+
+
+
+
 <!-- /.container-fluid -->
 {% endblock %}
 
@@ -58,11 +140,7 @@
 <script type="text/javascript">
     $(document).ready(function () {
         var schoolId='{{schoolId}}'
-        //卡片点击事件
-        $("div[name='Cls']").click(function () {
-            var clsId = $(this).parent().attr("id")
-            $(location).attr('href', '{% url "school-get-class-detail" %}?clsId=' + clsId);
-        })
+
         //添加班级事件
         $("#addCls").click(function () {
             $.get("{% url "ajax-subjects" %}",function(data,status){
@@ -71,8 +149,8 @@
                     $.get("{% url "get-all-teachers" %}",function(data,status){
                         if (status == "success"){
                             var teachers = $.parseJSON(data);
-                            //console.log(subject)
-                            //console.log(teachers)
+                            console.log(subject)
+                            console.log(teachers)
                             $.AddClsMsgBox.Confirm("添加班级",teachers,subject,function () {
                                 var name = $("input[name='name']").val();
                                 var grade = $("input[name='grade']").val();
@@ -136,5 +214,123 @@
             }
         }
     });
+</script>
+
+<script type="text/javascript">
+    var gradeUpdate = function(grade){
+        switch (parseInt(grade)) {
+            case 1 : return "小学一年级";
+            case 2 : return "小学二年级";
+            case 3 : return "小学三年级";
+            case 4 : return "小学四年级";
+            case 5 : return "小学五年级";
+            case 6 : return "小学六年级";
+            case 7 : return "初中一年级";
+            case 8 : return "初中二年级";
+            case 9 : return "初中三年级";
+            case 10 : return "高中一年级";
+            case 11 : return "高中二年级";
+            case 12 : return "高中三年级";
+        }
+    };
+
+    var gradeClick = function(grade){
+        // $(".hiddenDiv").addClass("hide");
+        // console.info($('div[grade_num="'+grade+'"]').hasClass("hide"))
+        if($('div[grade_num="'+grade+'"]').hasClass("hide")){
+            $('div[grade_num="'+grade+'"]').removeClass("hide");
+            $('img[grade_num="'+grade+'"]').attr('src', "{% static "assets/img/down.png" %}");
+        }else{
+            $('div[grade_num="'+grade+'"]').addClass("hide");
+            $('img[grade_num="'+grade+'"]').attr('src', "{% static "assets/img/add.png" %}");
+        }
+    };
+
+
+    //卡片点击事件
+    $(document).on("click","div[name='Cls']",function () {
+        var clsId = $(this).parent().attr("id")
+        $(location).attr('href', '{% url "school-get-class-detail" %}?clsId=' + clsId);
+    });
+
+
+    $(document).ready(function () {
+        var teacherId = $('#tird').val();
+        console.info(teacherId)
+        var classList = {};
+        if(teacherId){
+            $.get("{% url 'ajax-get-cls' %}?teacherId="+teacherId,function (data,status) {
+                var dataJson = JSON.parse(data).classes;
+                var classInformation = {};
+                for(var item in dataJson){
+                    if(!classInformation[dataJson[item].grade]){
+                        classInformation[dataJson[item].grade] = [];
+                    }
+                    classInformation[dataJson[item].grade].push(dataJson[item]);
+                }
+                var htmlString = '';
+                var grade = 0;
+                for(var item in classInformation){
+                    grade = gradeUpdate(item);
+                    htmlString += '<label onclick="gradeClick('+item+')" ><span class="gradeText"><img src="{% static "assets/img/add.png" %}"  grade_num="'+item+'"  class="imgClass" >'+grade+'</span></label><div  grade_num="'+item+'"  class="context hiddenDiv hide">' ;
+                    for(var value in  classInformation[item]){
+                        htmlString += '<div style="margin: 5px" >\n' +
+                            '                <div class="card mb-4"  id="'+classInformation[item][value].id +'" >\n' +
+                            '                  <div class="card-header">\n' +
+                            '                    <h6 class="m-0 font-weight-bold text-primary">'+classInformation[item][value].name+'</h6>  \n' +
+                            '                  </div>\n' +
+                            '                  <div class="card-body"  name="Cls">\n' +
+                            '                    <p>班级名称：'+classInformation[item][value].name +'</p>\n' +
+                            '                    <p>学生总数：'+classInformation[item][value].num +'</p>\n' +
+                            '                    <p>学科：'+classInformation[item][value].subject +'</p>\n' +
+                            '                    <p>授课老师：'+classInformation[item][value].teacher__name +'</p>\n' +
+                            '                  </div>\n' +
+                            '                </div>\n' +
+                            '              </div>'
+                    }
+                    htmlString += "</div>"
+
+                }
+                $('.myContainer').html(htmlString);
+            })
+        }else{
+            $.get("{% url 'ajax-get-cls' %}",function (data,status) {
+                var dataJson = JSON.parse(data).classes;
+                var classInformation = {};
+                for(var item in dataJson){
+                    if(!classInformation[dataJson[item].grade]){
+                        classInformation[dataJson[item].grade] = [];
+                    }
+                    classInformation[dataJson[item].grade].push(dataJson[item]);
+                }
+                var htmlString = '';
+                var grade = 0;
+                for(var item in classInformation){
+                    grade = gradeUpdate(item);
+                    htmlString += '<label onclick="gradeClick('+item+')" ><span class="gradeText"><img src="{% static "assets/img/add.png" %}"  grade_num="'+item+'"  class="imgClass" >'+grade+'</span></label><div  grade_num="'+item+'"  class="context hiddenDiv hide">' ;
+                    for(var value in  classInformation[item]){
+                        htmlString += '<div style="margin: 5px">\n' +
+                            '                <div class="card mb-4" id="'+classInformation[item][value].id +'">\n' +
+                            '                  <div class="card-header">\n' +
+                            '                    <h6 class="m-0 font-weight-bold text-primary">'+classInformation[item][value].name+'</h6>  \n' +
+                            '                  </div>\n' +
+                            '                  <div class="card-body" name="Cls">\n' +
+                            '                    <p>班级名称：'+classInformation[item][value].name +'</p>\n' +
+                            '                    <p>学生总数：'+classInformation[item][value].num +'</p>\n' +
+                            '                    <p>学科：'+classInformation[item][value].subject +'</p>\n' +
+                            '                    <p>授课老师：'+classInformation[item][value].teacher__name +'</p>\n' +
+                            '                  </div>\n' +
+                            '                </div>\n' +
+                            '              </div>'
+                    }
+                    htmlString += "</div>"
+                }
+                $('.myContainer').html(htmlString);
+            })
+        }
+
+    })
+
+
 </script>
 {% endblock %}

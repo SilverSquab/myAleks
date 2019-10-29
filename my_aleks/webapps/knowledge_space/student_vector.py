@@ -12,11 +12,13 @@ def get_or_create_graph_vector(student_id, graph_id):
     student_id = str(student_id)
     graph_id = str(graph_id)
     result = {}
-    
+    #print(student_id)
     #get student profile by id
     try:
-        profile = StudentProfile.objects.get(pk=student_id)
+        profile = StudentProfile.objects.get(student_no=student_id)
+        #print(profile)
     except:
+       # print(1)
         result['status'] = 'fail'
         result['reason'] = 'student not existed'
         return json.dumps(result)
@@ -36,7 +38,7 @@ def get_or_create_graph_vector(student_id, graph_id):
         d = {}
         nodes = graph.knowledgenode_set.values_list('id', flat=True)
         for node in nodes:
-            d[node] = {"belief" : 1, "score": 0.5}
+            d[node] = {"belief" : 1, "score": 0.6}
 
         col.insert_one({"student_id": student_id, "vectors":{graph_id:d}})
         vector_obj = col.find_one({"student_id": student_id})
@@ -53,7 +55,7 @@ def get_or_create_graph_vector(student_id, graph_id):
         d = {}
         nodes = graph.knowledgenode_set.values_list('id', flat=True)
         for node in nodes:
-            d[node] = {"belief" : 1, "score": 0.5}
+            d[node] = {"belief" : 1, "score": 0.6}
 
         vectors[graph_id] = d
         
@@ -83,9 +85,8 @@ def get_cls_graph(cls_id, graph_id):
 
     #print(cls.students)
     students = StudentProfile.objects.filter(pk__in=json.loads(cls.students))
-    #print(students)
     #print(students.values_list('pk', flat=True))
-    dicts = list(map(foo, students.values_list('pk', flat=True)))
+    dicts = list(map(foo, students.values_list('student_no', flat=True)))
     #print(dicts)
     if len(dicts) == 0:
         result['status'] = 'fail'
@@ -108,7 +109,7 @@ def get_cls_graph(cls_id, graph_id):
 
     for key in keys:
         result[key] = dict_average(dicts, key)
-
+    #print(result)
     ret = {}
     ret['status'] = 'success'
     ret['data'] = result
@@ -116,4 +117,33 @@ def get_cls_graph(cls_id, graph_id):
     return json.dumps(ret)
         
     
+def get_node_scores(student_id, nodes_list):
+    nodes = KnowledgeNode.objects.filter(pk__in=nodes_list)
+    #get graphs
+    graphs = list(set(nodes.values_list('graph', flat=True)))
+    dic = {}
+    for graph_pk in graphs:
+        graph_vector = json.loads(get_or_create_graph_vector(student_id, graph_pk))
+        if graph_vector['status'] == 'success':
+            dic.update(graph_vector['data'])
+    
+    #filter scores we need from whole graph vectors
+    scores = {}
+    for node_pk in nodes_list:
+        if node_pk in dic:
+            scores[node_pk] = dic[node_pk]
+    return scores
 
+def get_node_score(student_id, node_id):
+    try:
+        node = KnowledgeNode.objects.get(pk=node_id)
+    except:
+        return {'status': False, 'reason': 'node does not exist'}
+
+    graph = node.graph
+    graph_vector = json.loads(get_or_create_graph_vector(student_id, graph.pk))
+    if graph_vector['status'] == 'fail':
+        return {'status': False, 'reason': 'cannot get graph vector'}
+
+    return {'status': True, 'score': graph_vector['data'][node_id]}
+        

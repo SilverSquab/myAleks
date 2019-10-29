@@ -43,10 +43,10 @@
             {% endif %}
           </div>
 	  </div>
-	{% if  base_template == 'school/school_base.html' %}
+	{% if  base_template == 'school/school_base.html' and not planInfo.resources %}
         <div class="input-group-append" style="float: none;">
             <button class="btn btn-primary" id="buy" type="button">
-                <i class="fas fa-search">购买套餐</i>
+                <i>选择套餐</i>
             </button>
         </div>
 	{% endif %}
@@ -66,6 +66,7 @@
 
 	          <thead>
 	            	<tr>
+                      <th>学号</th>
 	                  <th>姓名</th>
 	                  <th>学情档案</th>
 	                  <th>支付状态</th>
@@ -76,6 +77,7 @@
 	          <tbody>
 	              	{% for stu in students %}
 	                    <tr id="{{stu.id}}">
+                          <td>{{stu.student_no}}</td>
 	                      <td>{{stu.name}}</td>
 	                      <td><a href="{% url "teacher-index" %}?classId={{clsInfo.id}}&studentId={{stu.id}}">查看学情档案</a></td>
 	                      <td stuPlanId="{{stu.stuPlanId}}">{% if stu.payStatus %}已支付{% else %}未支付{% if  base_template == 'school/school_base.html' %}（ <a href="#" name="pays">代支付</a>）{% endif %}{% endif %}</td>
@@ -183,6 +185,8 @@
                                         	window.location.reload();
                                          $("input[name='stuId']").val("");
                                          $("input[name='stuPhone']").val("");
+                                     }else if (data=="class have not plan"){
+                                         func("该班级没有选择套餐，请先选择套餐！","#fef0f0","#f56c6c");//#f56c6c
                                      }else {
                                          $("#mb_box,#mb_con1").remove();
                                          func("添加失败！","#fef0f0","#f56c6c");//#f56c6c

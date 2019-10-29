@@ -18,6 +18,7 @@ class Cls(models.Model):
     students = models.TextField(max_length=20000, null=True, default='[]')
     num = models.IntegerField(default=0)
     teacher = models.ForeignKey('teacher.TeacherProfile', blank=True, null=True, related_name='classes')
+    deleted = models.BooleanField(default=False)
     #TODO: <student, class>tuple
 
 '''

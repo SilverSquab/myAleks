@@ -15,6 +15,7 @@ class Publisher(models.Model):
         return (self.name + ' ' + self.chinese_name) or u'None'
 
 class Textbook(models.Model):
+    order = models.IntegerField(unique=True, blank=True, null=True)
     id = models.CharField(primary_key=True, max_length=100, default=uuid.uuid4, editable=False)
     subject = models.CharField(max_length=20, blank=True, null=True)
     name = models.CharField(max_length=40, blank=False, null=False)

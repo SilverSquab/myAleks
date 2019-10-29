@@ -16,6 +16,8 @@ class TeacherProfile(models.Model):
     stats = models.TextField(max_length=2000, blank=True, null=True, default='')
 
     user = models.OneToOneField(User, blank=False, null=False)
+    
+    img = models.ImageField(blank=True, null=True, upload_to='teacher_imgs')
 
 class Favorites(models.Model):
     teacher = models.OneToOneField(TeacherProfile, blank=False, null=False)

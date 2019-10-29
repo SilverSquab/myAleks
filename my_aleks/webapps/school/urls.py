@@ -11,5 +11,9 @@ urlpatterns = [
     url(r'pay-student-plan', views.pay_student_plan, name='pay-student-plan'),
     url(r'create-class', views.create_class, name='create-class'),
     url(r'get-all-teachers', views.get_all_teachers, name='get-all-teachers'),
-    url(r'get-teachers',views.get_teachers, name='get-teachers')
+    url(r'get-teachers',views.get_teachers, name='get-teachers'),
+    url(r'^ajax-get-school-name',views.ajax_get_school_name,name='ajax-get-school-name'),
+
+    url(r'^ajax-get-cls',views.ajax_get_cls,name='ajax-get-cls'),
+    url(r'^delete-class',views.delete_class,name='delete-class')
 ]

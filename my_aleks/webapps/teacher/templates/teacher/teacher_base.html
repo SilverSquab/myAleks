@@ -42,13 +42,25 @@
       </a>
 
       <!-- Divider -->
-      <hr class="sidebar-divider my-0">
+     <!-- <hr class="sidebar-divider my-0">-->
 
       <!-- Nav Item - Dashboard -->
-      <li class="nav-item active">
+      <!--<li class="nav-item active">
         <a class="nav-link" href="{% url "teacher-index" %}">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>班级学情</span></a>
+      </li>-->
+      <!-- Divider -->
+      <!--<hr class="sidebar-divider">-->
+
+      <!-- Heading -->
+      <!--<div class="sidebar-heading">
+        教师
+      </div>-->
+      <li class="nav-item active">
+        <a class="nav-link" href="{% url "my-teacher_profile" %}">
+          <i class="fa fa-fw fa-home"></i>
+          <span>首页</span></a>
       </li>
 
       <!-- Divider -->
@@ -56,7 +68,7 @@
 
       <!-- Heading -->
       <div class="sidebar-heading">
-        学生
+        班级
       </div>
 
       <!-- Nav Item - Pages Collapse Menu -->
@@ -73,8 +85,14 @@
         </div>
       </li> -->
       <li class="nav-item">
+        <a class="nav-link" href="{% url "teacher-index" %}">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>班级学情</span></a>
+      </li>
+
+      <li class="nav-item">
         <a class="nav-link" href="{% url "my-classes" %}">
-          <i class="fas fa-user-circle fa-fw"></i>
+          <i class="fas fa-users fa-fw"></i>
           <span>班级管理</span></a>
       </li>
       <!-- Nav Item - Utilities Collapse Menu -->
@@ -95,14 +113,14 @@
 
       <!-- Nav Item - Pages Collapse Menu -->
       <li class="nav-item">
-        <a class="nav-link" href="{% url "compose-quiz" %}">
+        <a class="nav-link" href="{% url "compose-quizs" %}">
           <i class="fas fa-tools fa-fw"></i>
           <span>组卷工具</span></a>
       </li>
 	  <li class="nav-item">
         <a class="nav-link" href="{% url "mark-quiz" %}">
-          <i class="fas fa-search"></i>
-          <span>判卷工具</span></a>
+          <i class="fas fa-fw fa-search"></i>
+          <span>批改试卷</span></a>
       </li>
 
       <!-- Nav Item - Charts -->
@@ -116,6 +134,11 @@
           <i class="fas fa-fw fa-file"></i>
           <span>测评记录</span></a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url "compose-quiz" %}">
+          <i class="fa fa-fw fa-list-ul"></i>
+          <span>题库</span></a>
+       </li>
 
 
       <!-- Nav Item - Tables -->
@@ -233,11 +256,11 @@
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.username }}</span>
-                <img class="img-profile rounded-circle" src="{% static "assets/img/user.jpg" %}">
+                <span id ="user_img"><img class="img-profile rounded-circle" src="{% static "assets/img/user.jpg" %}"></span>
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="#">
+                <a class="dropdown-item" href="{% url "my-teacher_profile" %}">
                   <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                   个人主页
                 </a>
@@ -273,6 +296,10 @@
           <div class="copyright text-center my-auto">
             <span>Copyright &copy; 指针AI</span>
           </div>
+          <div class="copyright text-center my-auto" style="padding-top:10px">
+            <span>杭州指针智汇教育科技有限公司</span><span style="padding-left:20px">客服电话：13586349923</span>
+          </div>
+
         </div>
       </footer>
       <!-- End of Footer -->
@@ -316,7 +343,19 @@
   <!-- Custom scripts for all pages-->
   <script src={% static "assets/js/sb-admin-2.min.js" %}></script>
   <script src={% static "assets/vendor/mathquill/mathquill.min.js" %}></script>
-
+  <script type="text/javascript">
+      //每次加载页面完成后执行
+        $(document).ready(function () {
+            $.get("{% url "ajax-get-user-img" %}",function(data,status){
+                
+                if(data=='user no have teacherProfile'){
+                    
+                }else{
+                    $('#user_img').html('<img class="img-profile rounded-circle" src="http://47.110.253.251'+data+'">')
+                }
+            })
+        })
+  </script>
 
   {% block "scripts" %}
   {% endblock %}

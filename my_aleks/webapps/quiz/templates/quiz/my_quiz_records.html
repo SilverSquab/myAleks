@@ -21,6 +21,7 @@
                   <p>组卷人：{{quiz.generator}}</p>
                   <p>班级：{{quiz.cls}}</p>
                   <p>科目：{{quiz.subject}}</p>
+                  <p>未参加人数：{{quiz.non_participant_num}}</p>
                 </div>
               </div>
             </div>
@@ -109,7 +110,7 @@
         $("div[name='quiz']").click(function () {
             var quizId= $(this).attr("id")
             //console.log(quizId)
-            $(location).attr('href', "{% url "quiz-page" %}?quizRecordId="+quizId);
+            $(location).attr('href', "{% url "quiz-record" %}?quiz_record_id="+quizId);
         })
 	</script>
 {% endblock %}

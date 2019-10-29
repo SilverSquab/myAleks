@@ -38,9 +38,11 @@
 			            // 	+'<input type="text" style="width: 100%;height:40px" fontSize="16px"; name="teacher" Placeholder="老师" required=""/>'
 			            // +'</div>'
                         +'</form>'
-			            +'<div id="mb_btnbox">'
-			        		+'<input id="mb_btn_ok" type="button" value="确定" />'
-			        		+'<input id="mb_btn_no" type="button" value="取消" />'
+			            +'<div id="mb_btnbox" style="padding:20px">'
+                            +' <button class="btn btn-primary" id="mb_btn_ok" style="margin: 20px" type="button"><i>添加</i></button>'
+                            +'<button class="btn btn-primary" id="mb_btn_no" type="button"><i>取消</i></button>'
+			        		//+'<input id="mb_btn_ok" type="button" value="确定" />'
+			        		//+'<input id="mb_btn_no" type="button" value="取消" />'
 			        	+ '</div>'
 			       ;
         //必须先将_html添加到body，再设置Css样式
@@ -70,8 +72,8 @@
         });
         $("#mb_btnbox").css({ margin: '15px 0 10px 0', textAlign: 'center' });
         $("#mb_btn_ok,#mb_btn_no").css({ width: '85px', height: '30px', color: 'white', border: 'none' });
-        $("#mb_btn_ok").css({ backgroundColor: '#1fc88d' });//按钮颜色
-        $("#mb_btn_no").css({ backgroundColor: '#1fc88d', marginLeft: '20px' });//按钮颜色
+        //$("#mb_btn_ok").css({ backgroundColor: '#1fc88d' });//按钮颜色
+        //$("#mb_btn_no").css({ backgroundColor: '#1fc88d', marginLeft: '20px' });//按钮颜色
         //右上角关闭按钮hover样式
         $("#mb_ico").hover(function () {
             $(this).css({ backgroundColor: '#1fc88d', color: 'White' });//鼠标悬停效果

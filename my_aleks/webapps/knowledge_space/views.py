@@ -152,8 +152,8 @@ def get_student_graph_vector(request):
 
     if not graph_id:
         return HttpResponse('failed: graph id missing')
-        
-    result = json.loads(get_or_create_graph_vector(student_id, graph_id))
+    student_no = StudentProfile.objects.get(pk=student_id).student_no    
+    result = json.loads(get_or_create_graph_vector(student_no, graph_id))
     if result['status'] == 'fail':
         return HttpResponse('failed: ' + result['reason'])
 
@@ -166,8 +166,9 @@ def get_student_section_vector(request):
 
     student_id = request.GET.get('student_id', '')
     section_id = request.GET.get('section_id', '')
+    student_no = StudentProfile.objects.get(pk=student_id).student_no
 
-    return HttpResponse(get_student_section_vector_wrapper(student_id, section_id))
+    return HttpResponse(get_student_section_vector_wrapper(student_no, section_id))
 
 
 def get_student_section_vector_wrapper(student_id, section_id):

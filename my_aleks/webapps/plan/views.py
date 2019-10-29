@@ -46,8 +46,17 @@ def assign_plan_to_class(request):
 
     if cls.school != user.school:
         return HttpResponse('class not belong to this user')
-
-    if create_plan_from_template(plan_template, cls):
+    try:
+        plan=Plan.objects.get(cls=cls)
+        plan.template=plan_template
+        plan.resources = plan_template.resources
+        plan.remaining_resources = plan_template.resources
+        plan.price = plan_template.default_price
+        plan.subject = plan_template.subject
+        plan.save()
         return HttpResponse('OK')
+    except:
+        if create_plan_from_template(plan_template, cls):
+            return HttpResponse('OK')
 
     return HttpResponse('failed to create plan')

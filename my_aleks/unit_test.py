@@ -1,0 +1,4 @@
+from webapps.knowledge_space.student_vector import get_node_scores
+l = ['797a377571ff', 'a9573a2aee40', '3a01fd8122a2', 'b44696475514']
+
+get_node_scores(5, l)

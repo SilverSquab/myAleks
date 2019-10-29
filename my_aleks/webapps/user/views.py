@@ -20,7 +20,7 @@ def login_view(request):
             login(request, user)
             request.session['username']=username
             if user.groups.filter(name='TEACHER').exists():
-                next_url = request.GET.get("next", "/abc/teacher/index/")
+                next_url = request.GET.get("next", "/abc/teacher/view-teacher-profile/")
             if user.groups.filter(name='SCHOOL_MANAGER').exists():
                 next_url = request.GET.get("next","/abc/school/get-classes/")
             return redirect(next_url)

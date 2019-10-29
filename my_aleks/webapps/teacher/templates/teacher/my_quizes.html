@@ -1,36 +1,141 @@
 {% extends 'teacher/teacher_base.html'%}
 {% load staticfiles %}
+{% block "stylesheets" %}
+<style>
+    *{
+        margin:0;
+        padding:0;
+
+    }
+    html,body{
+        width:100%;
+        height:100%;
+    }
+    .myContainer{
+        width:80%;
+        margin:0 auto;
+        margin-bottom: 20px;
+        margin-top:30px;
+        /*border:1px solid #dddddd;*/
+        /*border-radius:1px;*/
+        border:5px solid #1d8ce0;
+        border-radius:30px;
+        padding: 30px 10px;
+
+    }
+    input{
+        display:none;
+    }
+    label{
+        display:block;
+        background-color: #F5F5F5;
+        width:98%;
+        height:40px;
+        margin:0 auto;
+        border-radius:5px;
+        border:1px solid #dddddd;
+        margin-top:10px;
+        line-height: 40px;
+    }
+    .gradeText{
+        margin-left: 20px;
+    }
+    .imgClass{
+        width: 15px;
+        height: 15px;
+        margin-right: 5px;
+    }
+    .context{
+        width:96%;
+        margin:0 auto;
+        border:1px solid #dddddd;
+        border-radius:2px;
+        transition:height 0.5s linear;
+        -webkit-transition:height 0.5s linear;
+        -moz-transition:height 0.5s linear;
+        -ms-transition:height 0.5s linear;
+    }
+    .hide {
+        display: none;
+    }
+
+
+</style>
+
+{% endblock %}
 {% block "main_content" %}
 
-          <!-- Page Heading -->
-          <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">我的试卷</h1>
-          </div>
-          <div class="row">
-          	{% for quiz in quizInfo %} 
-            <div class="col-lg-6">
-              <!-- Default Card Example -->
-              <div class="card mb-4" id="{{quiz.id}}" style="cursor:pointer" name="quiz">
-                <div class="card-header">
-                  <h6 class="m-0 font-weight-bold text-primary">试卷名称:{{quiz.info.title}}</h6>                
-                </div>
-                <div class="card-body">
-                  <p>组卷人：{{quiz.generator}}</p>
-                  <p>科目：{{quiz.subject}}</p>
-                </div>
-              </div>
-            </div>
-           {% endfor %}
-          </div>
+    <!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800">我的试卷</h1>
+</div>
+    <div class="myContainer"></div>
 {% endblock %}
 {% block "scripts" %}
 	<script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
 	<script type="text/javascript">
        /*卡片的点击事件*/
-        $("div[name='quiz']").click(function () {
+        $(document).on('click',"div[name='quiz']",function () {
             var quizId= $(this).attr("id")
             //console.log(quizId)
             $(location).attr('href', "{% url "quiz-page" %}?quizId="+quizId);
+        })
+        var subjectUpdate = function(subject){
+            console.info("-----"+subject)
+            switch (parseInt(subject)) {
+                case 1 : return "初中数学";
+                case 2 : return "物理";
+                case 3 : return "地理";
+                case 6 : return "高中数学";
+                case 8 : return "化学";
+            }
+        };
+
+        var subjectClick = function(subject){
+            // $(".hiddenDiv").addClass("hide");
+            console.info($('div[grade_num="'+subject+'"]').hasClass("hide"))
+            if($('div[grade_num="'+subject+'"]').hasClass("hide")){
+                $('div[grade_num="'+subject+'"]').removeClass("hide");
+                $('img[grade_num="'+subject+'"]').attr('src', "{% static "assets/img/down.png" %}");
+            }else{
+                $('div[grade_num="'+subject+'"]').addClass("hide");
+                $('img[grade_num="'+subject+'"]').attr('src', "{% static "assets/img/add.png" %}");
+            }
+        };
+        $(document).ready(function () {
+            $.get("{% url 'ajax-my-quizes' %}",function (data,status) {
+                var dataJson = JSON.parse(data);
+                var quizInformation = {};
+                for(var item in dataJson){
+                    if(!quizInformation[dataJson[item].subject]){
+                        quizInformation[dataJson[item].subject] = [];
+                    }
+                    quizInformation[dataJson[item].subject].push(dataJson[item]);
+                }
+                var htmlString = '';
+                var subject = 0;
+                var type={"full":"综合测评","small":"随堂测","suitang":"随堂测"};
+                for(var item in quizInformation){
+                    subject = subjectUpdate(item);
+                    htmlString += '<label onclick="subjectClick('+item+')" ><span class="gradeText"><img src="{% static "assets/img/add.png" %}"  grade_num="'+item+'"  class="imgClass" >'+subject+'</span></label><div  grade_num="'+item+'"  class="context hiddenDiv hide">' ;
+                    for(var value in  quizInformation[item]){
+                        htmlString += '<div style="margin: 5px">\n' +
+                            '                <div class="card mb-4" id="'+quizInformation[item][value].id+'" style="cursor:pointer" name="quiz">\n' +
+                            '                  <div class="card-header">\n' +
+                            '                    <h6 class="m-0 font-weight-bold text-primary">'+quizInformation[item][value].info.title+'</h6>  \n' +
+                            '                  </div>\n' +
+                            '                  <div class="card-body">\n' +
+                            '                    <p>组卷人：'+quizInformation[item][value].generator +'</p>\n' +
+                            '                    <p>学科：'+quizInformation[item][value].subject +'</p>\n' +
+                            '                    <p>试卷类型：'+type[quizInformation[item][value].quiz_type] +'</p>\n' +
+                            '                  </div>\n' +
+                            '                </div>\n' +
+                            '              </div>'
+                    }
+                    htmlString += "</div>"
+                }
+                $('.myContainer').html(htmlString);
+            })
         })
 	</script>
 {% endblock %}

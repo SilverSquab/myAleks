@@ -13,42 +13,56 @@
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
             <div class="card-header py-3">
-              <h6 class="m-0 font-weight-bold text-primary">考试名</h6>
+              <h6 class="m-0 font-weight-bold text-primary">{{info.title}}</h6>
+              <!--<a href='{% url "quiz-page"%}?quiz_record_id={{quiz_record_id}}' class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i>测试卷面</a>-->
             </div>
             <div style="padding-left:20px; padding-top:10px;">
-              <p>组卷人：XXX</p>
-            <p>科目：XXX</p>
-            <p>知识点范围：XXX</p>
-            <p>已考人数：XXX</p>
-            <p>平均成绩：XXX</p>
-
+            <div style='float:right'>
+             <a href='{% url "quiz-page"%}?quizRecordId={{quiz_record_id}}' style="margin-right:20px;color:white" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">试卷详情</a>
+             </div>
+            <p>组卷人：{{generator}}</p>
+            <p>科目：{{subject}}</p>
+            <p>班级：{{cls}}</p>
+            <p>未参加人数：{{non_participant_num}}</p>
             </div>
-
             <div class="card-body">
               <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                   <thead>
                     <tr>
+                      <th>学号</th>
                       <th>姓名</th>
-                      <th>班级</th>
                       <th>成绩</th>
                       <th>排名</th>
                       <th>测试时间</th>
+                      <th>进度</th>
                       <th>详情</th>
                     </tr>
                   </thead>
-                  <tfoot>
+                  <!--<tfoot>
                     <tr>
                       <th>姓名</th>
                       <th>班级</th>
                       <th>成绩</th>
                       <th>排名</th>
                       <th>测试时间</th>
+                      <th>进度</th>
                       <th>详情</th>
                     </tr>
-                  </tfoot>
+                  </tfoot>-->
                   <tbody>
+                    {% for student in students %}
                     <tr>
+                      <th>{{student.student_no}}</th>
+                      <th>{{student.name}}</th>
+                      <th>{{student.score}}</th>
+                      <th>{{student.rank}}</th>
+                      <th>{{student.time}}</th>
+                      <th>{{student.status}}</th>
+                      <th><a href="#">详情</a></th>
+                    </tr>
+                    {% endfor %}
+                    <!--<tr>
                       <th>姓名</th>
                       <th>班级</th>
                       <th>成绩</th>
@@ -231,15 +245,7 @@
                       <th>排名</th>
                       <th>测试时间</th>
                       <th><a href="#">详情</a></th>
-                    </tr>
-                    <tr>
-                      <th>姓名</th>
-                      <th>班级</th>
-                      <th>成绩</th>
-                      <th>排名</th>
-                      <th>测试时间</th>
-                      <th><a href="#">详情</a></th>
-                    </tr>
+                    </tr>-->
                   </tbody>
                 </table>
               </div>

@@ -47,9 +47,12 @@
                                 +'<th width="50%"></th>'
                             +'</tr>'
                         +'</table>'
-                            +'<div id="mb_btnbox" style="padding-bottom: 20px">'
-			        		+'<input id="mb_btn_ok" type="button" value="确定添加" />'
-			        		+'<input id="mb_btn_no" type="button" value="取消" />'
+                            +'<div id="mb_btnbox" style="padding-top: 20px">'
+                                +' <button class="btn btn-primary" id="mb_btn_ok" style="margin: 20px" type="button"><i>添加</i></button>'
+                                +'<button class="btn btn-primary" id="mb_btn_no" type="button"><i>取消</i></button>'
+
+			        		//+'<input id="mb_btn_ok" type="button" value="确定添加" />'
+			        		//+'<input id="mb_btn_no" type="button" value="取消" />'
 			        	+ '</div>'
                     +'</div>'
                 +'</div>'
@@ -102,8 +105,8 @@
         });
         $("#mb_btnbox").css({ margin: '15px 0 10px 0', textAlign: 'center' });
         $("#mb_btn_ok,#mb_btn_no").css({ width: '85px', height: '30px', color: 'white', border: 'none' });
-        $("#mb_btn_ok").css({ backgroundColor: '#1fc88d' });//按钮颜色
-        $("#mb_btn_no").css({ backgroundColor: '#1fc88d', marginLeft: '20px' });//按钮颜色
+        //$("#mb_btn_ok").css({ backgroundColor: '#1fc88d' });//按钮颜色
+        //$("#mb_btn_no").css({ backgroundColor: '#1fc88d', marginLeft: '20px' });//按钮颜色
         //右上角关闭按钮hover样式
         $("#mb_ico").hover(function () {
             $(this).css({ backgroundColor: '#1fc88d', color: 'White' });//鼠标悬停效果

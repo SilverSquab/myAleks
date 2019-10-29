@@ -34,7 +34,7 @@ def ajax_upload_textbooks(request):
 @login_required
 def ajax_get_all_textbooks(request):
     ts = Textbook.objects.all()
-    l = list(ts.values('id', 'grade_no', 'subject', 'name', 'chinese_name', 'grade', 'publisher'))
+    l = list(ts.values('id', 'grade_no', 'subject', 'name', 'chinese_name', 'grade', 'publisher','order'))
     return HttpResponse(json.dumps(l))
 
 @login_required

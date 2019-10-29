@@ -12,7 +12,7 @@ class StudentProfile(models.Model):
     cls_list = models.CharField(max_length=200, blank=True, null=True, default='[]')
     
     name = models.CharField(max_length=20, blank=False, null=False, db_index=True)
-    phone = models.CharField(max_length=12, unique=True, blank=False, null=False, db_index=True)
+    phone = models.CharField(max_length=12, unique=True, blank=True, null=True, db_index=True)
     image = models.ImageField(max_length=255, blank=True, null=True, upload_to='student_imgs')
 
     student_no = models.CharField(max_length=20, blank=True, null=True, db_index=True)
@@ -56,7 +56,7 @@ class StudentQuestionRecord(models.Model):
 
 class StudentQuizRecord(models.Model):
     datetime = models.DateTimeField(auto_now_add=True)
-    student = models.ForeignKey(User, blank=False, null=False)
+    student = models.ForeignKey(StudentProfile, blank=True, null=True)
     quiz_record = models.ForeignKey('quiz.QuizRecord', blank=False, null=False)
     score = models.FloatField(default=0)
     

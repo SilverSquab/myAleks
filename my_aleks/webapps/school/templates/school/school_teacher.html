@@ -12,6 +12,13 @@
 <!-- Begin Page Content -->
 
 <!-- Page Heading -->
+<script type="text/javascript">
+    var clickTeacher = function(teacherId){
+         $(location).attr('href', '{% url "school-get-classes" %}?teacherId=' + teacherId);
+    }
+</script>
+
+
 
 
 <!-- Page Heading -->
@@ -21,18 +28,19 @@
   		<h1 class="h3 mb-0 text-gray-800">师资力量</h1>
 	</div>
 </div>
+
 <!--题目卡片-->
 <div class="row" id="question-container">
 {% for t in teachers %}
-  	<div class="col-lg-6">
+    <div class="col-lg-6" onclick="clickTeacher({{t.id}})" style="cursor:pointer;" >
     	<!-- Default Card Example -->
     	<div class="card mb-4">
      	 	<div class="card-header">
-        	<h6 class="m-0 font-weight-bold text-primary" style="line-height: 1.5rem;">教学科目：{{t.subject.chinese_name}}</h6>
+        	<h6 class="m-0 font-weight-bold text-primary" style="line-height: 1.5rem;">姓名:{{t.name}}</h6>
         </div>
     		<div class="card-body">
-      		<p>姓名：{{t.name}}</p>
-          <p>教学科目：{{t.subject.chinese_name}}</p>
+      		<!--<p>姓名：{{t.name}}</p>-->
+         <p>教学科目：{{t.subject.chinese_name}}</p>
       		<p>联系方式：{{t.phone}}</p>
     		</div>
     	</div>
@@ -41,3 +49,5 @@
 </div>
 <!-- /.container-fluid -->
 {% endblock %}
+
+

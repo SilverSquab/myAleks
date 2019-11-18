@@ -1,0 +1,350 @@
+{% extends 'school/school_base.html'%}
+{% load staticfiles %}
+
+
+
+
+{% block "stylesheets" %}
+<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+<style>
+    .mySpan{
+        color:#5f5f5f;
+    }
+    .myInput {
+        outline:none;
+        background:transparent;
+        border:none;
+        outline:medium;
+    }
+    .hide{
+        display: none;
+    }
+    .jumpText{
+        color:#1FC88D;
+        cursor: pointer;
+    }
+    td form{
+        position: relative;
+        width: 200px;
+        height: 200px;
+    }
+    input[type="file"]{
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 200px;
+        opacity: 0;
+        cursor: pointer;
+    }
+    input[type="submit"]{
+        outline: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #31B0D5;
+        border: none;
+        width: 60px;
+        height: 25px;
+        font-size: 16px;
+    }
+    .myClassBox{
+        width:95%;
+        margin:0 auto;
+        /*margin-bottom: 20px;*/
+        /*margin-top:10px;*/
+        /*border:1px solid #dddddd;*/
+        /*border-radius:1px;*/
+        border:5px solid #1d8ce0;
+        border-radius:30px;
+        padding: 30px 10px;
+
+    }
+    .register-title {
+        font-size: 30px;
+        font-weight: 700;
+        margin-bottom: .363636rem;
+    }
+
+
+</style>
+{% endblock %}
+
+
+{% block "main_content" %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">机构信息</h1>
+</div>
+
+<table border="0" width="800" height="800" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="260" border="1" valign="top">
+            <table >
+                <tr height="100">
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+
+                    <td width="230" align="right">
+                        <form id="myForm">
+                            <input type="file" id="imgUpload" name="imgUpload" accept=".png,.jpg,.jpeg" onchange="prev(this)" class="hide">
+                            {% if schoolProfile.school.img %}
+                            <img id="imgUpdate" class="img-profile rounded-circle" src="http://47.110.253.251/abc/media/{{schoolProfile.school.img}}" style="height: 200px;width:200px">
+                            {% else %}
+                            <img id="imgUpDown" class="img-profile rounded-circle" src="{% static 'assets/img/user.jpg' %}" style="height: 200px">
+                            {% endif %}
+                            <span id="submitSpan" class="hide">点击图片更换机构logo<input id="submitBtn" type="submit" value="提交"></span>
+                        </form>
+                    </td>
+
+                    <td width="30">
+
+                    </td>
+
+                </tr>
+            </table>
+
+
+        </td>
+        <td width="30"></td>
+
+        <td width="480" valign="top">
+            <div style="height: 55px"></div>
+            <table border="0" cellpadding="0" cellspacing="0" width="480">
+                <tr height="20">
+                    <td align="right">
+                    </td>
+                </tr>
+            </table>
+
+            <hr>
+            <table border="0" cellpadding="0" cellspacing="0" width="480">
+                <tr height="30">
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <span style="font-weight:bold;" teacherId="{{schoolProfile.school.id}}" id="profileSpan">机构情况</span>&nbsp;&nbsp;
+                        <span class="jumpText" id="updateClick">修改信息</span>
+                        <span class="hide jumpText" id="affirmClick">保存</span>&nbsp;&nbsp;<span class="hide jumpText" id="cancelClick">取消</span>
+                    </td>
+                </tr>
+                <tr>
+                <tr height="10"><td></td></tr>
+                <td width="50%">机构名称 : <span><input readonly id="name" class="myInput" value="{{schoolProfile.school.name}}"></span></td>
+                </tr>
+                <tr>
+                <tr height="10"><td></td></tr>
+                <td width="50%">电话 : <span style="color: #000000"><input readonly id="phone" class="myInput" value="{{schoolProfile.school.phone}}"></span></td>
+                </tr>
+
+                <tr>
+                <tr height="10"><td></td></tr>
+                <td width="50%">机构地址 : <span style="color: #000000"><input readonly id="location" class="myInput" value="{{schoolProfile.school.location}}"></span></td>
+                </tr>
+
+                <tr>
+                <tr height="10"><td></td></tr>
+                <td width="50%">机构余额 : <span style="color: #000000">{{schoolProfile.school.account}}</span></td>
+                </tr>
+
+                <tr>
+                <tr height="10"><td></td></tr>
+                <td width="50%">老师数量 : <span style="color: #000000">{{schoolProfile.teacher}}</span></td>
+                </tr>
+
+                <tr>
+                <tr height="10"><td></td></tr>
+                <td width="50%">班级数量 : <span style="color: #000000">{{schoolProfile.classes}}</span></td>
+                </tr>
+
+                <tr>
+                <tr height="10"><td></td></tr>
+                <td width="50%">套餐 : <span style="color: #000000">试用套餐</span></td>
+                </tr>
+
+
+            </table>
+
+
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            <div data-v-5ae4297d="" class="register-title">相关班级</div>
+            <div class="myClassBox">
+
+                <table border="0" cellpadding="0" cellspacing="0" id="classTable" style="margin-left: 20px">
+                    {% for cls in schoolProfile.classesList %}
+                    {% if forloop.counter|divisibleby:2 == 1 %}
+                        <td>
+                            <span style="margin-right: 10px" class="classGrade mySpan">{{cls.grade}}</span>
+                            <span>
+                                <a href="{%url 'school-get-class-detail'%}?clsId={{cls.id}}">{{cls.name}}</a>
+                            </span>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if forloop.counter|divisibleby:2 == 0 %}
+                    <tr>
+                        <td>
+                            <span style="margin-right: 10px" class="classGrade mySpan">{{cls.grade}}</span>
+                            <span>
+                                <a href="{%url 'school-get-class-detail'%}?clsId={{cls.id}}">{{cls.name}}</a>
+                            </span>
+                        </td>
+                    {% endif %}
+
+                    {% endfor %}
+                </table>
+            </div>
+        </td>
+
+    </tr>
+
+</table>
+
+
+
+
+
+
+
+{% endblock %}
+
+
+{% block "scripts" %}
+<script type="text/javascript">
+    //存储当前用户的用户名、电话号码、介绍
+    var nameNow = '';
+    var phoneNow = '';
+    var locationNow = '';
+
+    var gradeUpdate = function(grade){
+        switch (parseInt(grade)) {
+            case 1 : return "小学一年级--------";
+            case 2 : return "小学二年级--------";
+            case 3 : return "小学三年级--------";
+            case 4 : return "小学四年级--------";
+            case 5 : return "小学五年级--------";
+            case 6 : return "小学六年级--------";
+            case 7 : return "初中一年级--------";
+            case 8 : return "初中二年级--------";
+            case 9 : return "初中三年级--------";
+            case 10 : return "高中一年级--------";
+            case 11 : return "高中二年级--------";
+            case 12 : return "高中三年级--------";
+        }
+    };
+
+    //展开修改
+    $("#updateClick").click(function () {
+       $("table input").removeClass("myInput");
+       $("table input").removeAttr("readonly");
+       $("#updateClick").addClass("hide");
+       $("#affirmClick").removeClass("hide");
+       $("#cancelClick").removeClass("hide");
+       $("#submitSpan").removeClass("hide");
+       $("#imgUpload").removeClass("hide");
+       nameNow = $("#name").val();
+       phoneNow = $("#phone").val();
+       locationNow = $("#location").val();
+    });
+    //取消修改
+    $("#cancelClick").click(function () {
+        $("table input").addClass("myInput");
+        $("table input").attr("readonly","true");
+        $("#updateClick").removeClass("hide");
+        $("#affirmClick").addClass("hide");
+        $("#cancelClick").addClass("hide");
+        $("#submitSpan").addClass("hide");
+        $("#imgUpload").addClass("hide");
+        $("#name").val(nameNow);
+        $("#phone").val(phoneNow);
+        $("#location").val(locationNow);
+    });
+    //确认修改
+    $("#affirmClick").click(function () {
+       var data = {
+           name: $("#name").val(),
+           phone:$("#phone").val(),
+           location:$("#location").val()
+       };
+       console.info(data);
+        $.post("{% url 'ajax-update-school' %}",JSON.stringify(data),function (data,status) {
+            if(data == 'OK'){
+                alert("修改成功");
+                window.location.reload();
+            }else{
+                alert("修改失败");
+            }
+        })
+
+    });
+    /*//上传图片
+    $('#submitBtn').on('click', function () {
+        var data = new FormData();
+        if(!$('#imgUpload')[0].files[0]){
+            alert("请先选择图片");
+            return
+        }
+        data.append('img', $('#imgUpload')[0].files[0]);
+        data.append('profile_id',$("#profileSpan").attr("teacherId"));
+        $.ajax({
+            type:"POST",
+            url:"{% url 'upload-teacher-img' %}",
+            data:data,
+            // dataType:"json",
+            cache: false,
+            processData: false,
+            contentType: false,
+            success:function (res) {
+                console.info(res);
+                if(res == "OK"){
+                    alert("上传成功")
+                    window.location.reload();
+                }else{
+                    alert(res)
+                }
+            }
+        })
+
+
+    });
+    //修改展示图片
+    function prev(event){
+        //获取展示图片的区域
+        var img = document.getElementById("imgUpdate");
+        if(!img){
+            img = document.getElementById("imgUpDown");
+        }
+        //获取文件对象
+        let file = event.files[0];
+        //获取文件阅读器
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(){
+            //给img的src设置图片url
+            img.setAttribute("src", this.result);
+        }
+    }*/
+
+
+    $(document).ready(function () {
+        var graderList = document.getElementsByClassName("classGrade");
+        for(item in graderList){
+            graderList[item].innerText = gradeUpdate(graderList[item].innerText);
+        }
+        var width = $(".myClassBox").width() - 40
+        $("#classTable").attr("width",width)
+
+
+        // console.info(graderList);
+    });
+
+
+
+
+
+</script>
+{% endblock %}
+

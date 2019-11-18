@@ -1,7 +1,9 @@
-{% extends base_template %}
-{% load staticfiles %}
-{% block "main_content" %}
+{% extends 'teacher/teacher_base.html'%}
 
+{% load staticfiles %}
+
+{% block "main_content" %}
+    <div>
            <!-- Page Heading -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 class="h3 mb-0 text-gray-800">学情报告</h1>
@@ -134,6 +136,144 @@
                 </div>
                 {% endif %}
 
+
+        {% if studentProfile %}
+        <div class="row">
+            <!-- Content Column -->
+            <div class="col-lg-6">
+                <!-- DataTales Example -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">学生信息</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table  cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="260" border="1" valign="top">
+                                        <table >
+                                            <tr height="10">
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+
+                                                <td width="230" align="right">
+                                                    {% if studentProfile.profile.image %}
+                                                    <img id="imgUpdate" class="img-profile rounded-circle" src="{{studentProfile.profile.image}}" style="height: 200px;width:200px">
+                                                    {% else %}
+                                                    <img id="imgUpDown" class="img-profile rounded-circle" src="{% static 'assets/img/user.jpg' %}" style="height: 200px">
+                                                    {% endif %}
+                                                </td>
+
+                                                <td width="30">
+
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td width="30"></td>
+
+                                    <td  valign="top">
+                                        <table border="0" cellpadding="0" cellspacing="0" >
+                                            <tr height="15">
+                                                <td align="right">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2">
+                                                    <span style="font-weight:bold;">学生信息</span>&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                            <tr height="10"><td></td></tr>
+                                            <td width="50%">姓名 : <span style="color: #000000">{{studentProfile.profile.name}}</span></td>
+                                            </tr>
+                                            <tr>
+                                            <tr height="10"><td></td></tr>
+                                            <td width="50%">年龄 : <span style="color: #000000">{{studentProfile.profile.age}}</span></td>
+                                            </tr>
+
+                                            <tr>
+                                            <tr height="10"><td></td></tr>
+                                            <td width="50%">电话号码 : <span style="color: #000000">{{studentProfile.profile.phone}}</span></td>
+                                            </tr>
+
+                                            <tr>
+                                            <tr height="10"><td></td></tr>
+                                            <td width="50%">学号 : <span style="color: #000000">{{studentProfile.profile.student_no}}</span></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <!-- DataTales Example -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <div class="m-0 font-weight-bold text-primary" style="display: inline-block;padding-top: 6px">家长信息</div>
+                        <div style="float: right" class="btn btn-info btn-icon-split">
+                            <span class="text" id="addParent"  studentId="{{studentProfile.profile.id}}">添加家长信息</span>
+                        </div>
+                    </div>
+                    <div class="card-body" style="height: 230px">
+                        <div class="table-responsive">
+                            <table>
+                                <tr height="15">
+                                    <td align="right">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="100px">
+                                        <span style="font-weight:bold;" >家长姓名</span>&nbsp;&nbsp;
+                                    </td>
+                                    <td width="100px">
+                                        <span style="font-weight:bold;" >关系</span>&nbsp;&nbsp;
+                                    </td>
+                                    <td width="150px">
+                                        <span style="font-weight:bold;" >联系电话</span>&nbsp;&nbsp;
+                                    </td>
+                                    <td width="100px">
+                                        <span style="font-weight:bold" >操作</span>&nbsp;&nbsp;
+                                    </td>
+                                </tr>
+
+                                {% for parent in studentProfile.parentList %}
+                                <tr height="10"><td></td></tr>
+                                <tr>
+                                    <td width="100px" id="parentName{{parent.id}}">{{parent.name}}</td>
+                                    <td width="100px" id="parentInfo{{parent.id}}">{{parent.info}}</td>
+                                    <td width="150px" id="parentPhone{{parent.id}}">{{parent.phone}}</td>
+                                    <td width="100px"><span style="color:#1FC88D;cursor: pointer;" parentId="{{parent.id}}" class="updateParent">修改信息</span></td>
+                                </tr>
+                                {% endfor %}
+
+
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        {% endif %}
+
+
+
+
+
+
+
+
+
+
                 <!-- Content Row -->
 
                 <div class="row">
@@ -233,9 +373,15 @@
                                             <td>{{student.student_no}}</td>
                                             <td>{{student.name}}</td>
                                             <td class="tdOnStudent">
+                                                {% if student.is_join %}
                                                 <div class="btn btn-info btn-icon-split">
                                                     <span class="text" name="{{student.id}}">查看学情报表</span>
                                                 </div>
+                                                {% else %}
+                                                <div >
+                                                    <span >未参加</span>
+                                                </div>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -248,6 +394,7 @@
                     </div>
                 </div>
                 {% endif %}
+    </div>
 {% endblock %}
 
 {% block "scripts" %}
@@ -261,28 +408,103 @@
   <script src="{% static "assets/js/demo/datatables-demo.js" %}" type="text/javascript"></script>
   <script src="{% static "assets/vendor/teacherReport/jquerysession.js" %}" type="text/javascript"></script>
   <script src="{% static "assets/vendor/teacherReport/statement.js" %}" type="text/javascript"></script>
+<script src="{% static "assets/js/jquery.addParentbox.js" %}" type="text/javascript"></script>
 
 	<script type="text/javascript">
+
+        //添加家长信息
+        $('#addParent').click(function () {
+            var student_id = $(this).attr('studentId');
+            console.info(student_id)
+            $.AddClsMsgBox.Confirm("添加信息",function () {
+                var name = $("input[name='name']").val();
+                var phone = $("input[name='phone']").val();
+                var info = $("input[name='info']").val();
+                $.post("{% url 'update-parent' %}",{
+                    'student_id':student_id,
+                    'name':name,
+                    'phone':phone,
+                    'info':info
+                },function(data,status){
+                    if (status != "success"){
+                        alert("添加失败！");
+                    } else {
+                        if (data=='OK'){
+                            alert("添加成功！");
+                            window.location.reload();
+                        } else {
+                            alert("添加失败！");
+                        }
+                    }
+                });
+            },[]);
+        });
+        //修改家长信息
+        $('.updateParent').click(function () {
+            var parent_id = $(this).attr('parentId');
+            var name1 = '#parentName'+parent_id;
+            name1 = $(name1).text();
+            var phone1 = '#parentPhone'+parent_id;
+            phone1 = $(phone1).text();
+            var info1 = '#parentInfo'+parent_id;
+            info1 = $(info1).text();
+            $.AddClsMsgBox.Confirm("修改信息",function () {
+                var name = $("input[name='name']").val();
+                var phone = $("input[name='phone']").val();
+                var info = $("input[name='info']").val();
+                $.post("{% url 'update-parent' %}", {
+                    'parent_id': parent_id,
+                    'name': name,
+                    'phone': phone,
+                    'info': info
+                },function(data,status){
+                    if (status != "success"){
+                        alert("添加失败！");
+                    } else {
+                        if (data=='OK'){
+                            alert("添加成功！");
+                            window.location.reload();
+                        } else {
+                            alert("添加失败！");
+                        }
+                    }
+                });
+            },[name1,phone1,info1]);
+        });
+
+
+
+
+
+
         //获取该学生的知识弱点
         var getKnowledgeList = function (studentId){
         //获取学生最近学习的知识id
-        var graphId = '3c741c85dc27';
-        $.get("{% url "get-student-graph-vector" %}"+"?student_id="+studentId+"&graph_id="+graphId,function(data,status){
+        var graphId = 'ac32709e67ff';
+        $.get("{% url 'get-student-graph-vector' %}"+"?student_id="+studentId+"&graph_id="+graphId,function(data,status){
             var jsonData = JSON.parse(data);
             var array = [];
             for(var key in jsonData) {
-                jsonData[key]['score'] = jsonData[key]['score'] * 100;
-                jsonData[key]['name']=key;
-                array.push(jsonData[key]);
+                var scoreItem = parseInt(jsonData[key]['score'] * 100);
+                if(scoreItem != 60){
+                    jsonData[key]['score'] = scoreItem;
+                    jsonData[key]['name']=key;
+                    array.push(jsonData[key]);
+                }
+
             }
             array.sort(sortFun);
             var nodeList = [];
+            if(array.length == 0){
+                $('#weaknessListBody').html('<div style="height:200px;padding: 15px">缺少测试数据，无法查询弱点知识</div>');
+                return;
+            }
             if(array.length >= 5 ){
                 nodeList = array.slice(0,5)
             }else{
                 nodeList = array.slice(0,array.length);
             }
-            $.post("{% url "get-node-chineseName" %}",JSON.stringify(nodeList),function(data,status){
+            $.post("{% url 'get-node-chineseName' %}",JSON.stringify(nodeList),function(data,status){
                 if(data){
                     var dataJson = JSON.parse(data);
                     var htmlString = "";
@@ -307,24 +529,31 @@
     //获取班级知识弱点
     var getClassKnowledgeList = function (clsId){
         //获取班级最近学习的知识id
-        var graphId = '1b91efc09f85';
-        $.get("{% url "get-cls-graph-vector" %}"+"?cls_id="+clsId+"&graph_id="+graphId,function(data,status){
+        var graphId = 'ac32709e67ff';
+        $.get("{% url 'get-cls-graph-vector' %}"+"?cls_id="+clsId+"&graph_id="+graphId,function(data,status){
             var jsonData = JSON.parse(data);
             var array = [];
             for(var key in jsonData) {
-                var item = {score:'',name:''}
-                item['score'] = jsonData[key] * 100;
-                item['name']=key;
-                array.push(item);
+                var item = {score:'',name:''};
+                var scoreItem = parseInt(jsonData[key] * 100);
+                if(scoreItem != 60){
+                    item['score'] = scoreItem
+                    item['name']=key;
+                    array.push(item);
+                }
             }
             array.sort(sortFun);
             var nodeList = [];
+            if(array.length == 0){
+                $('#weaknessListBody').html('<div style="height:200px;padding: 15px">缺少测试数据，无法查询弱点知识</div>');
+                return;
+            }
             if(array.length >= 5 ){
                 nodeList = array.slice(0,5)
             }else{
                 nodeList = array.slice(0,array.length);
             }
-            $.post("{% url "get-node-chineseName" %}",JSON.stringify(nodeList),function(data,status){
+            $.post("{% url 'get-node-chineseName' %}",JSON.stringify(nodeList),function(data,status){
                 if(data){
                     var dataJson = JSON.parse(data);
                     var htmlString = "";
@@ -361,14 +590,14 @@
                 var json = JSON.parse(data)
                 for(var i in json.quiz_record){
                     var name = json.quiz_record[i].pdf_uri.split('.')[0];
-                    htmlString +='<tr><td>'+name+'</td><td class="tdOnReport"><div class="btn btn-info btn-icon-split">    <span class="text" name="'+name+'">查看报告</span></div></td><td class="tdOnDownload"><div     class="btn btn-info btn-icon-split"><span class="text" name="'+name+'">导出PDF文件</span></    div></td></tr>'
+                    htmlString +='<tr><td>'+name+'</td><td class="tdOnReport"><div class="btn btn-info btn-icon-split"> <span class="text" name="'+name+'">查看报告</span></div></td><td class="tdOnDownload"><div class="btn btn-info btn-icon-split"><span class="text" name="'+name+'">导出PDF文件</span></div></td></tr>'
                 }
                 var buttonString = '';
                 if(page > 1){
-                    buttonString += '<div class="btn btn-info btn-icon-split" style="margin: 5px float:right" id="previ    ousClassReportButton"><span class="text" name="previous">上一页</span></div>'
+                    buttonString += '<div class="btn btn-info btn-icon-split" style="margin: 5px float:right" id="previousClassReportButton"><span class="text" name="previous">上一页</span></div>'
                 }
                 if(data.hasNext){
-                    buttonString += '<div class="btn btn-info btn-icon-split" style="float:right" id="nextClassReportBu    tton"><span class="text" name="">下一页</span></div>'
+                    buttonString += '<div class="btn btn-info btn-icon-split" style="float:right" id="nextClassReportButton"><span class="text" name="">下一页</span></div>'
                 }
                 $('#myTableButton').html(buttonString);
                 $('#myTBody').html(htmlString);
@@ -417,6 +646,22 @@
                 }
             }
         })
+    //查看报告
+    //$('.tdOnReport .text').on('click',function (){
+    $(document).on('click','.tdOnReport .text',function(){
+        var name = $(this).attr("name");
+        var url = '{{TEMPLATES_IP}}/templates-static/templates/html/'+name+'.html'
+        window.open(url);
+    });
+
+    //下载pdf文档
+    //$('.tdOnDownload .text').on('click',function (){
+    $(document).on('click','.tdOnDownload .text',function(){    
+        var name=$(this).attr("name");
+        var url = '{{TEMPLATES_IP}}/templates-static/templates/pdf/'+name+'.pdf';
+        window.open(url);
+    });
+
 	</script>
 
     <script type="text/javascript">

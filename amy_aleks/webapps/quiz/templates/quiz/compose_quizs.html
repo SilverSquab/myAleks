@@ -1,0 +1,1427 @@
+{% extends 'teacher/teacher_base.html'%}
+{% load staticfiles %}
+
+{% block "stylesheets" %}
+<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+
+<style>
+    a {
+        font-size: 15px;
+        text-decoration: none;
+    }
+
+    a:hover {
+        font-size: 17px;
+        color: #999999;
+    }
+
+    .tree2 {
+        padding-left: 20px;
+        display: none;
+    }
+
+    .tree_img {
+        width: 15px;
+    }
+
+    .tree_body {
+        cursor: pointer;
+        padding-left: 20px;
+    }
+    .tree_body_chapter {
+        cursor: pointer;
+        padding-left: 20px;
+    }
+
+    /* 书籍弹框*/
+
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+
+    .containor {
+        width: 1000px;
+        height: auto;
+        position: relative;
+        margin: 0 auto;
+
+    }
+
+    .nav_left ul {
+        width: 100%;
+        height: auto;
+    }
+
+    .nav_left ul li {
+        height: 50px;
+        line-height: 50px;
+        text-align: left;
+    }
+
+    .nav_left ul li span {
+        padding-left: 10px;
+        height: 50px;
+        line-height: 50px;
+        display: block;
+    }
+
+    .nav_right {
+        width: 800px;
+        height: 500px;
+        position: absolute;
+        margin-left: 200px;
+        top: 0px;
+    }
+
+    .sub {
+        position: relative;
+        overflow: auto;
+        width: 400px;
+        height: 600px;
+        background: #FFFFFF;
+        padding: 10px 10px;
+        z-Index: 2;
+    }
+
+
+    .sub dl {
+        overflow: hidden;
+        padding: 0px 0px 10px 0px;
+    }
+
+    .sub dt {
+        width: 100px;
+        float: left;
+        display: block;
+        position: relative;
+        clear: left;
+    }
+
+    .sub dt a {
+        font-size: 14px;
+        color: #000;
+        font-weight: bold;
+        text-align: center;
+        padding-left: 20px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .sub dt i {
+        width: 4px;
+        right: 12px;
+        top: 2px;
+        font-size: 14px;
+        position: absolute;
+        font-style: normal;
+    }
+
+    .sub dd {
+        padding-left: 10px;
+        width: 400px;
+        float: left;
+        display: block;
+        position: relative;
+        overflow: hidden;
+        padding-right: 20px;
+        border-bottom: 1px dashed #E3E3E3;
+    }
+
+    .sub dd a {
+        font-size: 12px;
+        float: left;
+        color: #666;
+        padding: 0 10px;
+        margin: 4px 0px 10px 0px;
+        text-decoration: none;
+        cursor: pointer;
+        border-left: 1px solid #E3E3E3;
+    }
+
+
+    .hide {
+        display: none;
+    }
+
+    .infoWin {
+        position: fixed;
+        right: 20px;
+        bottom: 330px;
+        z-Index: 2;
+    }
+    #questionInput{
+        text-align: left;
+        margin: 0.5rem 0 0.5rem 0;
+        padding: .375rem .75rem;
+        background-color: #f8f9fc;
+        border:#e5e5e5 1px solid;
+        border-radius:5px;
+    }
+    #classInput{
+        text-align: left;
+        margin: 0.5rem 0 0.5rem 0;
+        padding: .375rem .75rem;
+        background-color: #f8f9fc;
+        border:#e5e5e5 1px solid;
+        border-radius:5px;
+    }
+    #questionSelect{
+        margin: 0.5rem 0 0.5rem 0;
+        padding: .375rem .75rem;
+        background-color: #f8f9fc;
+        border:#e5e5e5 1px solid;
+        border-radius:5px;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: 400;
+        color:#858694;
+    }
+    #questionSelect option{
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: 400;
+        color:#858694;
+    }
+
+
+
+
+</style>
+{% endblock %}
+
+{% block "main_content" %}
+
+<!-- Begin Page Content -->
+
+<!-- Page Heading -->
+
+
+<!-- Page Heading 标题头部 -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">组卷选题</h1>
+    <span></span>
+    <span href="javascript:void(0);" class="d-none d-sm-inline-block btn  btn-sm btn-primary shadow-sm infoWin"
+          data-toggle="modal" data-target="#myModal" style="cursor: pointer;height: 240px;width:50px"><span style="font-size: 17px">点击查看选题篮<i class="fas fa-fw fa-arrow-right"></i></span><br/><span style="font-size: 9px">已选:<span id="questionNumber">0</span></span></span>
+</div>
+
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="width: 1200px">
+            <div class="modal-header">
+                <h4 id="myModalLabel" class="h4 mb-0 text-gray-800" style="float: left">
+                    选题篮
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card shadow mb-4" style="width: 100%">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">已选题目</h6>
+                    </div>
+                    <div class="card-body">
+                        试卷标题:<input type="text"  id="questionInput" placeholder="请输入题目">&nbsp;&nbsp;
+                        测试类型:<select id="questionSelect"><option value="small">随堂测</option><option value="full">综合测评</option></select>
+                        <button class="pull-right btn btn-primary" id="submit-quiz" style="margin: 0.5rem 0 0.5rem 1rem;">保存试卷</button>
+                        测试班级:<input type="text"  placeholder="请选择班级" class="dropdown-toggle" data-toggle="dropdown"aria-haspopup="true" aria-expanded="false" readonly="readonly"  id="classInput" >
+                            <ul class="dropdown-menu dropdown-menu-left">
+                                <li class="classCheckLi" id="select">
+                                </li>
+                            </ul>
+                        <button type="button" class="btn btn-primary" id="publish">保存并发布</button>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="selected_questions" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <th style="width: 150px">题号</th>
+                                    <th>题目</th>
+                                    <th style="width: 250px;">知识点</th>
+                                    <th style="width: 150px;">
+                                        <button class="pull-right btn btn-primary" id="marking-btn">启用计分</button>
+                                    </th>
+
+                                    <th style="width: 150px">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody class="tbodyHtml" id="questionListHtml">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+            </div>
+        </div>
+    </div>
+</div>
+<!--已选题目-->
+
+
+<!--目录+题目页面-->
+<div class="col-lg-12" style="clear: both">
+    <div class="card mb-4 containor" id='bookTreeBox' style="width: 25%;float: left">
+        <div class="card-body ">
+            <!--课本名称-->
+            <div class="nav_left">
+                <ul>
+                    <li class="book-li" data-id="2">当前课本：无</li>
+                </ul>
+                <hr style="height: 5px"/>
+            </div>
+            <div class="nav_right">
+                <div class="sub hide overY" data-id="2" id = "bookDiv">
+
+                </div>
+            </div>
+            <!--  章节树-->
+            <div id="book-tree">
+                <div style="text-align: center">未选择教材！</div>
+            </div>
+        </div>
+    </div>
+    <!-- 题目页面-->
+    <div class="card mb-4" style="width: 73%;float: right">
+        <div class="card-body">
+            <!--<h6>试题列表:<span style="cursor: pointer"></span></h6>-->
+            <!--<form id="form1" >题目范围：
+                <input type="radio"  name="node" checked  value="true" />显示全部&nbsp;&nbsp;
+                <input type="radio"  name="node" value="false" />只显示优选题
+            </form>-->
+            <button class="btn btn-primary" id="questionType-btn" type="button" >
+                <i class="fas fa-search fa-sm"><span class="questionTypeButton">查询优选题</span></i>
+            </button>
+            <hr style="height: 5px"/>
+            <div class="row" id="question-container">
+                <div style="text-align: center;width: 100%">暂无试题！</div>
+            </div>
+            <div style="text-align: center">
+                <span style="padding: 10px;cursor: pointer" id="down_page">上一页</span>|<span style="padding-left: 10px" id="page">1</span>/<span style="padding-right:10px" id="maxpage">1</span>|<span style="padding: 10px;cursor: pointer" id="up_page">下一页</span><input style="width:30px" id="pageInput" /><a  id="jump-page" style="padding: 10px;cursor: pointer" type="button">跳转</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- /.container-fluid -->
+{% endblock %}
+
+{% block "scripts" %}
+<script type="text/javascript" async
+        src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Ajax.config.path["mhchem"] =
+        "https://cdnjs.cloudflare.com/ajax/libs/mathjax-mhchem/3.3.2";
+    MathJax.Hub.Config({
+        TeX: {
+            extensions: ["[mhchem]/mhchem.js"]
+        }
+    });
+</script>
+<script src="{% static "assets/js/jquery.etui.msgbox.js" %}" type="text/javascript"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
+<script src="{% static "assets/js/jquery.sendQuiz.msgbox.js" %}" type="text/javascript"></script>
+<script type="text/javascript">
+    var school='{{school}}'
+    var maxpage = 5;
+    var page = 1;
+    //节id
+    var section_id = '';
+    //章id
+    var chapter_id = '';
+    //存储选中题目
+    var checkQuestionList = [];
+    //当前题目知识类型
+    var nowSubject = '';
+    //是否采用计分方式
+    var isScore = false;
+    //当前教材对应的科目
+    var subject='';
+    //所有科目信息
+    var subjectList = {};
+    //是否是优选题
+    var isExcellent = false;
+    //是否是采用章查询
+    var isChapter = true;
+
+
+    //按节查询数据
+    var findQustionListBySection = function(p){
+        page = p;
+        $.get("{% url 'ajax-get-questions-by-section' %}?section_id=" + section_id + "&page=" + page+"&selected="+isExcellent, function (data, status) {
+            if (status == "success") {
+                var questions = JSON.parse(data);
+                var question_body_html = ''
+                for (question_id in questions) {
+                    question_body_html += '<div class="col-lg-12">'
+                        + '<div class="card mb-4" question-id="' + question_id + '">'
+                        + '<div class="card-header">'
+                        + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> '
+                        //+ '<a href="/abc/quiz/upload-question/?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
+                        + '</div>'
+                        question_body_html += '<div class="card-body">'
+                        + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '}</p>'
+                        if (questions[question_id]['img_url']){
+                            question_body_html += '<p><img src="{{TEMPLATES_IP}}'+questions[question_id]['img_url']+'"></p>'
+                        }
+                        question_body_html += '<div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
+                        if (questions[question_id]['options']['A']['img_url']){
+                            question_body_html += '<p><img src="{{TEMPLATES_IP}}'+questions[question_id]['options']['A']['img_url']+'"></p>'
+                        }
+                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
+                        if (questions[question_id]['options']['B']['img_url']){
+                            question_body_html += '<p><img src="{{TEMPLATES_IP}}'+questions[question_id]['options']['B']['img_url']+'"></p>'
+                        }
+                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
+                        if (questions[question_id]['options']['C']['img_url']){
+                            question_body_html += '<p><img src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
+                        }
+                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
+                        if (questions[question_id]['options']['D']['img_url']){
+                            question_body_html += '<p><img src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
+                        }
+                        question_body_html += '</div>'
+                        + '</div></div></div>'
+                }
+                $("#question-container").html(question_body_html);
+                MathJax.Hub.Typeset();
+                $(location).attr('href', "#top");
+            }
+        });
+        //修改页面样式
+        $("#page").html(page);
+
+    };
+    //获取节的总页数
+    var findPageBySection = function(){
+        $.get("{% url 'ajax-get-page-count-by-section' %}?section_id=" + section_id+"&selected="+isExcellent, function (data, status) {
+            if (status == "success") {
+                maxpage = parseInt(data);
+                $("#maxpage").html(maxpage);
+            }
+        });
+    };
+    //按章查询数据
+    var findQuestionListByChapter = function(p){
+        page = p;
+        $.get("{% url 'ajax-get-questions-by-chapter' %}?chapter_id=" + chapter_id + "&page=" + page+"&selected="+isExcellent, function (data, status) {
+            if (status == "success") {
+                var questions = JSON.parse(data);
+                var question_body_html = ''
+                for (question_id in questions) {
+                    question_body_html += '<div class="col-lg-12">'
+                        + '<div class="card mb-4" question-id="' + question_id + '">'
+                        + '<div class="card-header">'
+                        + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> '
+                        //+ '<a href="/abc/quiz/upload-question/?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
+                        + '</div>'
+                        question_body_html += '<div class="card-body">'
+                        + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '}</p>'
+                        if (questions[question_id]['img_url']){
+                            question_body_html += '<p><img src="{{TEMPLATES_IP}}'+questions[question_id]['img_url']+'"></p>'
+                        }
+                        question_body_html += '<div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
+                        if (questions[question_id]['options']['A']['img_url']){
+                            question_body_html += '<p><img src="{{TEMPLATES_IP}}'+questions[question_id]['options']['A']['img_url']+'"></p>'
+                        }
+                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
+                        if (questions[question_id]['options']['B']['img_url']){
+                            question_body_html += '<p><img src="{{TEMPLATES_IP}}'+questions[question_id]['options']['B']['img_url']+'"></p>'
+                        }
+                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
+                        if (questions[question_id]['options']['C']['img_url']){
+                            question_body_html += '<p><img src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
+                        }
+                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
+                        if (questions[question_id]['options']['D']['img_url']){
+                            question_body_html += '<p><img src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
+                        }
+                        question_body_html += '</div>'
+                        + '</div></div></div>'
+                }
+                $("#question-container").html(question_body_html);
+                MathJax.Hub.Typeset();
+                $(location).attr('href', "#top");
+            }
+        });
+        //修改页面样式
+        $("#page").html(page);
+    };
+    //获取章的页数
+    var findPageByChapter = function(){
+        $.get("{% url 'ajax-get-page-count-by-chapter' %}?chapter_id=" + chapter_id+"&selected="+isExcellent, function (data, status) {
+            if (status == "success") {
+                maxpage = parseInt(data);
+                $("#maxpage").html(maxpage);
+            }
+        });
+    };
+
+    //点击节查询
+    $(document).on('click', '.tree_body', function () {
+        section_id = $(this).attr('tree_body_id');
+        chapter_id = "";
+        nowSubject = $(this).text();
+        isChapter = false;
+        isExcellent = false;
+        $(".questionTypeButton").text("显示优选题");
+        //修改选中的字体样式颜色
+        $('.tree_body').css('color','');
+        $('.tree_body_chapter').css('color','');
+        $('span[tree_body_id="'+section_id+'"]').css('color','#27BFEE');
+        findQustionListBySection(1);
+        findPageBySection();
+    });
+    //点击章查询
+    $(document).on("click",".tree_body_chapter",function () {
+        chapter_id = $(this).attr('tree_body_id');
+        section_id = "";
+        nowSubject = $(this).text();
+        isChapter = true;
+        isExcellent = false;
+        $(".questionTypeButton").text("显示优选题");
+        $('.tree_body').css('color','');
+        $('.tree_body_chapter').css('color','');
+        $('span[tree_body_id="'+chapter_id+'"]').css('color','#27BFEE');
+        findQuestionListByChapter(1);
+        findPageByChapter();
+    });
+
+
+    //跳页查询
+    $(document).on('click','#jump-page',function(){
+        var jumpPage = $("#pageInput").val();
+        if(isChapter){
+            findQuestionListByChapter(parseInt(jumpPage));
+        }else{
+            findQustionListBySection(parseInt(jumpPage));
+        }
+    });
+    //切换查询范围
+    $("#questionType-btn").click(function () {
+       if(!(section_id || chapter_id) || !nowSubject ){
+           alert("请先选择教材章节");
+           return
+       }
+           isExcellent = !isExcellent;
+           if(isExcellent){
+               $(".questionTypeButton").text("显示全部题目");
+           }else{
+               $(".questionTypeButton").text("显示优选题");
+           }
+        if(isChapter){
+            findQuestionListByChapter(1);
+            findPageByChapter();
+        }else{
+            findQustionListBySection(1);
+            findPageBySection();
+        }
+
+    });
+    //获取老师所带班级
+    //生成班级选择列表
+    $(document).ready(function () {
+        $.get("{% url 'ajax-get-own-classes' %}",function(data,status){
+            if(data=='user is not teacher'){
+
+            }else if(data=="cls not existed"){
+
+            }else{
+                data=JSON.parse(data)
+                html=''
+                for (var key in data){
+                    html+='<div class="dropdown-item" style="cursor:hand" name="'+key+'">'+data[key]+'</div>'
+                    }
+                $('#select').html(html)
+            }
+        })
+        $("#classInput").attr('name','')
+        $("#classInput").val('')
+    })
+
+    //选择班级点击事件
+    $(document).on('click','.dropdown-item',function(){
+        var id = $(this).attr('name')
+        var name = $(this).text()
+        $("#classInput").attr('name',id)
+        $("#classInput").val(name)
+    })
+
+
+
+    //点击上一页
+    $('#down_page').click(function () {
+        // console.log('上一页')
+        if (page > 1) {
+            page = page - 1
+        }else{
+            alert("已到首页")
+            return
+        }
+        // console.log(page)
+        /*$.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page+"&selected="+isExcellent, function (data, status) {
+            if (status == "success") {
+                // console.log(data)
+                var questions = JSON.parse(data);
+                var question_body_html = ''
+                for (question_id in questions) {
+                    question_body_html += '<div class="col-lg-12">'
+                        + '<div class="card mb-4" question-id="' + question_id + '">'
+                        + '<div class="card-header">'
+                        + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> ' 
+                        //+ '<a href="/abc/quiz/upload-question/?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
+                        + '</div>'
+                    question_body_html += '<div class="card-body">'
+                        + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '}</p>'
+                        + '<div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
+                        + '</div>'
+                        + '</div></div></div>'
+                }
+                // console.log(question_body_html)
+                $("#question-container").html(question_body_html);
+                MathJax.Hub.Typeset();
+                $("#page").html(page);
+            }
+        });*/
+        if(isChapter){
+            findQuestionListByChapter(page);
+        }else{
+            findQustionListBySection(page);
+        }
+        $(location).attr('href', "#top");
+    });
+    //点击下一页
+    $('#up_page').click(function () {
+        // console.log('下一页')
+        if (page < maxpage) {
+            page = page + 1
+        }else{
+            alert("已到尾页");
+            return
+        }
+        // console.log(page)
+        /*$.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page+"&selected="+isExcellent, function (data, status) {
+            if (status == "success") {
+                // console.log(data)
+                var questions = JSON.parse(data);
+                var question_body_html = ''
+                for (question_id in questions) {
+                    question_body_html += '<div class="col-lg-12">'
+                        + '<div class="card mb-4" question-id="' + question_id + '">'
+                        + '<div class="card-header">'
+                        + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> ' 
+                        //+ '<a href="/abc/quiz/upload-question/?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
+                        + '</div>'
+                    question_body_html += '<div class="card-body">'
+                        + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '}</p>'
+                        + '<div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
+                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
+                        + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
+                        + '</div>'
+                        + '</div></div></div>'
+                }
+                // console.log(question_body_html)
+                $("#question-container").html(question_body_html);
+                $("#page").html(page);
+                MathJax.Hub.Typeset();
+            }
+        });*/
+        if(isChapter){
+            findQuestionListByChapter(page);
+        }else{
+            findQustionListBySection(page);
+        }
+        $(location).attr('href', "#top");
+    });
+    //点击书名查询书的结构形成树
+    $(document).on('click', '.book-name', function () {
+        var book_id = $(this).attr("book_id")
+        subject=$(this).attr("subject")
+        var hisTableWid = document.getElementById("bookTreeBox").clientWidth;
+        hisTableWid = hisTableWid -50;
+        $.get("{% url 'ajax-get-textbook-structure' %}?book_id=" + book_id, function (data, status) {
+            if (status == "success") {
+                var book_data = JSON.parse(data);
+                // console.log(book_data)
+                var tree_html = ''
+                //对章进行排序
+                var chapters_order_by_order = book_data.chapters.sort(
+                    function (a, b) {
+                        if (typeof a.order == "undefined" || a.order == null || a.order == "") return 1
+                        if (typeof b.order == "undefined" || b.order == null || b.order == "") return -1
+                        var aText = (a.order.split("章")[0]).substring(1);
+                        var bText = (b.order.split("章")[0]).substring(1);
+                        if (typeof aText == "undefined" || aText == null || aText == "") return 1
+                        if (typeof bText == "undefined" || bText == null || bText == "") return -1
+                        return parseFloat(aText) - parseFloat(bText);
+                    }
+                );
+                for (chapter in chapters_order_by_order) {
+                    // console.info(chapters_order_by_order[chapter])
+                    tree_html += '<div style="clear: both;overflow：hidden;">'
+                        + '<span  tree_book_sign="treeBookSection"   tree_body_id=' + '"' + chapters_order_by_order[chapter].id + '"' + ' class="tree_body_chapter" style="white-space: nowrap; display: inline-block;width: '+hisTableWid+'px;overflow: hidden;text-overflow: ellipsis"><img src="{% static "assets/img/add.png" %}"  class="tree_img" did=' + '"' + chapters_order_by_order[chapter].id + '"' + '/>&nbsp;&nbsp;'+ chapters_order_by_order[chapter].order + '、' + chapters_order_by_order[chapter].chinese_name + '</span>'
+                        + '</div>'
+                        + '<div class="tree2" id=' + '"' + chapters_order_by_order[chapter].id + '"' + ' style="clear: both;overflow：hidden;">'
+                    //对节进行排序
+                    var sections_order_by_order = chapters_order_by_order[chapter].sections.sort(
+                        function (a, b) {
+
+                            if (typeof a.order == "undefined" || a.order == null || a.order == "") return -1
+                            if (typeof b.order == "undefined" || b.order == null || b.order == "") return 1
+                            var aText = a.order.split("、")[0];
+                            var bText = b.order.split("、")[0];
+                            if (typeof aText == "undefined" || aText == null || aText == "") return -1
+                            if (typeof bText == "undefined" || bText == null || bText == "") return 1
+                            return parseFloat(aText) - parseFloat(bText);
+                        }
+                    );
+                    for (section in sections_order_by_order) {
+
+                        if (sections_order_by_order[section].parts.length > 0) {
+                            tree_html +='<span tree_book_sign="treeBookSign" tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body" style="white-space: nowrap; display: inline-block;width: '+hisTableWid+'px;overflow: hidden;text-overflow: ellipsis;">'+ '<img src="{% static "assets/img/none.png" %}" class="tree_img" did=' + '"' + sections_order_by_order[section].id + '"' + '/>&nbsp;&nbsp;' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
+                           /* tree_html += '<div class="tree2" id=' + '"' + sections_order_by_order[section].id + '"' + ' style="clear: both">'
+                            for (part in sections_order_by_order[section].parts) {
+                                tree_html += '<img src="{% static "assets/img/none.png" %}" class="tree_img_none"/><span tree_body_id=' + '"' + sections_order_by_order[section].parts[part].section + '"' + ' class="tree_body">' + sections_order_by_order[section].parts[part]['chinese_name'] + '</span><br>'
+                            }
+                            tree_html += '</div>'*/
+                        } else {
+                            tree_html += '<span tree_book_sign="treeBookSign" tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body" style="white-space: nowrap; display: inline-block;width: '+hisTableWid+'px;overflow: hidden;text-overflow: ellipsis;"><img src="{% static "assets/img/none.png" %}" class="tree_img_none"  />&nbsp;&nbsp;' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
+                        }
+                    }
+                    tree_html += '</div>'
+                }
+                // console.log(tree_html)
+                $("#book-tree").html(tree_html);
+                $(".book-li").html('当前课本：' +subjectList[book_data.subject] + book_data.chinese_name)
+
+                $('#bookTreeBox').css('font-size',15)
+
+            }
+        });
+    });
+    //页面大小改变事件
+    $(window).resize(function(){
+        var divWidth = document.getElementById("bookTreeBox").clientWidth;
+        $('span[tree_book_sign="treeBookSign"]').width(divWidth - 60);
+        $('span[tree_book_sign="treeBookSection"]').width(divWidth - 45);
+
+    });
+//点击树的图片进行展开
+    $(document).on('click', '.tree_img', function () {
+        var d1 = $(this).attr("did")
+        if (document.getElementById(d1).style.display == 'none') {
+            document.getElementById(d1).style.display = 'block'; //触动的层如果处于隐藏状态，即显示
+            $(this).attr('src', "{% static "assets/img/down.png" %}")
+        } else {
+            document.getElementById(d1).style.display = 'none'; //触动的层如果处于显示状态，即隐藏
+            $(this).attr('src', "{% static "assets/img/add.png" %}")
+        }
+        $(".nav_right").addClass('hide');
+        $(".sub").addClass('hide');
+
+    });
+    //鼠标悬于书名上方
+    $('.containor').on('mouseenter', function () {
+        $(".nav_right").removeClass('hide');
+    }).on('mouseleave', function () {
+        $(".nav_right").addClass('hide');
+        $(".sub").addClass('hide');
+    }).on('mouseenter', '.book-li', function (e) {
+        $.get("{% url 'ajax-get-all-textbooks' %}", function (data, status) {
+            if (status == "success") {
+            		$.get("{% url 'ajax-subjects' %}", function (data1, status) {
+            				if (status == "success") {
+            						var subject = JSON.parse(data1);
+            						var subjects={}
+            						for (index in subject){
+            								subjects[subject[index][0]]=subject[index][1]
+            						}
+				                var books = JSON.parse(data)
+                                // console.info(books)
+                                var booksOnSubjectList = {}
+                                for(var item in books){
+                                    if(!booksOnSubjectList[books[item].subject]){
+                                        booksOnSubjectList[books[item].subject] = [];
+                                    }
+                                    booksOnSubjectList[books[item].subject].push(books[item]);
+                                }
+
+                                for(var key in booksOnSubjectList){
+                                    // console.info(booksOnSubjectList[key])
+                                    booksOnSubjectList[key] = booksOnSubjectList[key].sort(function (last,next) {
+                                        // return last.name.toString() > next.name.toString()
+                                        return last.order > next.order
+                                    })
+                                }
+                                // console.info(booksOnSubjectList)
+                                //暂时不显示化学教材
+                                delete(booksOnSubjectList[8])
+
+                                var htmlString = "";
+                                for(var key in booksOnSubjectList){
+                                    htmlString += '<dl>\n' +
+                                        '                        <dt><a>'+subjects[key]+ '<i> &gt;</i></a></dt>\n' +
+                                        '                        <dd id="book">\n'
+                                    for(var index in booksOnSubjectList[key] ){
+                                        htmlString +=  '<a class="book-name" book_id=' + '"' + booksOnSubjectList[key][index]["id"] + '"' + ' subject=' + '"' + booksOnSubjectList[key][index]['subject'] + '"' +'>' + booksOnSubjectList[key][index]['name'] + '</a>'
+                                    }
+                                    htmlString += "</dd></dl>"
+                                }
+
+
+                                subjectList = subjects
+				                $("#bookDiv").html(htmlString)
+				                var li_data = $(this).attr('data-id');
+				                //2取不到
+				                li_data = '2'
+				                $(".sub").addClass('hide');
+				                $('.sub[data-id="' + li_data + '"]').removeClass('hide');
+		              	}
+              })
+            }
+        })
+    });
+
+    //选择题目的点击事件
+    var checkQuestionFunction = function (questionId) {
+        //判断是否已选
+        var flag = false;
+        for (var i = 0; i < checkQuestionList.length; i++) {
+            if (checkQuestionList[i].id == questionId) {
+                flag = true;
+            }
+        }
+        if (flag) {
+            alert("该题已选");
+            return;
+        }
+        //加该题
+        var questionBody = $("div[question-id=" + questionId + "] .question-body").html();
+        var subject = nowSubject.split('、')[1];
+        var item = {'body': questionBody, 'subject': subject, 'id': questionId,'score':0};
+        checkQuestionList.push(item);
+        var questionNumber = document.getElementById("questionNumber");
+        questionNumber.innerText = checkQuestionList.length + "";
+    };
+
+
+    //展示选中题目
+    $('.infoWin').on('click', function () {
+        var html = '';
+        for (var i in checkQuestionList) {
+            html += '<tr>\n' +
+                '<td>' + (parseInt(i) + 1)+ '</td>\n' +
+                '<td>' + checkQuestionList[i].body + '</td>\n' +
+                '<td>' + checkQuestionList[i].subject + '</td>\n' +
+                '<td><input type="number" class="form-control score_input" disabled placeholder="'+ checkQuestionList[i].score +'"  onblur="inputValue('+checkQuestionList[i].id +',this)" ></td>\n' +
+                '<td><a href="#" onclick="deleteCheckQuestion(' + checkQuestionList[i].id + ')">删除</a></td>\n' +
+                '</tr>';
+        }
+        $(".tbodyHtml").html(html);
+        // MathJax.Hub.Typeset();
+
+
+        if(isScore){
+            $(".score_input").each(function () {
+                $(this).removeAttr('disabled');
+            })
+            $(this).html('选题篮');
+        }
+    });
+    //删除题目
+    var deleteCheckQuestion = function (questionId) {
+        for (var i = 0; i < checkQuestionList.length; i++) {
+            if (checkQuestionList[i].id == questionId) {
+                checkQuestionList.splice(i, 1);
+                var questionNumber = document.getElementById("questionNumber");
+                questionNumber.innerText = checkQuestionList.length + "";
+                var html = '';
+                for (var i in checkQuestionList) {
+                    html += '<tr>\n' +
+                        '<td>' + (parseInt(i) + 1) + '</td>\n' +
+                        '<td>' + checkQuestionList[i].body + '</td>\n' +
+                        '<td>' + checkQuestionList[i].subject + '</td>\n' +
+                        '<td><input type="number" class="form-control score_input"  disabled  placeholder="'+ checkQuestionList[i].score +'"  onblur="inputValue('+ checkQuestionList[i].id +',this)"></td>\n' +
+                        '<td><a href="#" onclick="deleteCheckQuestion(' + checkQuestionList[i].id + ')">删除</a></td>\n' +
+                        '</tr>';
+                }
+                $(".tbodyHtml").html(html);
+
+                // setTimeout(MathJax.Hub.Typeset(),3000);
+                if(isScore){
+                    $(".score_input").each(function () {
+                        $(this).removeAttr('disabled');
+                    })
+                    $(this).html('关闭计分');
+                }
+                return;
+            }
+        }
+        alert("删除失败");
+    };
+    //是否计分
+    $('#marking-btn').on('click',function () {
+        isScore = !isScore;
+    })
+    //注入计分
+    var inputValue = function(questionId,that){
+        var value = that.value;
+        for(var i = 0; i < checkQuestionList.length; i++) {
+            if(checkQuestionList[i].id == questionId){
+                //默认为0
+                if(!value){
+                    value = 0;
+                }
+                checkQuestionList[i].score = value;
+            }
+        }
+    }
+    //提交试卷
+    var getQuizInformation = function () {
+        //获取卷子信息
+        var body = {};
+        for(var i in checkQuestionList){
+            var arryBody = [];
+            arryBody.push(checkQuestionList[i].id+"");
+            arryBody.push(parseInt(checkQuestionList[i].score));
+            body[parseInt(i) + 1] = arryBody;
+        }
+        //获取输入信息
+        var title = $("#questionInput").val();
+        var type = $("#questionSelect").val();
+
+        //判断数据是否为空
+        if(!title){
+            func("试卷标题不能为空！","#fef0f0","#f56c6c");//#f56c6c
+            return ;
+        }
+        var keys = Object.keys(body);
+        if(keys.length < 1){
+            func("试卷选题不能为空！","#fef0f0","#f56c6c");//#f56c6c
+            return ;
+        }
+        if(keys.length < 5 && type == 'full'){
+            func("随堂测试题目不能少于5题！","#fef0f0","#f56c6c");//#f56c6c
+            return ;
+        }
+
+
+        var data = {
+            info:JSON.stringify({"title":title,"question_num":keys.length}),
+            body:JSON.stringify(body),
+            generator_id:1,
+            subject:subject,
+            marking:isScore,
+            public:false,
+            quiz_type:type,
+        };
+        return data;
+
+    };
+    $("#submit-quiz").on("click",function () {
+        var data = getQuizInformation();
+        if(!data){
+            return
+        }
+        $.ajax({
+            method: "POST",
+            url: "{% url 'compose-quiz' %}",
+            data: data,
+            success:function (data,status) {
+                data=JSON.parse(data)
+                //console.log(data)
+                if(data.status == 'OK'){
+                    func("提交成功！",'#f0f9eb','#89c26b');//#89c26b
+                    quiz_id=data.quiz_id
+                    $.post("{{TEMPLATES_IP}}/templates/classQuiz/pdf",{"id":data.quiz_id,'school':school},function(data,status){
+                        $.post("{{TEMPLATES_IP}}/templates/classQuiz/html",{"id":quiz_id},function(data,status){
+
+                        });
+                    });
+                    var htmlString = '<p style="text-indent:35px;line-height:30px">该试卷已经保存成功，如需查看具体详情，请前往<a href="{{TEMPLATES_IP}}/abc/teacher/my-quizes/">我的试卷>>>></a></p>';
+                    $('#myModal').modal('hide');//完后隐藏模态框
+                    $.setInformation.Confirm("试卷保存",htmlString)
+                }else{
+                    func("提交失败！","#fef0f0","#f56c6c");//#f56c6c
+                }
+            }
+        })
+    });
+    $("#publish").on("click",function () {
+        var data = getQuizInformation();
+        if(!data){
+            return
+        }
+        var classId = $("#classInput").attr("name");
+        //判断班级是否为空
+        if(!classId){
+            func("班级不能为空！","#fef0f0","#f56c6c");//#f56c6c
+            return ;
+        }
+        data['cls_id'] = classId;
+        $.ajax({
+            method: "POST",
+            url: "{% url "ajax-save-quiz-and-publish" %}",
+            data: data,
+            success:function (data,status) {
+                var htmlString = '';
+                var title = '';
+                switch (data) {
+                    case"quiz body not found":{
+                        title = '保存试卷失败';
+                        htmlString = '<span style="color: red">试卷题目不能为空！</span>'
+                        $.setInformation.Confirm(title,htmlString)
+                    } break;
+                    case"class not having": {
+                        title = '保存试卷失败';
+                        htmlString = '<span style="color: red">班级不存在！</span>'
+                        $.setInformation.Confirm(title,htmlString)
+                    } break;
+                    case"user not having this class": {
+                        title = '发布试卷失败';
+                        htmlString = '<span style="color: red">没有权限为该班发布考试！</span>'
+                        $.setInformation.Confirm(title,htmlString)
+                    } break;
+                    case"subject not found": {
+                        title = '保存试卷失败';
+                        htmlString = '<span style="color: red">学科不存在！</span>'
+                        $.setInformation.Confirm(title,htmlString)
+                    } break;
+                    case"class subject is not quiz subject": {
+                        title = '发布试卷失败';
+                        htmlString = '<span style="color: red">试卷科目与该班科目不一致！</span>'
+                        $.setInformation.Confirm(title,htmlString)
+                    } break;
+                    case"cannot create quiz": {
+                        title = '保存试卷失败';
+                        htmlString = '<span style="color: red">试卷创建失败！</span>'
+                        $.setInformation.Confirm(title,htmlString)
+                    } break;
+                    case"save failed": {
+                        title = '发布试卷失败';
+                        htmlString = '<span style="color: red">发布试卷失败！</span>'
+                        $.setInformation.Confirm(title,htmlString)
+                    } break;
+                    default:{
+                        title = "测试详情";
+                        data=JSON.parse(data);
+                        $.SendQuiz.Confirm(title,data,function () {
+                            var quiz_id=data.quiz_id
+                            $.post("{{TEMPLATES_IP}}/templates/classQuiz/pdf",{"id":quiz_id,'school':school},function(data,status){
+                                var pdf = new RegExp('.pdf')
+                                if(pdf.test(data)){
+                                    //window.open("{{TEMPLATES_IP}}/templates-static/templates/pdf/"+data);
+                                    $(location).attr('href', '{{TEMPLATES_IP}}/templates-static/templates/pdf/' + data);
+                                }else{
+                                    alert("生成pdf失败！")
+                                }
+                            });
+                        },function () {
+                            window.location.href="{{TEMPLATES_IP}}/abc/teacher/my-quizes/";
+                        })
+                    }
+                }
+            }
+        });
+    });
+
+
+    //消息提醒
+    var layer=document.createElement("div");
+    layer.id="layer";
+    function func(title,color,font_color)
+    {
+        var style=
+            {
+                background:"#D7ECF1",
+                position:"absolute",
+                zIndex:10,
+                width:"380px",
+                height:"48px",
+                left:"50%",
+                top:"20px",
+                textAlign:"center",
+                paddingTop:"17px",
+                paddingBottom:"17px"
+            };
+        var _width=(document.documentElement.clientWidth-380)/2
+        style["left"]=_width+"px"
+        style["background"]=color;
+        for(var i in style){
+            layer.style[i]=style[i];
+        }
+        layer.innerHTML="<div style='color:"+font_color+";font-size: 14px'><b>"+title+"</b></div>"
+        if(document.getElementById("layer")==null)
+        {
+            // document.body.appendChild(layer);
+            // setTimeout("document.body.removeChild(layer)",2000)
+            document.getElementById("myModal").appendChild(layer);
+            setTimeout('document.getElementById("myModal").removeChild(layer)',2000);
+        }
+    }
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+        var quiz_info = {'title': ''};
+        var quiz_body = {};
+        var quiz_subject = '';
+        var total_score = 0;
+
+        var quiz_marking = false;
+
+        var nodes_arr = '';
+        var subject = '';
+
+        var order_counter = 0;
+
+        $("#nodeSearchBar").focus(function () {
+            $(this).next().css("display", "block");
+        })
+
+
+        $("#nodeSearchBar").blur(function () {
+            var t = $(this);
+            setTimeout(function () {
+                t.next().css("display", "none");
+            }, 750);
+
+        })
+
+        $("#subjectSearchBar").focus(function () {
+            $(this).next().css("display", "block");
+        })
+
+
+        $("#subjectSearchBar").blur(function () {
+            var t = $(this);
+            setTimeout(function () {
+                t.next().css("display", "none");
+            }, 750);
+
+        })
+
+
+        //启用计分
+        $("#marking-btn").click(function () {
+            if (quiz_marking) {
+                quiz_marking = false;
+                $(".score_input").each(function () {
+                    $(this).attr('disabled', 'disabled');
+                })
+                $(this).html('启用计分');
+            } else {
+                quiz_marking = true;
+                $(".score_input").each(function () {
+                    $(this).removeAttr('disabled');
+                })
+                $(this).html('关闭计分');
+
+            }
+        })
+
+        //搜索框
+        $(".node_table").on("click", ".node_item", function () {
+            // console.log($(this).parent().parent().attr('id'));
+            $(this).parent().parent().parent().prev().val($(this).find('td').html());
+
+
+            var parent_id = $(this).parent().parent().attr('id');
+            //subjects
+            if (parent_id == "subject_table") {
+                subject = $(this).attr("id");
+                // console.log(subject);
+            }
+            //knowledge node
+            else {
+                nodes_arr = $(this).attr("id");
+            }
+
+        })
+
+
+        var old_val = "";
+
+        $(".score_input").on("change", function () {
+
+
+            total_score = 0;
+
+            $(".score_input").each(function () {
+                if ($(this).val() == '') {
+                    $(this).val(0);
+                } else if ($(this).val() < 0) {
+                    $(this).val(0);
+                }
+
+                total_score += parseInt($(this).val());
+            })
+            $("#total_score").html(total_score);
+
+        })
+
+        $(".score_input").on("click", function () {
+            $(this).val('');
+        })
+
+        $("#nodeSearchBar").on("change input", function () {
+            var node_input = $(this);
+            var val = $(this).val();
+
+            if (val == old_val)
+                return;
+
+            setTimeout(function () {
+                if (node_input.val() == val) {
+                    old_val = val;
+
+                    $.ajax({
+                        method: "GET",
+                        url: "{% url "ajax-nodes" %}",
+                        data: {text: old_val}
+                    })
+                        .done(function (msg) {
+                            var l = JSON.parse(msg);
+                            s = "";
+                            //console.log(l);
+                            for (i in l) {
+                                var s = s + '<tr class="node_item" id="' + l[i][0] + '"><td>' + l[i][1] + '</td></tr>';
+                            }
+
+                            node_input.next().find("tbody").html(s);
+
+                        });
+
+
+                }
+
+            }, 750);
+        })
+
+        $("#subjectSearchBar").on("click", function () {
+            var t = $(this).next();
+
+            setTimeout(function () {
+
+                $.ajax({
+                    method: "GET",
+                    url: "{% url "ajax-subjects" %}",
+
+                })
+                    .done(function (msg) {
+                        var l = JSON.parse(msg);
+                        s = "";
+                        //console.log(l);
+                        for (i in l) {
+                            var s = s + '<tr class="node_item" id="' + l[i][0] + '"><td>' + l[i][1] + '</td></tr>';
+                        }
+
+                        //console.log($(this).next().find("tbody").html());
+                        t.find("tbody").html(s);
+
+                    });
+
+
+            }, 750);
+        })
+
+//regex settings
+        String.prototype.format = function () {
+            if (arguments.length == 0) return this;
+            var param = arguments[0];
+            var s = this;
+            if (typeof (param) == 'object') {
+                for (var key in param)
+                    s = s.replace(new RegExp("\\{" + key + "\\}", "g"), param[key]);
+                return s;
+            } else {
+                for (var i = 0; i < arguments.length; i++)
+                    s = s.replace(new RegExp("\\{" + i + "\\}", "g"), arguments[i]);
+                return s;
+            }
+        }
+
+        function append_question(dic) {
+
+
+            s = '<div class="col-lg-6">\
+            <div class="card mb-4">\
+              <div class="card-header">\
+                        <button class="btn btn-primary select-btn" type="button">选择题目</button>  {question_id}\
+                        <a href="/abc/quiz/upload-question/?question_id={question_id}" id="edit-{question_id}" type="button">编辑题目</a>  \
+              </div>\
+                <div class="card-body">\
+                  <p class="question-body">（单选题）{question_body}</p>\
+                  <p>A. {optionA} </p>\
+                  <p>B. {optionB}</p>\
+                  <p>C. {optionC}</p>\
+                  <p>D. {optionD}</p>\
+                  <p>{analysis}</p>\
+                </div>'
+
+
+            if (dic['img_url']) {
+                s += 'image: <img src="' + dic['img_url'] + '" style="width: 150px; height: 150px;">';
+            }
+            if (dic['optionAimg']) {
+                s += 'option A image: <img src="' + dic['optionAimg'] + '" style="width: 150px; height: 150px;">';
+            }
+            if (dic['optionBimg']) {
+                s += 'option B image: <img src="' + dic['optionBimg'] + '" style="width: 150px; height: 150px;">';
+            }
+            if (dic['optionCimg']) {
+                s += 'option C image: <img src="' + dic['optionCimg'] + '" style="width: 150px; height: 150px;">';
+            }
+            if (dic['optionDimg']) {
+                s += 'option D image: <img src="' + dic['optionDimg'] + '" style="width: 150px; height: 150px;">';
+            }
+
+            s += '</div></div>';
+            $("#question-container").append(s.format(dic));
+
+            MathJax.Hub.Typeset();
+        }
+
+
+        var questions_tbody = $("#selected_questions").find("tbody");
+
+
+        function append_selected_question(dic) {
+            var tr_id = 'question_' + order_counter;
+            s = '<tr id={tr_id}>\
+                  <td>{order}</td>\
+                  <td>{body}</td>\
+                  <td>{nodes}</td>\
+                  <td><input type="number" class="form-control score_input" placeholder="分值" disabled></td>\
+                  <td><a href="#">删除</a></td>\
+                </tr>';
+            d = {};
+            d['tr_id'] = tr_id;
+            d['order'] = order_counter;
+
+            questions_tbody.append(s.format)
+
+        }
+
+
+        //搜索自己的题目
+        $("#search-own-btn").click(function () {
+            $.ajax({
+                method: "GET",
+                url: "{% url "ajax-get-own-questions" %}",
+                data: {node_id: nodes_arr}
+            })
+                .done(function (msg) {
+                    var l = JSON.parse(msg);
+                    s = "";
+                    var counter = 0;
+
+                    // console.log(l);
+                    $('#question-container').html('');
+                    //for(question_id in l){
+                    for (i = 0; i < l.length; i++) {
+                        question_dic = l[i]
+                        question_id = question_dic[0]
+
+                        question = question_dic[1];
+
+                        dic = {};
+                        dic['question_id'] = question_id;
+                        dic['question_body'] = question['body'];
+
+                        if (question['analysis'])
+                            dic['analysis'] = question['analysis'];
+                        else
+                            dic['analysis'] = "无解析";
+
+                        if (question['img_url']) {
+                            dic['img_url'] = question['img_url']
+                        }
+                        for (key in question['options']) {
+                            dic['option' + key] = question['options'][key]['body'];
+                            if (question['options'][key]['img_url']) {
+                                dic['option' + key + 'img'] = question['options'][key]['img_url'];
+                            }
+                        }
+                        dic['nodes'] = nodes_arr;
+                        append_question(dic);
+                        counter++;
+                    }
+
+                    $("#question_counter").find("span").html(counter);
+                    $("#question_counter").css("display", "block");
+                });
+
+        })
+
+        //搜索题目
+        $("#search-btn").click(function () {
+            $.ajax({
+                method: "GET",
+                url: "{% url "ajax-get-questions" %}",
+                data: {node_id: nodes_arr, subject: subject}
+            })
+                .done(function (msg) {
+                    // console.log(msg);
+                    var l = JSON.parse(msg);
+                    s = "";
+                    //console.log(l);
+
+                    // console.log(l);
+                    $('#question-container').html('');
+                    for (question_id in l) {
+                        question = l[question_id];
+
+                        dic = {};
+                        dic['question_id'] = question['question_id'];
+                        dic['question_body'] = question['body'];
+
+                        if (question['analysis'])
+                            dic['analysis'] = question['analysis'];
+                        else
+                            dic['analysis'] = "无解析";
+                        if (question['img_url']) {
+                            dic['img_url'] = question['img_url']
+                        }
+                        for (key in question['options']) {
+                            dic['option' + key] = question['options'][key]['body'];
+                        }
+                        dic['nodes'] = nodes_arr;
+                        append_question(dic);
+                    }
+                });
+
+        })
+
+
+    })
+
+
+</script>
+{% endblock %}

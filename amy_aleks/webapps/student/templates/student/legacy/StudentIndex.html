@@ -1,0 +1,225 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>查看题库</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<!-- VENDOR CSS -->
+	<link rel="stylesheet" href="{% static "assets/vendor/bootstrap/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "assets/vendor/font-awesome/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "assets/vendor/linearicons/style.css" %}">
+	<link rel="stylesheet" href="{% static "assets/vendor/chartist/css/chartist-custom.css" %}">
+	<!-- MAIN CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/main.css" %}">
+	<link rel="stylesheet" href="{% static "assets/css/iconfont.css" %}">
+	<!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
+	<!-- <link rel="stylesheet" href="assets/css/demo.css"> -->
+</head>
+
+<body>
+	<!-- WRAPPER -->
+	<div id="wrapper">
+		<!-- NAVBAR -->
+		<nav class="navbar navbar-default navbar-fixed-top">
+			<!-- <div class="brand">
+				<a href="index.html"><img src="assets/img/logo-dark.png" alt="Klorofil Logo" class="img-responsive logo"></a>
+			</div> -->
+			<div class="container-fluid">
+				<div class="navbar-btn">
+					<button type="button" class="btn-toggle-fullwidth"><i class="lnr lnr-arrow-left-circle"></i></button>
+				</div>
+				<form class="navbar-form navbar-left">
+					<div class="input-group">
+						<input type="text" value="" class="form-control" placeholder="查找...">
+						<span class="input-group-btn"><button type="button" class="btn btn-primary">Go</button></span>
+					</div>
+				</form>
+				<div id="navbar-menu">
+					<ul class="nav navbar-nav navbar-right">
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>{{ request.session.username }}</span> <i class="icon-submenu lnr lnr-chevron-down"></i></a>
+							<ul class="dropdown-menu">
+								<li><a href="/student/index/"><i class="lnr lnr-user"></i> <span>个人主页</span></a></li>
+								<li><a href="#"><i class="lnr lnr-envelope"></i> <span>Message</span></a></li>
+								<li><a href="#"><i class="lnr lnr-cog"></i> <span>Settings</span></a></li>
+								<li><a href="#"><i class="lnr lnr-exit"></i> <span>Logout</span></a></li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+		<!-- END NAVBAR -->
+		<!-- LEFT SIDEBAR -->
+		<div id="sidebar-nav" class="sidebar">
+			<div class="sidebar-scroll">
+				<nav>
+                    <ul class="nav"><li><a href="/student/index/" class="active"><i class="lnr lnr-home"></i> <span>主页</span></a></li>
+						<li><a href="/student/get_assessment/" class=""><i class="iconfont icon-chakan"></i> <span>查看评估</span></a></li>
+						<li><a href="/student/get_practice_session_record/" class=""><i class="iconfont icon-5"></i> <span>做题记录</span></a></li>
+						<li>
+							<a href="#subPages2" data-toggle="collapse" class="collapsed"><i class="lnr lnr-file-empty"></i> <span>练习</span> <i class="icon-submenu lnr lnr-chevron-left"></i></a>
+							<div id="subPages2" class="collapse ">
+								<ul class="nav">
+									<li><a href="/student/practice/" class=""><i class="iconfont icon-zhangjielianxi"></i> <span>开始练习</span></a></li>
+									<li><a href="/student/get_knowledge_graph/" class=""><i class="iconfont icon-banshou_Line"></i> <span>题目解析</span></a></li>
+								</ul>
+							</div>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+		<!-- END LEFT SIDEBAR -->
+		<!-- MAIN -->
+		<div class="main">
+			<!-- MAIN CONTENT -->
+			<div class="main-content">
+				<div class="container-fluid">
+					<div class="panel panel-profile">
+						<div class="clearfix">
+							<!-- LEFT COLUMN -->
+							<div class="profile-left">
+								<!-- PROFILE HEADER -->
+								<div class="profile-header">
+									<div class="overlay"></div>
+									<div class="profile-main">
+										<br>
+										<br>
+										<h3 class="name">{{ request.session.username }}</h3>
+										<br>
+										<span class="">已激活</span>
+										<br>
+										<br>
+										<br>
+									</div>
+								</div>
+								<!-- END PROFILE HEADER -->
+								<!-- PROFILE DETAIL -->
+								<div class="profile-detail">
+									<div class="profile-info">
+										<h4 class="heading">基本信息</h4>
+										<ul class="list-unstyled list-justify">
+											<li>生日： <span>24 Aug, 2016</span></li>
+											<li>联系号码： <span>+86 12345678910</span></li>
+											<li>学校： <span>ABCD</span></li>
+											<li>年级： <span>Three</span></li>
+											<li>班级： <span>Two</span></li>
+										</ul>
+									</div>
+									<div class="text-center"><a href="#" class="btn btn-primary">更改信息</a></div>
+								</div>
+								<!-- END PROFILE DETAIL -->
+							</div>
+							<!-- END LEFT COLUMN -->
+							<!-- RIGHT COLUMN -->
+							<div class="profile-right">
+								<h4 class="heading">{{ request.session.username }} 的最近做题记录</h4>
+								<div class="awards">
+									<div class="row">
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>学科</span>
+											</div>
+										</div>
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>做题时间</span>
+											</div>
+										</div>
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>得分</span>
+											</div>
+										</div>
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>用时</span>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>数学</span>
+											</div>
+										</div>
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>2019-1-20</span>
+											</div>
+										</div>
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>85</span>
+											</div>
+										</div>
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>30分钟</span>
+											</div>
+										</div>
+									</div>
+									<div class="text-center"><a href="/student/get_practice_session_record/" class="btn btn-default">查看所有做题记录</a></div>
+								</div>
+								<h4 class="heading">教师评估</h4>
+								<div class="awards">
+									<div class="row">
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>老师</span>
+											</div>
+										</div>
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>学科</span>
+											</div>
+										</div>
+										<div class="col-md-6 col-sm-6">
+											<div class="award-item">
+												<span>评估内容</span>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>A老师</span>
+											</div>
+										</div>
+										<div class="col-md-3 col-sm-3">
+											<div class="award-item">
+												<span>数学</span>
+											</div>
+										</div>
+										<div class="col-md-6 col-sm-6">
+											<div class="award-item">
+												<span>....................</span>
+											</div>
+										</div>
+									</div>
+									<div class="text-center"><a href="/student/get_assessment/" class="btn btn-default">查看所有评估</a></div>
+								</div>
+							</div>
+							<!-- END RIGHT COLUMN -->
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- END MAIN CONTENT -->
+		</div>
+		<!-- END MAIN -->
+		<div class="clearfix"></div>
+	</div>
+	<!-- END WRAPPER -->
+	<!-- Javascript -->
+	<script src="{% static "assets/vendor/jquery/jquery.min.js" %}"></script>
+	<script src="{% static "assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js" %}"></script>
+	<script src="{% static "assets/vendor/bootstrap/js/bootstrap.min.js" %}"></script>
+	<script src="{% static "assets/scripts/klorofil-common.js" %}"></script>
+</body>
+
+</html>

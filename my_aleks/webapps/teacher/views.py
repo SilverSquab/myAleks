@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from webapps.school.models import Cls
 from webapps.quiz.models import Quiz
+from webapps.parent.models import ParentProfile
 from webapps.quiz.models import QuizRecord
 from webapps.quiz.models import QuizRecordPaper
 from django.views.decorators.csrf import csrf_exempt
@@ -25,7 +26,7 @@ def index(request):
         class_id = request.GET.get('classId', '')
         student_id = request.GET.get('studentId', '')
         try:
-            classes = user.teacherprofile.classes
+            classes = user.teacherprofile.classes.filter(deleted=False)
             class_dics = list(classes.values('id', 'name'))
         except:
             class_dics=[]
@@ -39,8 +40,13 @@ def index(request):
                 student=StudentProfile.objects.get(pk=student_id)
             except:
                 return render(request,'teacher/errorPage.html',{"errorType":"参数错误","particulars":"fault:student not exists"})
+            parentList = ParentProfile.objects.filter(student=student)
+            studentProfile = {"profile":student,"parentList":parentList}
+            #print("---------------------")
+            #print(student)
+            #print(parentList)
             try:
-                cls = Cls.objects.get(pk=class_id)
+                cls = Cls.objects.get(pk=class_id,deleted=False)
             except:
                 return render(request,'teacher/errorPage.html',{"errorType":"参数错误","particulars":"fault:class not exists"})
             try:
@@ -51,29 +57,34 @@ def index(request):
                 student_quiz_record_dics =[]
                 #return render(request,'teacher/errorPage.html',{"errorType":"用户数据不全","particulars":"fault:student_quiz_record_paper not exists"})
             LearningInformation = {
-                'weaknessList': [
-                    {'knowledgeName': '一元二次方程', 'ration': 20},
-                    {'knowledgeName': '置换反应', 'ration': 30},
-                    {'knowledgeName': '牛顿第一定律', 'ration': 40},
-                    {'knowledgeName': '细胞有丝分裂', 'ration': 50},
-                    {'knowledgeName': '阅读理解', 'ration': 60}
-                ],
                 'reportList': student_quiz_record_dics,
             }
+            #print(studentProfile)
             return render(request, 'teacher/index.html',
-                          {'LearningInformation': LearningInformation, 'classes': class_dics,'base_template':base_template})
+                          {'LearningInformation': LearningInformation, 'classes': class_dics,'base_template':base_template,'studentProfile':studentProfile})
         if class_id :
             try:
-                cls = Cls.objects.get(pk=class_id)
+                cls = Cls.objects.get(pk=class_id,deleted=False)
             except:
                 return render(request,'teacher/errorPage.html',{"errorType":"参数错误","particulars":"fault:class not exists"})
             if user!=cls.teacher.user:
                 return render(request,'teacher/errorPage.html',{"errorType":"权限不足","particulars":"fault:user is not this class's teacher"})
             students = json.loads(cls.students)
             try:
-                student_profiles = StudentProfile.objects.filter(pk__in=students)
+                student_profiles = StudentProfile.objects.filter(student_no__in=students)
             except:
                 return render(request,'teacher/errorPage.html',{"errorType":"用户数据紊乱","particulars":"fault:student_profile not exists"})
+
+            students_list = []
+            for student_profile in student_profiles:
+                try:
+                    student_quiz_record = StudentQuizRecord.objects.get(student=student_profile,quiz_record__cls=cls)
+                    is_join = True
+                except:
+                    is_join = False
+                students_list.append({"student_no" : student_profile.student_no, "name" : student_profile.name, "id" : student_profile.pk,"is_join" : is_join})
+
+
             try:
                 quizrecord = list(QuizRecord.objects.filter(cls=cls).order_by('-datetime').values('info'))
             except:
@@ -81,33 +92,26 @@ def index(request):
                 pass
             try:
                 info = json.loads(quizrecord[0]['info'])
+                if info['average_score'] <= 1:
+                    info['average_score'] = int(info['average_score'] * 100)
+                if info['lowest_score'] < 1:
+                    info['lowest_score'] = int(info['lowest_score'] * 100)
+                if info['highest_score'] <= 1:
+                    info['highest_score'] = int(info['highest_score'] * 100)
                 # print (json.loads(student_profiles))
                 LearningInformation = {
                     'performance': {
-                        'averageScore': info['averageScore'],
-                        'lowestScore': info['lowestScore'],
-                        'topScore': info['topScore'],
+                        'averageScore': info['average_score'],
+                        'lowestScore': info['lowest_score'],
+                        'topScore': info['highest_score'],
                     },
-                    'weaknessList': [
-                        {'knowledgeName': '牛顿第二定理', 'ration': 20},
-                        {'knowledgeName': '加速度计算', 'ration': 30},
-                        {'knowledgeName': '自由落体定理', 'ration': 40},
-                        {'knowledgeName': '合力与分力', 'ration': 50},
-                        {'knowledgeName': '光的折射', 'ration': 60}
-                    ],
-                    'studentList': student_profiles
+                    'studentList': students_list
                 }
             except:
                  LearningInformation = {
-                    'weaknessList': [
-                        {'knowledgeName': '牛顿第二定理', 'ration': 20},
-                        {'knowledgeName': '加速度计算', 'ration': 30},
-                        {'knowledgeName': '自由落体定理', 'ration': 40},
-                        {'knowledgeName': '合力与分力', 'ration': 50},
-                        {'knowledgeName': '光的折射', 'ration': 60}
-                    ],
-                    'studentList': student_profiles
+                    'studentList': students_list
                 }                
+        
             return render(request, 'teacher/index.html', {'LearningInformation': LearningInformation,'classes':class_dics,'base_template':'teacher/teacher_base.html'})
         return render(request, 'teacher/index.html', {'classes':class_dics,'base_template':'teacher/teacher_base.html'})
     return render(request, 'teacher/index.html',{'base_template':'teacher/teacher_base.html'})
@@ -179,7 +183,7 @@ def ajax_get_class_report_by_class_id(request):
     page = dic["page"]
     size = dic["size"]
     try:
-        cls = Cls.objects.get(pk=class_id)
+        cls = Cls.objects.get(pk=class_id,deleted=False)
     except:
         return HttpResponse('class not existed')
     quiz_records=cls.quizrecord_set.all()
@@ -209,20 +213,25 @@ def ajax_get_scores_student(request):
     class_id = dic["classId"]
     student_id = dic["studentId"]
     try:
-        cls = Cls.objects.get(pk=class_id)
+        cls = Cls.objects.get(pk=class_id,deleted=False)
     except:
         return HttpResponse('class not existed')
     quiz_records=cls.quizrecord_set.all()
     student=StudentProfile.objects.get(pk=student_id)
-    student_quiz_record=list(StudentQuizRecord.objects.filter(student=student.user,quiz_record__in=quiz_records).order_by("-datetime").values("datetime","score"))
+    student_quiz_record=list(StudentQuizRecord.objects.filter(student=student,quiz_record__in=quiz_records).order_by("-datetime").values("datetime","score"))
     if len(student_quiz_record)>8:
         student_quiz_record=student_quiz_record[0:8]
-    score=[]
-    time=[]
+    scores=[]
+    times=[]
     for index in student_quiz_record:
-        score.append(index['score'])
-        time.append(index['datetime'].strftime('%Y-%m-%d'))
-    return HttpResponse(json.dumps({"score":score,"time":time}))
+        if index['score'] <= 1:
+            scores.append(index['score']*100)
+        else:
+            scores.append(index['score'])
+        times.append(index['datetime'].strftime('%Y-%m-%d'))
+    scores.reverse()
+    times.reverse()
+    return HttpResponse(json.dumps({"score":scores,"time":times}))
 
 @login_required
 @csrf_exempt
@@ -230,18 +239,25 @@ def ajax_get_scores_class(request):
     dic =json.loads(request.body.decode('utf-8'))
     class_id = dic['classId']
     try:
-        cls = Cls.objects.get(pk=class_id)
+        cls = Cls.objects.get(pk=class_id,deleted=False)
     except:
         return HttpResponse('class not existed')
     quiz_record_dics=list(cls.quizrecord_set.all().order_by('-datetime').values('datetime','info'))
     if len(quiz_record_dics)>8:
         quiz_record_dics=quiz_record_dics[0:8]
-    score = []
-    time = []
+    scores = []
+    times = []
     for quiz_record in quiz_record_dics:
-        score.append(json.loads(quiz_record['info'])['averageScore'])
-        time.append(quiz_record['datetime'].strftime('%Y-%m-%d'))
-    return HttpResponse(json.dumps({"score":score,"time":time}))
+        quiz_record_info = json.loads(quiz_record['info'])
+        if 'average_score' in quiz_record_info:
+            score = quiz_record_info['average_score']
+            if score <= 1:
+                score=score*100
+            scores.append(score)
+            times.append(quiz_record['datetime'].strftime('%Y-%m-%d'))
+    scores.reverse()
+    times.reverse()
+    return HttpResponse(json.dumps({"score":scores,"time":times}))
 @login_required
 @csrf_exempt
 def ajax_update_teacher_profile(request):
@@ -274,7 +290,7 @@ def view_class(request):
     if not class_id:
         return HttpResponse('no class_id')
     try:
-        cls = Cls.objects.get(pk=class_id)
+        cls = Cls.objects.get(pk=class_id,deleted=False)
     except:
         return HttpResponse('class not existed')
 
@@ -295,12 +311,13 @@ def view_teacher_profile(request):
     try:
         teacher = user.teacherprofile
     except:
-        return HttpResponse(request,'teacher/errorPage.html',{"errorType":"数据缺失","particulars":"fault:teacher profile not existed"})
+        return render(request,'teacher/errorPage.html',{"errorType":"数据缺失","particulars":"fault:teacher profile not existed"})
         
     try:
         classes = user.teacherprofile.classes
+        classes = classes.filter(deleted=False)
     except:
-        return HttpResponse(request,'teacher/errorPage.html',{"errorType":"数据缺失","particulars":"fault:class not existed"})
+        return render(request,'teacher/errorPage.html',{"errorType":"数据缺失","particulars":"fault:class not existed"})
     try:
         subject=Subject.objects.get(name=teacher.subject_id).chinese_name
     except:
@@ -308,9 +325,13 @@ def view_teacher_profile(request):
     try:
         school = teacher.school.name
     except:
-        return HttpResponse(request,'teacher/errorPage.html',{"errorType":"数据缺失","particulars":"fault:school not existed"})
-
-    return render(request, 'teacher/teacher_profile.html', {'teacherProfile':{'teacher':teacher,'subject':subject,'classes':classes.all(),'school':school}})
+        return render(request,'teacher/errorPage.html',{"errorType":"数据缺失","particulars":"fault:school not existed"})
+    teacherFileList = TeacherFile.objects.filter(teacher=teacher)
+    #try:
+     #   teacherFileList = TeacherFile.object.filter(teacher=teacher)
+    #except:
+    #     return render(request,'teacher/errorPage.html',{"errorType":"查询错误","particulars":"fault:system error"})
+    return render(request, 'teacher/teacher_profile.html', {'teacherProfile':{'teacher':teacher,'subject':subject,'classes':classes.all(),'school':school,'teacherFiles':teacherFileList.all()}})
 
 
 
@@ -324,6 +345,7 @@ def ajax_my_classes(request):
         return HttpResponse('user is not a teacher')
     try:
         classes = user.teacherprofile.classes
+        classes = classes.filter(deleted=False)
     except:
         return HttpResponse("fault:class not existed")
     class_dicts = []
@@ -370,6 +392,27 @@ def upload_teacher_img(request):
 
         teacher_profile.img = img
         teacher_profile.save()
+        return HttpResponse('OK')
+    
+    if request.method == 'GET':
+        return HttpResponse('wrong method, should be POST')
+
+@login_required
+@csrf_exempt
+def upload_teacherfile(request):
+    if request.method == 'POST':
+        try:
+            img = request.FILES['img']
+        except:
+            return HttpResponse('failed: no image')
+        profile_id = request.POST.get('profile_id', '')
+        try:
+            teacher_profile = TeacherProfile.objects.get(pk=profile_id)
+        except:
+            return HttpResponse('failed: profile not existed')
+        description = request.POST.get('description')
+        teacherFile = TeacherFile.objects.create(teacher=teacher_profile,description=description,img=img);
+        teacherFile.save()
         return HttpResponse('OK')
     
     if request.method == 'GET':

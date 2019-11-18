@@ -16,5 +16,6 @@ urlpatterns = [
     url(r'^ajax-get-scores-class',views.ajax_get_scores_class,name='ajax-get-scores-class'),
     url(r'^ajax-update-teacher-profile',views.ajax_update_teacher_profile,name='ajax-update-teacher'), 
     url(r'^upload-teacher-img', views.upload_teacher_img, name='upload-teacher-img'),
-    url(r'^ajax-get-user-img',views.ajax_get_user_img,name='ajax-get-user-img')
+    url(r'^ajax-get-user-img',views.ajax_get_user_img,name='ajax-get-user-img'),
+    url(r'^ajax-upload-teacherfile',views.upload_teacherfile,name='ajax-upload-teacherfile')
 ]

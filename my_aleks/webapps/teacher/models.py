@@ -22,3 +22,8 @@ class TeacherProfile(models.Model):
 class Favorites(models.Model):
     teacher = models.OneToOneField(TeacherProfile, blank=False, null=False)
     questions = models.ManyToManyField('quiz.Question', blank=True, null=True)
+
+class TeacherFile(models.Model):
+    teacher = models.ForeignKey(TeacherProfile, blank=False, null=False)
+    description = models.TextField(max_length=200, blank=True, null=True)
+    img = models.ImageField(blank=True, null=True, upload_to='teacher_imgs/files')

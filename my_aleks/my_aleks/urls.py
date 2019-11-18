@@ -36,4 +36,5 @@ urlpatterns = [
     url(r'^abc/plan/',include('webapps.plan.urls'), name="plan-url"),
     url(r'^abc/user/',include('webapps.user.urls'), name="user-url"),
     url(r'^abc/textbook/',include('webapps.textbook.urls'), name="textbook-url"),
+    url(r'^abc/parent/', include('webapps.parent.urls'), name='parent-url')
 ] + static(MEDIA_URL, document_root=MEDIA_ROOT)

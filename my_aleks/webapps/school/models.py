@@ -9,6 +9,9 @@ class School(models.Model):
     location = models.TextField(max_length=100, blank=True, null=True)
     account = models.IntegerField(default=0)
     manager = models.OneToOneField(User, blank=True, null=True)
+    phone = models.CharField(max_length=12, blank=True, null=True)
+
+    img = models.ImageField(blank=True, null=True, upload_to='school_imgs')
 
 class Cls(models.Model):
     subject = models.CharField(max_length=20, blank=True, null=True)

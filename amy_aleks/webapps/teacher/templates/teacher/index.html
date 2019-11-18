@@ -1,0 +1,470 @@
+{% extends 'teacher/teacher_base.html'%}
+
+{% load staticfiles %}
+
+{% block "main_content" %}
+    <div>
+           <!-- Page Heading -->
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <h1 class="h3 mb-0 text-gray-800">学情报告</h1>
+                    <!--<a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>-->
+                </div>
+
+                
+                <!--                <div class="row">-->
+                <!--级联选择框 -->
+                {% if  base_template == 'teacher/teacher_base.html' %}
+                <div class="col-lg-12" style="padding:30px 10px;background: #eeeeee">
+                    <div class="input-group">
+                        <input type="text" style="text-align: left;" readonly="readonly" id="classInput" >
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">选择班级 <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                {% for schoolClass in classes %}
+                                <li class="classCheckLi">
+                                    <div class="dropdown-item" style="cursor:hand" name="{{schoolClass.id}}">{{schoolClass.name}}</div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div><!-- /btn-group -->
+                        <div class="btn btn-info btn-icon-split" style="margin-left: 10px" id="checkButton">
+                            <span class="text" id="query_learning" name="checkStudyState">查询学情状况</span>
+                        </div>
+                    </div>
+                    <!--<button id="testButton">查询报告</button>-->
+                </div>
+                {% endif %}
+
+
+                <!--                </div>-->
+
+                {% if LearningInformation.performance %}
+                <!-- Content Row -->
+                <div class="row">
+                    <div class="col-xl-4 col-lg-5">
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-12 col-md-6 mb-4"></div>
+                        <div class="col-xl-12 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                最近一次考试最高分
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                {{LearningInformation.performance.topScore}}
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-12 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                最近一次考试最低分
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                {{LearningInformation.performance.lowestScore}}
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Requests Card Example -->
+                        <div class="col-xl-12 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                最近一次考试平均分
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                {{LearningInformation.performance.averageScore}}
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">班级学情报告列表</h6>
+                                <div id="myTableButton">
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" width="100%" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th>报告名</th>
+                                            <th>打开</th>
+                                            <th>生成PDF文档</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody  id="myTBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Content Row -->
+
+                <div class="row">
+
+                    {% if LearningInformation.performance or LearningInformation.reportList %}
+                    <!-- Area Chart -->
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Dropdown -->
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">测试情况</h6>
+                                <div class="dropdown no-arrow">
+                                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                       <!-- <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>-->
+                                    </a>
+
+                                </div>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="card-body">
+                                <div class="chart-area">
+                                    <canvas id="myAreaChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   {% endif %}
+
+                    <!-- Pie Chart -->
+                    {% if LearningInformation.performance or LearningInformation.reportList %}
+                    <div class="col-xl-4 col-lg-5">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">弱点知识统计</h6>
+                            </div>
+                            <div class="card-body" id="weaknessListBody">
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if LearningInformation.reportList or LearningInformation.studentList %}
+                <!-- Content Row -->
+                <div class="row">
+                    <!-- Content Column -->
+                    <div class="col-lg-12">
+                        <!-- DataTales Example -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">学生学情报告列表</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                        {% if LearningInformation.reportList %}
+                                        <thead>
+                                        <tr>
+                                            <th>报告名</th>
+                                            <th>生成时间</th>
+                                            <th>打开</th>
+                                            <th>生成PDF文档</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for report in LearningInformation.reportList %}
+                                        <tr>
+                                            <td>{{report.pdf_uri|cut:".pdf"}}   </td>
+                                            <td>{{report.datetime}}</td>
+                                            <td class="tdOnReport">
+                                                <div class="btn btn-info btn-icon-split">
+                                                    <span class="text" name="{{report.pdf_uri|cut:".pdf"}}">查看报告</span>
+                                                </div>
+                                            </td>
+                                            <td class="tdOnDownload">
+                                                <div class="btn btn-info btn-icon-split">
+                                                    <span class="text" name="{{report.pdf_uri|cut:".pdf"}}">导出PDF文件</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                        {% endif %}
+                                        <!--根据对象不同展示不同数据 -->
+                                        {% if LearningInformation.studentList %}
+                                        <thead>
+                                        <tr>
+                                            <th>学生学号</th>
+                                            <th>学生姓名</th>
+                                            <th>操作</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for student in LearningInformation.studentList %}
+                                        <tr>
+                                            <td>{{student.student_no}}</td>
+                                            <td>{{student.name}}</td>
+                                            <td class="tdOnStudent">
+                                                {% if student.is_join %}
+                                                <div class="btn btn-info btn-icon-split">
+                                                    <span class="text" name="{{student.id}}">查看学情报表</span>
+                                                </div>
+                                                {% else %}
+                                                <div >
+                                                    <span >未参加</span>
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                        {% endif %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+    </div>
+{% endblock %}
+
+{% block "scripts" %}
+  <!-- Page level plugins -->
+  <script src="{% static "assets/vendor/chart.js/Chart.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/bootstrap/js/bootstrap.bundle.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/jquery-easing/jquery.easing.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/js/sb-admin-2.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/datatables/jquery.dataTables.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/datatables/dataTables.bootstrap4.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/js/demo/datatables-demo.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/teacherReport/jquerysession.js" %}" type="text/javascript"></script>
+  <script src="{% static "assets/vendor/teacherReport/statement.js" %}" type="text/javascript"></script>
+
+	<script type="text/javascript">
+        //获取该学生的知识弱点
+        var getKnowledgeList = function (studentId){
+        //获取学生最近学习的知识id
+        var graphId = 'ac32709e67ff';
+        $.get("{% url 'get-student-graph-vector' %}"+"?student_id="+studentId+"&graph_id="+graphId,function(data,status){
+            var jsonData = JSON.parse(data);
+            var array = [];
+            for(var key in jsonData) {
+                var scoreItem = parseInt(jsonData[key]['score'] * 100);
+                if(scoreItem != 60){
+                    jsonData[key]['score'] = scoreItem;
+                    jsonData[key]['name']=key;
+                    array.push(jsonData[key]);
+                }
+
+            }
+            array.sort(sortFun);
+            var nodeList = [];
+            if(array.length == 0){
+                $('#weaknessListBody').html('<div style="height:200px;padding: 15px">缺少测试数据，无法查询弱点知识</div>');
+                return;
+            }
+            if(array.length >= 5 ){
+                nodeList = array.slice(0,5)
+            }else{
+                nodeList = array.slice(0,array.length);
+            }
+            $.post("{% url 'get-node-chineseName' %}",JSON.stringify(nodeList),function(data,status){
+                if(data){
+                    var dataJson = JSON.parse(data);
+                    var htmlString = "";
+                    console.info(dataJson)
+                    for(var item in dataJson){
+                        console.info(dataJson[item])
+                        htmlString += '<h4 class="small font-weight-bold">'+dataJson[item].chinese_name+'<span class="float-right">'+dataJson[item].score+'%</span>\n' +
+                            '                                </h4>\n' +
+                            '                                <div class="progress mb-4">\n' +
+                            '                                    <div class="progress-bar bg-danger" role="progressbar"\n' +
+                            '                                         style="width: '+dataJson[item].score+'%" aria-valuenow="'+dataJson[item].score+'"\n' +
+                            '                                         aria-valuemin="0" aria-valuemax="100"></div>\n' +
+                            '                                </div>';
+                    }
+                }else{
+                    alert("转换错误");
+                }
+                    $('#weaknessListBody').html(htmlString);
+            })
+        })
+    };
+    //获取班级知识弱点
+    var getClassKnowledgeList = function (clsId){
+        //获取班级最近学习的知识id
+        var graphId = 'ac32709e67ff';
+        $.get("{% url 'get-cls-graph-vector' %}"+"?cls_id="+clsId+"&graph_id="+graphId,function(data,status){
+            var jsonData = JSON.parse(data);
+            var array = [];
+            for(var key in jsonData) {
+                var item = {score:'',name:''};
+                var scoreItem = parseInt(jsonData[key] * 100);
+                if(scoreItem != 60){
+                    item['score'] = scoreItem
+                    item['name']=key;
+                    array.push(item);
+                }
+            }
+            array.sort(sortFun);
+            var nodeList = [];
+            if(array.length == 0){
+                $('#weaknessListBody').html('<div style="height:200px;padding: 15px">缺少测试数据，无法查询弱点知识</div>');
+                return;
+            }
+            if(array.length >= 5 ){
+                nodeList = array.slice(0,5)
+            }else{
+                nodeList = array.slice(0,array.length);
+            }
+            $.post("{% url 'get-node-chineseName' %}",JSON.stringify(nodeList),function(data,status){
+                if(data){
+                    var dataJson = JSON.parse(data);
+                    var htmlString = "";
+                    for(var item in dataJson){
+                        htmlString += '<h4 class="small font-weight-bold">'+dataJson[item].chinese_name+'<span class="float-right">'+dataJson[item].score+'%</span>\n' +
+                            '                                </h4>\n' +
+                            '                                <div class="progress mb-4">\n' +
+                            '                                    <div class="progress-bar bg-danger" role="progressbar"\n' +
+                            '                                         style="width: '+dataJson[item].score+'%" aria-valuenow="'+dataJson[item].score+'"\n' +
+                            '                                         aria-valuemin="0" aria-valuemax="100"></div>\n' +
+                            '                                </div>';
+                    }
+                }else{
+                    alert("转换错误");
+                }
+                $('#weaknessListBody').html(htmlString);
+            })
+        })
+    };
+
+    //排序方法
+    var sortFun = function(a,b){
+        return a.score - b.score;
+    };
+
+        //获取班级学情报告每一页数据
+        var getClassReportByClassId = function(classId,page,size){
+            $.post("{% url "ajax-get-class-report-by-class-id" %}",JSON.stringify({
+                'classId':classId,
+                'page':page,
+                'size':size,
+            }),function(data,status){
+                var htmlString = '';
+                var json = JSON.parse(data)
+                for(var i in json.quiz_record){
+                    var name = json.quiz_record[i].pdf_uri.split('.')[0];
+                    htmlString +='<tr><td>'+name+'</td><td class="tdOnReport"><div class="btn btn-info btn-icon-split"> <span class="text" name="'+name+'">查看报告</span></div></td><td class="tdOnDownload"><div class="btn btn-info btn-icon-split"><span class="text" name="'+name+'">导出PDF文件</span></div></td></tr>'
+                }
+                var buttonString = '';
+                if(page > 1){
+                    buttonString += '<div class="btn btn-info btn-icon-split" style="margin: 5px float:right" id="previousClassReportButton"><span class="text" name="previous">上一页</span></div>'
+                }
+                if(data.hasNext){
+                    buttonString += '<div class="btn btn-info btn-icon-split" style="float:right" id="nextClassReportButton"><span class="text" name="">下一页</span></div>'
+                }
+                $('#myTableButton').html(buttonString);
+                $('#myTBody').html(htmlString);
+                $.session.set("page",page);
+            });
+        };
+
+        //跳转到班级学情报告上一页
+        $(document).on('click','#previousClassReportButton .text',function(){
+            var page = $.session.get("page") - 1;
+            var classId = $.session.get("classId");
+            getClassReportByClassId(classId,page,4);
+        });
+        //跳转到下一页
+        $(document).on('click','#nextClassReportButton .text',function(){
+            var page = $.session.get("page") + 1;
+            var classId = $.session.get("classId");
+            getClassReportByClassId(classId,page,4);
+        });
+    //获取url参数
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return (false);
+    }
+        //每次加载页面完成后执行
+        $(document).ready(function () {
+            var divBox = document.getElementById("myTBody");
+            var classId = getQueryVariable("classId");
+            var studentId = getQueryVariable("studentId");
+            if(divBox){
+                console.info("开始")
+                getClassDrawData(classId);
+                getClassReportByClassId(classId,1,4);
+                getClassKnowledgeList(classId);
+            }else{
+                if(studentId){
+                    getStudentDrawData(classId,studentId);
+                    getKnowledgeList(studentId);
+                }
+            }
+        })
+    //查看报告
+    //$('.tdOnReport .text').on('click',function (){
+    $(document).on('click','.tdOnReport .text',function(){
+        var name = $(this).attr("name");
+        var url = '{{TEMPLATES_IP}}/templates-static/templates/html/'+name+'.html'
+        window.open(url);
+    });
+
+    //下载pdf文档
+    //$('.tdOnDownload .text').on('click',function (){
+    $(document).on('click','.tdOnDownload .text',function(){    
+        var name=$(this).attr("name");
+        var url = '{{TEMPLATES_IP}}/templates-static/templates/pdf'+name+'.pdf';
+        window.open(url);
+    });
+
+	</script>
+
+    <script type="text/javascript">
+
+
+
+    </script>
+
+
+
+{% endblock %}

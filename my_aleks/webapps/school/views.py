@@ -34,12 +34,12 @@ def add_student_to_class(request):
         return HttpResponse('failed: missing data')
 
     try:
-        cls = Cls.objects.get(pk=class_id)
+        cls = Cls.objects.get(pk=class_id,deleted=False)
     except:
         return HttpResponse('class not existed')
 
     try:
-        student = StudentProfile.objects.get(pk=student_id)
+        student = StudentProfile.objects.get(student_no=student_id)
     except:
         return HttpResponse('student not existed')
 
@@ -136,7 +136,7 @@ def ajax_get_cls(request):
     classes = school.classes.all()
     if teacher_id:
         classes = classes.filter(teacher__id=teacher_id)
-    
+    classes=classes.filter(deleted=False)
     classes_dicts = list(classes.values('id', 'name', 'subject', 'grade', 'teacher__name', 'num'))
     for dic in classes_dicts:
         try:
@@ -154,7 +154,7 @@ def ajax_get_own_classes(request):
     if not user.groups.filter(name="TEACHER").exists():
         return HttpResponse("user is not teacher")
     try:
-        classes=Cls.objects.filter(teacher=user.teacherprofile)
+        classes=Cls.objects.filter(teacher=user.teacherprofile,deleted=False)
     except:
         return HttpResponse('cls not existed')
     cls_dist={}
@@ -181,7 +181,7 @@ def get_class_detail(request):
     cls_id = request.GET.get('clsId')
     try:
         #use filter to take use of queryset's values function
-        cls = Cls.objects.filter(pk=cls_id)
+        cls = Cls.objects.filter(pk=cls_id,deleted=False)
     except:
         return HttpResponse('class not existed')
 
@@ -203,7 +203,7 @@ def get_class_detail(request):
     
     #TODO: get students info
     students = json.loads(cls.students)
-    student_profiles = StudentProfile.objects.filter(pk__in=students)
+    student_profiles = StudentProfile.objects.filter(student_no__in=students)
     student_list=[]
     for student in student_profiles:
         try:
@@ -249,12 +249,12 @@ def remove_student_from_class(request):
         return HttpResponse('failed: missing data')
 
     try:
-        cls = Cls.objects.get(pk=class_id)
+        cls = Cls.objects.get(pk=class_id,deleted=False)
     except:
         return HttpResponse('class not existed')
 
     try:
-        student = StudentProfile.objects.get(pk=student_id)
+        student = StudentProfile.objects.get(student_no=student_id)
     except:
         return HttpResponse('student not existed')
 
@@ -292,7 +292,7 @@ def pay_student_plan(request):
         return HttpResponse('failed: missing data')
 
     try:
-        cls = Cls.objects.get(pk=class_id)
+        cls = Cls.objects.get(pk=class_id,deleted=False)
     except:
         return HttpResponse('class not existed')
 
@@ -304,7 +304,7 @@ def pay_student_plan(request):
     except:
         return HttpResponse('student plan not created')
 
-    student_id = student_plan.student.pk
+    student_id = student_plan.student.student_no
 
     students = json.loads(cls.students)
     if str(student_id) not in students:
@@ -373,22 +373,22 @@ def delete_class(request):
     cls_id = request.GET.get('cls_id','')
     with transaction.atomic():
         try:
-            cls = Cls.objects.get(pk=cls_id)
+            cls = Cls.objects.get(pk=cls_id,deleted=False)
         except:
             return HttpResponse('faield, class not existed')
         students=json.loads(cls.students)
-        for student in students:
-            studentProfile=StudentProfile.objects.get(id=student)
-            classes = json.loads(studentProfile.cls_list)
-            if cls_id in classes:
-                classes.remove(cls_id)
-            studentProfile.cls_list=classes
-            studentProfile.save()
-        try:
+        if students==[]:
             cls.delete()
-        except:
-            cls.deleted=True
-            cls.save()
+        else:
+            for student in students:
+                studentProfile=StudentProfile.objects.get(id=student)
+                classes = json.loads(studentProfile.cls_list)
+                if cls_id in classes:
+                    classes.remove(cls_id)
+                studentProfile.cls_list=json.dumps(classes)
+                studentProfile.save()
+                cls.deleted=True
+                cls.save()
     return HttpResponse('OK')
 
 
@@ -407,3 +407,90 @@ def get_all_teachers(request):
     teachers = list(school.teacherprofile_set.all().values_list('name', 'id'))
 
     return HttpResponse(json.dumps(teachers))
+
+
+
+@login_required
+def school_profile(request):
+    if request.method == "POST":
+        return HttpResponse('wrong method, should be GET')
+    user = request.user
+    if not user.groups.filter(name="SCHOOL_MANAGER").exists():
+        return HttpResponse('user is not a manager')
+    try:
+        school = user.school
+    except:
+        return render(request,'teacher/errorPage.html',{"errorType":"数据缺失","particulars":"fault:school profile not existed1"})
+    
+    try:
+        classes = user.school.classes.all().filter(deleted=False)
+    except:
+        return render(request,'teacher/errorPage.html',{"errorType":"数据缺失","particulars":"fault:school profile not existed2"})
+    try:
+        teachers=TeacherProfile.objects.filter(school=school)  
+    except:
+        return render(request,'teacher/errorPage.html',{"errorType":"数据缺失","particulars":"fault:school profile not existed3"})
+    return render(request,'school/school_profile.html', {'schoolProfile':{'school':school,'classes':len(classes),'classesList':classes,'teacher':len(teachers)}})
+
+
+@login_required
+@csrf_exempt
+def ajax_update_school(request):
+    user = request.user
+    if not user.groups.filter(name='TEACHER').exists():
+        return HttpResponse('user is not a teacher')
+    dic = json.loads(request.body.decode('utf-8'))
+    name = dic['name']
+    phone = dic['phone']
+    location = dic['location']
+    try:
+        school = user.school
+    except:
+        return HttpResponse('user have not  SchoolProfile')
+    school.name = name
+    school.phone = phone
+    school.location = location
+    try:
+        school.save()
+    except:
+        return HttpResponse('save failed')
+    return HttpResponse('OK')
+    
+@login_required
+@csrf_exempt
+def upload_school_img(request):
+    if request.method == 'POST':
+        try:
+            img = request.FILES['img']
+        except:
+            return HttpResponse('failed: no image')
+        school_id = request.POST.get('school_id', '')
+        try:
+            school = School.objects.get(pk=school_id)
+        except:
+            return HttpResponse('failed: school not existed')
+
+        school.img = img
+        school.save()
+        return HttpResponse('OK')
+    
+    if request.method == 'GET':
+        return HttpResponse('wrong method, should be POST')
+
+
+@login_required
+@csrf_exempt
+def ajax_get_school_img(request):
+    school_id = request.GET.get('school_id', '')
+    try:
+        school = School.objects.get(pk=school_id)
+    except:
+        return HttpResponse('failed: school not existed')
+
+    try:
+        img = school.img.url
+    except:
+        return HttpResponse('failed: school has no img')
+
+    return HttpResponse(img)
+

@@ -1,0 +1,101 @@
+{% extends 'teacher/teacher_base.html'%}
+{% load staticfiles %}
+{% block "stylesheets" %}
+    <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+    <script type="text/javascript"
+        src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    <script type="text/x-mathjax-config">
+	    MathJax.Hub.Config({
+	        tex2jax: {inlineMath: [['$', '$'], ['/[', '/]'],['\\(', '\\)'], ['\\ce{', '\}']]},
+	        messageStyle: "none"
+	    });
+	</script>
+{% endblock %}
+
+{% block "main_content" %}
+
+<!-- Begin Page Content -->
+
+<!-- Page Heading -->
+
+
+<!-- Page Heading -->
+<!--试卷信息-->
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">学生测评详情</h1>
+</div>
+<p>试卷名称:{{quizInfo.info.title}}</p>
+<p>科目：{{quizInfo.subject}}</p>
+<p>学生姓名：{{student.name}}</p>
+<!--题目卡片-->
+<div class="row" id="question-container">
+    {% for q in questions %}
+    <div class="col-lg-12">
+        <!-- Default Card Example -->
+        <div class="card mb-4">
+            <div class="card-header">                              
+                <h6 class="m-0 font-weight-bold text-primary"style="line-height: 1.5rem;">
+                    知识点：{% for k in q.knowledge_nodes %} {{k.title}}； {% endfor %}
+                </h6>                            
+            </div>
+            <div class="card-body">
+                <p>{{q.question.body}}</p>
+                    {% if q.question.img %}
+                        <div>
+                        <img class="question_img" src="{{TEMPLATES_IP}}/evaluation-img/{{q.question.img}}">
+                        </div>
+                    {% endif %}
+                    {% for o in q.options %}
+                    		<div style="float:left;padding-right:50px;padding-left:50p">
+                        <p>{{o.order}}.{{o.body}} </p>
+                        {% if o.img %}
+                            <img class="question_img" src="{{TEMPLATES_IP}}/evaluation-img/{{o.img}}">
+                        {% endif %}
+                      </div>
+                {% endfor %}
+                <div style="width:100%;clear:both">
+                    <hr/>
+                    <p>正确答案：{{q.true_option}}</p>
+                    <p>学生答案：{{q.student_answer}}</p>
+                    {% if q.correct_rate %}
+                    <P>正确率：{{q.correct_rate}}</P>
+                    {% endif %}
+                    <p>解析：{{q.question.analysis}}</p>
+                    {% if q.question.analysis_img %}
+                        <div>
+                            <img class="question_img" src="{{TEMPLATES_IP}}/evaluation-img/{{q.question.analysis_img}}">
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<!-- /.container-fluid -->
+{% endblock %}
+{% block "scripts" %}
+<script type="text/javascript" async src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Ajax.config.path["mhchem"] = "https://cdnjs.cloudflare.com/ajax/libs/mathjax-mhchem/3.3.2";
+    MathJax.Hub.Config({
+        TeX: {
+            extensions: ["[mhchem]/mhchem.js"],
+        }
+    });
+</script>
+<script src="{% static "assets/js/image.js" %}" type="text/javascript"></script>
+<script type="text/javascript">
+    //格式化数学公式
+	window.onload=function(){
+        MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("question-container")]);
+        // MathJax.Hub.Typeset();
+	}
+     //图片大小设定
+    $(document).ready(function() {
+        changeImageSize()
+    })
+</script>
+{% endblock %}

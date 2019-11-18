@@ -25,6 +25,7 @@ class Question(models.Model):
 
     knowledge_node = models.ManyToManyField('knowledge_space.KnowledgeNode', blank=False)
     img = models.ImageField(blank=True, null=True, upload_to='question_imgs')
+    analysis_img = models.ImageField(blank=True, null=True, upload_to='analysis_imgs')
     
     datetime = models.DateTimeField(auto_now_add = True, blank=True, null=True)
 
@@ -33,6 +34,9 @@ class Question(models.Model):
     analysis = models.TextField(max_length=2000, blank=True, null=True)
 
     selected = models.BooleanField(default=False)
+
+    # choose from U: unauthenticated, P: passed, R: rejected
+    authenticated = models.CharField(max_length=5, default='U', db_index=True)
 
     def student_answer_question(self, user, option):
         QuestionRecord.objects.get_or_create(user = user, option = option, question = self)
@@ -104,6 +108,9 @@ class Quiz(models.Model):
     # overall stat of this quiz. no regard to quiz record
     stat = models.OneToOneField('QuizStat', blank=True, null=True)
 
+    def __str__(self):
+        return self.subject + ' ' + str(self.id)
+
 # quiz record is a quiz taken by a certain class
 class QuizRecord(models.Model):
     quiz = models.ForeignKey(Quiz)
@@ -115,6 +122,9 @@ class QuizRecord(models.Model):
     info = models.TextField(max_length=1000, blank=True, null=True)
 
     stats = models.TextField(max_length=2000, default='{}')
+
+    def __str__(self):
+        return str(self.id)
 
 class QuizStat(models.Model):
     #quiz = models.ForeignKey(Quiz, blank=False, null=False)

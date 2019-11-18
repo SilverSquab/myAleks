@@ -13,7 +13,10 @@ urlpatterns = [
     url(r'get-all-teachers', views.get_all_teachers, name='get-all-teachers'),
     url(r'get-teachers',views.get_teachers, name='get-teachers'),
     url(r'^ajax-get-school-name',views.ajax_get_school_name,name='ajax-get-school-name'),
-
+    url(r'^school-profile',views.school_profile,name='school-profile'),
     url(r'^ajax-get-cls',views.ajax_get_cls,name='ajax-get-cls'),
-    url(r'^delete-class',views.delete_class,name='delete-class')
+    url(r'^delete-class',views.delete_class,name='delete-class'),
+    url(r'^ajax-update-school',views.ajax_update_school,name='ajax-update-school'),
+    url(r'^upload-school-img', views.upload_school_img, name='upload-school-img'),
+    url(r'^ajax-get-school-img', views.ajax_get_school_img, name='ajax-get-school-img'),
 ]

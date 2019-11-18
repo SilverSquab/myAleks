@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate,logout
 from django.contrib.auth.models import User
+from django.conf import settings
 # Create your views here.
 
 
@@ -22,7 +23,7 @@ def login_view(request):
             if user.groups.filter(name='TEACHER').exists():
                 next_url = request.GET.get("next", "/abc/teacher/view-teacher-profile/")
             if user.groups.filter(name='SCHOOL_MANAGER').exists():
-                next_url = request.GET.get("next","/abc/school/get-classes/")
+                next_url = request.GET.get("next","/abc/school/school-profile/")
             return redirect(next_url)
         else:
             return render(request, "Login.html", {"next": next_url})
@@ -58,3 +59,5 @@ def register(request):
             return HttpResponse('OK')
         except Exception as e:
             return HttpResponse('create user failed')
+def templates_ip_setting(request):
+    return {"TEMPLATES_IP" : settings.HTTP_IP}

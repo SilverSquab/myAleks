@@ -153,10 +153,15 @@ def ajax_get_student_profile(request):
         try:
             p = StudentProfile.objects.get(student_no = student_no)
         except:
-            return HttpResposne('failed: user not existed')
+            return HttpResponse('failed: user not existed')
 
     dic = {'name': p.name, 'student_id': p.pk, 'age': p.age, 'phone':p.phone, 'student_no': p.student_no, 'gender': p.gender}
 
     return HttpResponse(json.dumps(dic))
 
-    
+@login_required
+def student_profile_tuition(request):
+    return render(request, 'student/student_tuition.html')
+
+
+

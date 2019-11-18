@@ -1,5 +1,5 @@
 #coding=utf-8
-from webapps.quiz.helpers import answers_to_nodes, mark_quiz_wrapper
+from webapps.quiz.helpers import *
 from webapps.knowledge_space.student_vector import get_node_scores
 from webapps.knowledge_space.node_update import update_nodes
 from webapps.knowledge_space.helpers import *
@@ -10,6 +10,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
+from django.conf import settings
 
 from .models import *
 from django.forms import DateInput, DateField, Form, Select, SelectMultiple, ModelForm, Textarea, TextInput, MultipleChoiceField, FileInput, CheckboxInput
@@ -18,11 +19,13 @@ from webapps.knowledge_space.models import *
 from webapps.textbook.models import *
 from webapps.school.models import Cls
 from webapps.teacher.models import TeacherProfile
+from webapps.teacher.models import Favorites
 
 from django import forms
 import datetime
 import requests
 from webapps.knowledge_space.student_vector import get_or_create_graph_vector
+import operator
 # Create your views here.
 
 class QuestionQueryForm(forms.Form):
@@ -36,7 +39,7 @@ class QuestionQueryForm(forms.Form):
 # 定向检索题目，根据科目、知识点等
 @login_required
 def get_questions(request):
-    pass
+    return render(request, 'quiz/questions_bank.html')
 
 @login_required
 def question_detail(request):
@@ -51,18 +54,21 @@ def quiz_page(request):
     '''
     if request.method !='GET':
         return render(request,'teacher/errorPage.html',{"errorType":"调用方法错误","particulars":"fault:wrong method"})
-    user=request.user
-    school_name=TeacherProfile.objects.get(user=user).school.name
+    user = request.user
+    school_name = TeacherProfile.objects.get(user=user).school.name
     quiz_id = request.GET.get('quizId','')
-    quiz_record_id=request.GET.get('quizRecordId','')
+    quiz_record_id = request.GET.get('quizRecordId','')
     try:
         info=''
         if quiz_id:
             quiz = Quiz.objects.get(pk=quiz_id)
         if quiz_record_id:
-            quiz_record = QuizRecord.objects.get(pk=quiz_record_id)
-            quiz=quiz_record.quiz
-            info=json.loads(quiz_record.info)
+            try:
+                quiz_record = QuizRecord.objects.get(pk=quiz_record_id,cls__deleted=False)
+            except:
+                return render(request,'teacher/errorPage.html',{"errorType":"测评记录不存在","particulars":"fault:quiz record not exsited"})
+            quiz = quiz_record.quiz
+            info = json.loads(quiz_record.info)
     except:
         return render(request,'teacher/errorPage.html',{"errorType":"试卷查询失败","particulars":"fault:quiz not exsited"})
     try:
@@ -112,12 +118,15 @@ def quiz_records(request):
         return render(request,'teacher/errorPage.html',{"errorType":"用户权限不足","particulars":"fault:user is not a teacher"})
     #teacher=user.teacher
     #quiz_records=teacher.quizrecord_set.all()
-    quiz_records=QuizRecord.objects.filter(teacher__user=user)
+    quiz_records=QuizRecord.objects.filter(teacher__user=user,cls__deleted=False)
     quiz=[]
     for quiz_record in quiz_records:
         subject=Subject.objects.get(name=quiz_record.quiz.subject).chinese_name
         info = json.loads(quiz_record.quiz.info)
-        generator = quiz_record.quiz.generator.username
+        try:
+            generator = quiz_record.quiz.generator.username
+        except:
+            generator = ''
         cls = quiz_record.cls.name
         quiz_record_info=json.loads(quiz_record.info)
         try:
@@ -146,48 +155,116 @@ def quiz_record(request):
     Only visited by teacher.
     See his or her quiz records.
     '''
-    user=request.user
+    user = request.user
     if not user.groups.filter(name='TEACHER').exists():
         return render(request,'teacher/errorPage.html',{"errorType":"用户权限不足","particulars":"fault:user is not a teacher"})
-    quiz_record_id=request.GET.get('quiz_record_id',"")
+    quiz_record_id = request.GET.get('quiz_record_id',"")
     try:
-        quiz_record = QuizRecord.objects.get(pk=quiz_record_id)
+        quiz_record = QuizRecord.objects.get(pk=quiz_record_id,cls__deleted=False)
     except:
-        return HttpResponse('quiz record not exist')
-    generator = quiz_record.quiz.generator.username
-    subject=Subject.objects.get(name=quiz_record.quiz.subject).chinese_name
+        return render(request,'teacher/errorPage.html',{"errorType":"该测评记录不存在","particulars":"fault: quiz record not have"})
+    try:
+        generator = quiz_record.quiz.generator.username
+    except:
+        generator = ''
+    subject = Subject.objects.get(name=quiz_record.quiz.subject).chinese_name
     info = json.loads(quiz_record.quiz.info)
     cls = quiz_record.cls.name
-    quiz_record_info=json.loads(quiz_record.info)
+    cls_id = quiz_record.cls.id
+
     try:
-        non_participants=quiz_record_info['non_participants']
+        quiz_record_paper = QuizRecordPaper.objects.get(quiz_record=quiz_record)
+        quiz_record_paper_uri = quiz_record_paper.pdf_uri
     except:
-        non_participants=[]
-    non_participants_num=len(non_participants)
-    students=json.loads(quiz_record.cls.students)
-    student_info=[]
+        quiz_record_paper_uri = ''
+
+    quiz_record_info = json.loads(quiz_record.info)
+    try:
+        non_participants = quiz_record_info['non_participants']
+    except:
+        non_participants = []
+    non_participants_num = len(non_participants)
+
+    students = json.loads(quiz_record.cls.students)
+    student_info = []
     for student_id in students:
         if student_id in non_participants:
-            status="未参加"
-            time='——'
-            score='——'
-            rank='——'
+            status = "未参加"
+            time = '——'
+            score = '——'
+            rank = '——'
+            student_quiz_record_id=''
         else:
-            status="参加"
+            status = "参加"
             try:
-                student_quiz_record=StudentProfile.objects.get(quiz_record=quiz_record,student=student.user)
-                time=student_quiz_record.datetime
+                student_quiz_record = StudentQuizRecord.objects.get(quiz_record = quiz_record,student__student_no = student_id)
+                time = student_quiz_record.datetime.strftime('%Y-%m-%d')
+                score = student_quiz_record.score
+                student_quiz_record_id = student_quiz_record.pk 
             except:
-                time='——'
-        student = StudentProfile.objects.get(pk=student_id)
+                time = '——'
+                score = '——'
+                student_quiz_record_id=''
+        student = StudentProfile.objects.get(student_no = student_id)
+        rank = '——'
+        student_info.append({'id':student.pk,'student_no':student.student_no,'student_quiz_record_id':student_quiz_record_id,'status':status,'time':time,'score':score,'name':student.name,'rank':rank})
+
+    return render(request, 'quiz/quiz_record.html',{'students':student_info,'quiz_record_id':quiz_record_id,'cls':cls,'cls_id':cls_id,'quiz_record_paper_uri':quiz_record_paper_uri,'generator':generator,'subject':subject,'info':info,'non_participants_num':non_participants_num})
+
+@login_required
+def student_quiz_record(request):
+    '''
+    Technically this page if for teachers only. 
+    '''
+
+    if request.method !='GET':
+        return render(request,'teacher/errorPage.html',{"errorType":"调用方法错误","particulars":"fault:wrong method"})
+    user = request.user
+    school_name = TeacherProfile.objects.get(user = user).school.name
+    student_quiz_record_id = request.GET.get('student_quiz_record_id','')
+    try:
+        student_quiz_record = StudentQuizRecord.objects.get(pk=student_quiz_record_id)
+    except:
+        return render(request,'teacher/errorPage.html',{"errorType":"学生记录不存在","particulars":"fault:student quiz record not have"})
+    student = student_quiz_record.student
+    quiz_record = student_quiz_record.quiz_record
+    quiz = quiz_record.quiz
+    stats = json.loads(student_quiz_record.stats)
+    try:
+        quiz.subject = Subject.objects.get(name=quiz.subject).chinese_name
+    except:
+        pass
+    quiz.info = json.loads(quiz.info)
+
+    quiz_body = json.loads(quiz.body)
+    questions = []
+
+    for body in quiz_body:
+        # print(quiz_body[body][0])
         try:
-            score=quiz_record_info['student_marked'][str(student_profile.pk)]['score']
-            rank=quiz_record_info['student_marked'][str(student_profile.pk)]['rank']
+            correct_rate = info['correctRate'][body]
         except:
-            score="——"
-            rank="——"
-        student_info.append({'id':student.pk,'student_no':student.student_no,'status':status,'time':time,'score':score,'name':student.name,'rank':rank})
-    return render(request, 'quiz/quiz_record.html',{'students':student_info,'quiz_record_id':quiz_record_id,'cls':cls,'generator':generator,'subject':subject,'info':info,'non_participants_num':non_participants_num})
+            correct_rate = ''
+        try:
+            question = Question.objects.get(pk = quiz_body[body][0])
+        except:
+            return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:question not exsited"})
+        try:
+            student_answer = stats[str(question.pk)]
+        except:
+            student_answer = ''
+        try:
+            options = question.options.all().order_by('order')
+        except:
+            return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
+        options_dicts = list(options.values('body','order','img','is_correct'))
+        for option in options_dicts:
+            if option["is_correct"]:
+                true_option=option['order']
+        knowledge_node = KnowledgeNode.objects.filter(question=question)
+        questions.append({'question':question, 'options':options, "knowledge_nodes":knowledge_node, 'true_option':true_option, "correct_rate":correct_rate, 'student_answer':student_answer})
+    return render(request, 'quiz/student_quiz_record.html',{"quizInfo":quiz,'questions':questions,'student':student})
+
 
 @staff_member_required
 @csrf_exempt
@@ -199,7 +276,7 @@ def compose_quiz(request):
         f = QuestionQueryForm()
         
         if subject == '' and knowledge_node == '':
-            return render(request, 'quiz/compose_quiz.html', {'form': f})
+            return render(request, 'quiz/compose_quizs.html', {'form': f})
         
         if knowledge_node != '':
             try:
@@ -221,7 +298,7 @@ def compose_quiz(request):
             questions = questions.filter(knowledge_node__id=knowledge_node)
 
 
-        return render(request, 'quiz/compose_quiz.html', {'questions': questions, 'form': f})
+        return render(request, 'quiz/compose_quizs.html', {'questions': questions, 'form': f})
     
     '''
     post data: subject, info, body, marking, public
@@ -313,13 +390,23 @@ def question_page(request):
     return render(request, 'quiz/question.html', {'question': question})
 
 class QuestionForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(QuestionForm, self).__init__(*args, **kwargs)
+        self.fields['img'].widget.attrs.update({'class':'question-img line-bottom lineInput'})
+        self.fields['analysis_img'].widget.attrs.update({'class':'analysis-img line-bottom lineInput'})
     class Meta:
+        fields = ['subject','question_type','selected','body','img','analysis','analysis_img']
         model = Question
         #fields = '__all__'
-        exclude = ['knowledge_node']
+        exclude = ['knowledge_node','uploader_id']
         widgets = {
-            'body': Textarea(attrs={'rows': '5', 'class': 'bg-light form-control', 'id': 'id_question_body'}),
-            'subject': TextInput(attrs={'class': "bg-light form-control"}),
+            #'img': FileInput(attrs={'class':'question-img line-bottom lineInput'}),
+            'question_type':TextInput(attrs={'class':'question-type lineInput line-bottom input-right'}),
+            'analysis':Textarea(attrs={'rows': '5', 'class': 'bg-light form-control question-analysis line-bottom blockInput'}),
+            'selected':CheckboxInput(attrs={'class':'question-selected line-bottom'}),
+            'body': Textarea(attrs={'rows': '5', 'class': 'bg-light form-control line-bottom blockInput', 'id': 'id_question_body'}),
+            'subject': TextInput(attrs={'class': "lineInput line-bottom input-right"}),
+            #'analysis_img':FileInput(attrs={'class':'analysis-img line-bottom lineInput'})
             #'knowledge_node': Select(attrs={'class': 'bg-light'}),
         }
 
@@ -332,20 +419,22 @@ class OptionForm(ModelForm):
         super(OptionForm, self).__init__(*args, **kwargs)
         if order:
             self.order_of_option = order
+            self.fields['img'].widget.attrs.update({'id': 'id_option_img', 'class': 'lineInput line-bottom option_img'})
             for field in self.fields:
                 #print(self.fields[field])
                 self.fields[field].widget.attrs['id'] += '_' + str(order)
             
     class Meta:
+        fields = ['body','img','is_correct','error_reason']
         model = Option
         exclude = ['order', 'question', 'knowledge_node']
         widgets = {
-            'body': Textarea(attrs={'rows': '5', 'class': 'bg-light form-control', 'id': 'id_option_body'}),
+            'body': Textarea(attrs={'rows': '5', 'class': 'bg-light form-control line-bottom blockInput', 'id': 'id_option_body'}),
             #'order': TextInput(attrs={'id': 'id_option_order'}),
             #'question': Select(attrs={'id': 'id_option_question'}),
-            'is_correct': CheckboxInput(attrs={'id': 'id_option_is_correct', 'class': 'bg-light form-control'}),
-            'img': FileInput(attrs={'class': 'bg-light form-control', 'id': 'id_option_img'}),
-            'error_reason': SelectMultiple(attrs={'class': 'bg-light form-control', 'id': 'id_option_error_reason'}),
+            'is_correct': CheckboxInput(attrs={'id': 'id_option_is_correct', 'class': 'line-bottom option-iserror'}),
+            #'img': FileInput(attrs={'class': 'lineInput line-bottom option_img', 'id': 'id_option_img'}),
+            'error_reason': SelectMultiple(attrs={'class': 'bg-light form-control blockSelect line-bottom', 'id': 'id_option_error_reason'}),
             #'error_reason': MultipleChoiceField(),
             #'knowledge_node': TextInput(attrs={'id': 'id_option_knowledge_node'}),
         }
@@ -371,6 +460,7 @@ def ajax_upload_question(request):
             return HttpResponse('failed, question not existed') 
 
     img = request.FILES.get('img')
+    analysis_img = request.FILES.get('analysis_img')
     if question_form.is_valid():
         try:
             q = question_form.save()
@@ -378,9 +468,13 @@ def ajax_upload_question(request):
             # don't change uploader in amending.
             if int(question_id) == -1:
                 q.uploader = user
+            q.authenticated = 'U'
             q.save()
             if img:
                 q.img = img
+                q.save()
+            if analysis_img:
+                q.analysis_img = analysis_img
                 q.save()
         except Exception as e:
             return HttpResponse('failed')
@@ -422,7 +516,8 @@ def ajax_upload_option(request):
             o.knowledge_node = knowledge_node
 
             img = request.FILES.get('img')
-            o.img = img
+            if img:
+                o.img = img
             o.save()
             #print(1)
             return HttpResponse('OK')
@@ -486,9 +581,9 @@ def mark_quiz(request):
             return render(request, 'quiz/mark_quiz.html')
         else:
             try:
-                quiz_record=QuizRecord.objects.get(pk=quiz_record_id)
+                quiz_record=QuizRecord.objects.get(pk=quiz_record_id,cls__deleted=False)
             except:
-                return render(request,'teacher/errorPage.html',{"errorType":"参数数据错误","particulars":"fault:quizRecord not exsited"})
+                return render(request,'teacher/errorPage.html',{"errorType":"该测评记录不存在","particulars":"fault:quizRecord not exsited"})
             user=request.user
             if user!=quiz_record.teacher.user:
                 return render(request,'teacher/errorPage.html',{"errorType":"该用户没有此测评","particulars":"fault:user not having quizRecord"})
@@ -581,10 +676,14 @@ def mark_quiz(request):
     nodes_dic = tmp['nodes_dic']
     #print(nodes_dic)
 
+    quiz_data = mark_quiz_wrapper(student_id, quiz_record_id, answer_dic)
+    if quiz_data['status'] == False:
+        return HttpResponse('failed: ' + quiz_data['reason'])
+
     # XXX: algo 101, pure stats
     update_nodes(student_profile.student_no, score_dic)
 
-    quiz_data = mark_quiz_wrapper(student_id, quiz_record_id, answer_dic)
+    #print(quiz_data)
     #print(quiz_data)
     #return HttpResponse(200)
 
@@ -633,43 +732,62 @@ def mark_quiz(request):
 
 
 
-    if quiz.quiz_type == 'small':
-        questions = []
-        question_ids = map(lambda x: x[0], json.loads(quiz.body).values())
-        quiz_questions = Question.objects.filter(pk__in=question_ids)
-        for question in quiz_questions:
-            question_dic = {}
-            question_dic['id'] = question.pk
-            question_dic['question'] = question.body
-            question_dic['option'] = []
-            if question.img:
-                question_dic['image'] = question.img.url
-            question_dic['analysis'] = question.analysis
-            for option in question.options.all():
-                option_dic = {"order": option.order, "body": option.body}
-                if option.img:
-                    option_dic['image'] = option.img.url
-                question_dic['option'].append(option_dic)
-                if option.is_correct:
-                    question_dic['answer'] = option.order
+    #if quiz.quiz_type == 'small':
+    questions = []
+    #question_ids = map(lambda x: x[0], json.loads(quiz.body).values())
+    #quiz_questions = Question.objects.filter(pk__in=question_ids)
+    
+    body = json.loads(quiz.body)
+    for index in body:
+        question = Question.objects.get(pk = body[index][0])
+        #for question in quiz_questions:
+        question_dic = {}
+        question_dic['order'] = int(index)
+        question_dic['id'] = question.pk
+        question_dic['question'] = question.body
+        question_dic['option'] = []
+        if question.img:
+            question_dic['image'] = question.img.url[10:]
+        question_dic['analysis'] = question.analysis
+        for option in question.options.all().order_by('order'):
+            option_dic = {"order": option.order, "body": option.body}
+            if option.img:
+                option_dic['image'] = option.img.url[10:]
+            question_dic['option'].append(option_dic)
+            if option.is_correct:
+                question_dic['answer'] = option.order
+        #print(question.pk)
+        #print(answer_dic)
+        try:
+            student_answer=answer_dic[str(question.pk)]
+        except:
+            student_answer=''
+        question_dic['student_answer']=student_answer
+        questions.append(question_dic)
+    questions = sorted(questions, key=operator.itemgetter('order'))
 
-            questions.append(question_dic)
+    dic1['questions'] = questions
 
-        dic1['questions'] = questions
-
-    else:
-        #print(quiz_records)
-        student_quiz_record=list(StudentQuizRecord.objects.filter(student=student_profile.user,quiz_record__in=quiz_records).order_by("-datetime").values("datetime","score"))
+    if quiz.quiz_type == 'full':
+        student_quiz_records=list(StudentQuizRecord.objects.filter(student=student_profile,quiz_record__in=quiz_records).order_by("-datetime").values("datetime","score"))
         #print(len(student_quiz_record))
-        if len(student_quiz_record)>8:
-            student_quiz_record=student_quiz_record[0:8]
+        if len(student_quiz_records)>8:
+            student_quiz_records=student_quiz_records[0:8]
 
-        score=[]
-        time=[]
-        for index in student_quiz_record:
-            score.append(index['score'])
-            time.append(index['datetime'].strftime('%Y-%m-%d'))
-        dic1['image2']={"x":time,"y1":score}
+        score = []
+        times = []
+
+        total_score = sum([int(q[1]) for q in json.loads(quiz.body).values()])
+        if total_score == 0:
+           total_score = 1
+
+        for i in student_quiz_records:
+            score.append(round(i['score']/total_score, 1))
+            times.append(i['datetime'].strftime('%Y-%m-%d'))
+        times.reverse()
+        score.reverse()
+
+        dic1['image2']={"x":times,"y1":score}
 
     # score=[]
     # time=[]
@@ -700,16 +818,16 @@ def mark_quiz(request):
 
         #FIXME: difficulty doesn't have a meanning at this moment
         tmp['difficulty'] = 0
-        tmp['scoreRatio'] = round(nodes_dic[node_pk]['correct']/nodes_dic[node_pk]['count'], 2) * 100
+        tmp['scoreRatio'] = round(nodes_dic[node_pk]['correct']/nodes_dic[node_pk]['count'] * 100 , 2)
         #tmp['scoreRatio'] = 60 + nodes_vector[node_pk]['score'] * 10
         #if tmp['scoreRatio'] >= 100:
         #    tmp['scoreRation'] = 100
         tmp['score'] = round(nodes_vector[node_pk]['score'], 1)
 
         knowledges.append(tmp)
-
+    #print(quiz_data)
     errorReason = quiz_data['error_reasons']
-
+    #print(errorReason)
     knowledgeAnalysis['knowledges'] = knowledges
     knowledgeAnalysis['errorReason'] = errorReason
 
@@ -726,7 +844,7 @@ def mark_quiz(request):
             except:
                 continue
             tmp['knowledgeNode'] = node.title
-            tmp['masteryDegree'] = round(nodes_vector[node_pk]['score'], 1) * 5
+            tmp['masteryDegree'] = round(nodes_vector[node_pk]['score'], 1)
             # TODO: what should be done here?
             tmp['advancement'] = round((0.8 - nodes_vector[node_pk]['score']) * 5, 1)
             upScore += tmp['advancement']
@@ -789,7 +907,16 @@ def mark_quiz(request):
                 continue
             if graph_node_vector[node_id]['belief'] == 1:
                 continue
-            detail.append({'knowledge_node': node.title, 'masteryDegree': round(graph_node_vector[node_id]['score'], 1)})
+            successors = KnowledgeGraphEdge.objects.all().filter(predecessor=node).values_list('successor')
+            successor_titles = []
+            for successor in successors:
+                try:
+                    successor_node = KnowledgeNode.objects.get(pk=successor[0])
+                    if not successor_node.title in successor_titles:
+                        successor_titles.append(successor_node.title)
+                except:
+                    continue
+            detail.append({'knowledge_node': node.title, 'masteryDegree': round(graph_node_vector[node_id]['score'], 1),'nodes' : successor_titles})
             node_names.append(node.title)
 
     learningArchives['detail'] = detail
@@ -824,11 +951,11 @@ def mark_quiz(request):
     #print(dic1)
     headers={"Content-Type":"application/json"}
     if quiz.quiz_type == 'full':
-        requests.post(url='http://47.110.253.251' + '/templates/quizReport/' + 'pdf',data=data,headers=headers)
-        requests.post(url='http://47.110.253.251' + '/templates/quizReport/' + 'html',data=data,headers=headers)
+        requests.post(url= settings.HTTP_IP + '/templates/quizReport/' + 'pdf',data=data,headers=headers)
+        requests.post(url= settings.HTTP_IP + '/templates/quizReport/' + 'html',data=data,headers=headers)
     else:
-        requests.post(url='http://47.110.253.251' + '/templates/classQuizReport/' + 'pdf',data=data,headers=headers)
-        requests.post(url='http://47.110.253.251' + '/templates/classQuizReport/' + 'html',data=data,headers=headers)
+        requests.post(url= settings.HTTP_IP + '/templates/classQuizReport/' + 'pdf',data=data,headers=headers)
+        requests.post(url= settings.HTTP_IP + '/templates/classQuizReport/' + 'html',data=data,headers=headers)
         
     d = {'isFinish': True}
     return HttpResponse(json.dumps(d))
@@ -836,36 +963,58 @@ def mark_quiz(request):
 @login_required
 def ajax_get_questions(request):
     chapter_id = request.GET.get('chapter_id', '')
-    question_id=request.GET.get('questionId','')
+    section_id = request.GET.get('section_id', '')
+    question_id = request.GET.get('questionId','')
     subject = request.GET.get('subject', '')
     node_id = request.GET.get('node_id', '')
     page = request.GET.get('page', '1')
     date = request.GET.get('date', '')
-    node=request.GET.get('node','true')
+    node = request.GET.get('node','true')
+    own = request.GET.get('own','flase') 
     # FIXME: this could be very slow
+    user = request.user
     questions = Question.objects.all()
+    if subject:
+        questions = Question.objects.filter(subject=subject)
+    if chapter_id:
+        try:
+            chapter = Chapter.objects.get(pk=chapter_id)
+        except:
+            return HttpResponse('failed: chapter not found with this id')
+        nodes_list = []
+        for section in chapter.sections.all():
+            nodes_list += json.loads(section.nodes_list)
+            nodes_list = list(set(nodes_list))
+        questions = Question.objects.filter(knowledge_node__in=nodes_list)
+    if section_id:
+        try:
+            section = Section.objects.get(pk=section_id)
+        except:
+            return HttpResponse('failed: section not found with this id')
+        questions = Question.objects.filter(knowledge_node__in=json.loads(section.nodes_list))
     if date:
         datetime = date.split('-')
         questions = questions.filter(datetime__year=datetime[0],datetime__month=datetime[1],datetime__day=datetime[2])
-    if subject:
-        questions = questions.filter(subject=subject)
     if node_id:
         node = KnowledgeNode.objects.get(id=node_id)
         questions = questions.filter(knowledge_node=node)
+    #print(question_id)
     if question_id:
         try:
             questions = Question.objects.filter(pk=question_id)
         except:
             return HttpResponse('missing question_id')
     if node=='false':
-        questions=questions.filter(knowledge_node=None)
-        
+        questions = questions.filter(knowledge_node =None)
+    if own == 'true':
+        questions = questions.filter(uploader = user)
+    questions = questions.filter(authenticated = "P")
+
     page = int(page)
     paginator = Paginator(questions, 25)
     try:
         questions = paginator.page(page)
     except:
-        #questions = paginator.page(1)
         return HttpResponse('error')
     d = {}
     for question in questions:
@@ -886,6 +1035,58 @@ def ajax_get_questions(request):
         d[question.id] = val
     return HttpResponse(json.dumps(d))
 
+@login_required
+def ajax_get_page_count_questions(request):
+    chapter_id = request.GET.get('chapter_id', '')
+    section_id = request.GET.get('section_id', '')
+    question_id = request.GET.get('questionId','')
+    subject = request.GET.get('subject', '')
+    node_id = request.GET.get('node_id', '')
+    date = request.GET.get('date', '')
+    node = request.GET.get('node','true')
+    own = request.GET.get('own','flase') 
+
+    user = request.user
+    # FIXME: this could be very slow
+    questions = Question.objects.all()
+    if subject:
+        questions = Question.objects.filter(subject=subject)
+    if chapter_id:
+        try:
+            chapter = Chapter.objects.get(pk=chapter_id)
+        except:
+            return HttpResponse('failed: chapter not found with this id')
+        nodes_list = []
+        for section in chapter.sections.all():
+            nodes_list += json.loads(section.nodes_list)
+            nodes_list = list(set(nodes_list))
+        questions = Question.objects.filter(knowledge_node__in=nodes_list)
+    if section_id:
+        try:
+            section = Section.objects.get(pk=section_id)
+        except:
+            return HttpResponse('failed: section not found with this id')
+        questions = Question.objects.filter(knowledge_node__in=json.loads(section.nodes_list))
+    if date:
+        datetime = date.split('-')
+        questions = questions.filter(datetime__year=datetime[0],datetime__month=datetime[1],datetime__day=datetime[2])
+    if node_id:
+        node = KnowledgeNode.objects.get(id=node_id)
+        questions = questions.filter(knowledge_node=node)
+    if question_id:
+        try:
+            questions = Question.objects.filter(pk=question_id)
+        except:
+            return HttpResponse('missing question_id')
+    if node=='false':
+        questions = questions.filter(knowledge_node =None)
+    if own == 'true':
+        questions = questions.filter(uploader = user)
+    questions = questions.filter(authenticated = "P")
+
+    return HttpResponse(int((len(questions.all()) + 24)/25))
+
+@login_required
 def ajax_get_own_question_by_id(request):
     question_id=request.GET.get('questionId','')
     subject = request.GET.get('subject', '')
@@ -1040,6 +1241,7 @@ def get_next_question(request):
         return HttpResponse('failed: no subject')
     
     questions = Question.objects.filter(subject = subject)
+    questions = questions.filter(authenticated = "P")
 
     if len(questions) == 0:
         return HttpResponse('failed: no question available')
@@ -1183,11 +1385,13 @@ def ajax_save_quiz_record(request):
         except:
             return HttpResponse("quiz not having")
         try:
-            cls=Cls.objects.get(pk=cls_id)
+            cls=Cls.objects.get(pk=cls_id,deleted=False)
         except:
             return HttpResponse('class not having')
-        if cls.teacher.user!=user:
+        if cls.teacher.user != user:
             return HttpResponse("user not having this class")
+        if cls.subject != quiz.subject:
+            return HttpResponse('class subject is not quiz subject ')
         if QuizRecord.objects.filter(quiz_id=quiz_id,cls_id=cls_id).exists():
             return HttpResponse('quiz record is having')
         info=json.dumps({'non_participants':json.loads(cls.students)})
@@ -1220,7 +1424,7 @@ def ajax_save_quiz_and_publish(request):
     else:
         public = False
     try:
-        cls=Cls.objects.get(pk=cls_id)
+        cls=Cls.objects.get(pk=cls_id,deleted=False)
     except:
         return HttpResponse('class not having')
     if cls.teacher.user!=user:
@@ -1259,6 +1463,8 @@ def ajax_get_page_count_by_section(request):
     questions = Question.objects.filter(knowledge_node__in=json.loads(section.nodes_list))
     if selected=="true":
         questions = questions.filter(selected=True)
+    questions = questions.filter(authenticated = "P")
+
     return HttpResponse(int((len(questions.all()) + 24)/25))
 
 @login_required
@@ -1278,6 +1484,8 @@ def ajax_get_questions_by_section(request):
     questions = Question.objects.filter(knowledge_node__in=json.loads(section.nodes_list))
     if selected=="true":
         questions = questions.filter(selected=True)
+    questions = questions.filter(authenticated = "P")
+
     page = int(page)
     
     paginator = Paginator(questions, 25)
@@ -1398,6 +1606,8 @@ def ajax_get_page_count_by_chapter(request):
     questions = Question.objects.filter(knowledge_node__in=nodes_list)
     if selected=="true":
         questions = questions.filter(selected=True)
+    questions = questions.filter(authenticated = "P")
+
     return HttpResponse(int((len(questions.all()) + 24)/25))
 
 @login_required
@@ -1424,6 +1634,8 @@ def ajax_get_questions_by_chapter(request):
 
     if selected=="true":
         questions = questions.filter(selected=True)
+    questions = questions.filter(authenticated = "P")
+
     page = int(page)
     
     paginator = Paginator(questions, 25)
@@ -1451,4 +1663,472 @@ def ajax_get_questions_by_chapter(request):
         d[question.id] = val
 
     return HttpResponse(json.dumps(d))
+
+@login_required
+def get_class_quiz_report(request):
+    request_dic = request.GET
+    
+    cls_id = request.GET.get('cls_id', '')
+    if cls_id == '':
+        return HttpResponse('no cls id')
+
+    try:
+        cls = Cls.objects.get(pk=cls_id,deleted=False)
+    except:
+        return HttpResponse('cls not existed')
+    
+    quiz_record_id = request.GET.get('quiz_record_id', '')
+
+    if quiz_record_id == '':
+        return HttpResponse('no quiz record id')
+
+    try:
+        quiz_record = QuizRecord.objects.get(pk=quiz_record_id)
+    except:
+        return HttpResponse('quiz record not existed')
+
+    dic = {}
+    quiz = quiz_record.quiz
+
+    try:
+        subject=Subject.objects.get(pk=quiz.subject)
+    except:
+        return HttpResponse('subject not existed')
+
+    quiz_body = json.loads(quiz.body)
+
+    if quiz.marking:
+        total_score = sum([q[1] for q in quiz_body.values()])
+    else:
+        total_score = 0
+
+    dic['title'] = json.loads(quiz.info)['title']
+    dic["quizRecordId"] = str(quiz_record.pk)
+    dic["cls"] = quiz_record.cls.name
+
+    dic['schoolName']=quiz_record.cls.school.name
+
+    quiz_result = {}
+
+    info = json.loads(quiz_record.info)
+    keys = ["average_score", "highest_score", "lowest_score"]
+    for key in keys:
+        if key in info:
+            quiz_result[key] = info[key]*100
+
+    non_participants = info.get('non_participants', [])
+    participants = info.get('participants', [])
+
+
+    #XXX this is a change
+    quiz_result['participants_num'] = len(participants)
+    quiz_result['non_participants_num'] = len(non_participants)
+
+    quiz_result['student_num'] = len(participants) + len(non_participants)
+
+
+    scores = [p[1] for p in participants]
+
+    pass_num = 0
+    proficiency_num = 0
+    
+    # proficiency: score / total_score > 85%, pass: score / total_score > 60%
+    if quiz.marking and total_score != 0:
+        for score in scores:
+            if score / total_score >= 0.85:
+                proficiency_num += 1
+            if score / total_score >= 0.6:
+                pass_num += 1
+    else:
+        for score in scores:
+            if score >= 0.85:
+                proficiency_num += 1
+            if score >= 0.6:
+                pass_num += 1
+
+    quiz_result['pass_rate'] = round(pass_num / quiz_result['student_num'] * 100, 2)
+    quiz_result['proficiency'] = round(proficiency_num / quiz_result['student_num'] * 100, 2)
+
+    dic['quiz_result'] = quiz_result
+
+    #knowledges nodes:
+    nodes_data = class_answers_to_nodes(json.loads(quiz_record.stats))
+    if nodes_data['status'] == False:
+        return HttpResponse('failed: cannot generate nodes dictionary')
+    
+    nodes_dic = nodes_data['nodes_dic']
+    node_score_dic = nodes_data['node_score_dic']
+    node_question_dic = nodes_data['node_question_dic']
+    correct_count = nodes_data['correct_count']
+
+    knowledges = []
+
+    id_order_dict = {}
+    tmp_dict = json.loads(quiz.body)
+    for order in tmp_dict:
+        qid = tmp_dict[order][0]
+        id_order_dict[qid] = order
+
+    node_ids = node_score_dic.keys()
+    nodes = KnowledgeNode.objects.filter(pk__in=node_ids)
+
+    for node in nodes:
+        tmp = {}
+        tmp['knowledge'] = node.title
+        tmp['model'] = node.graph.description
+        tmp['questions'] = node_question_dic.get(node.pk, [])
+        l = []
+        for qid in tmp['questions']:
+            l.append(id_order_dict[qid])
+        tmp['questions'] = l
+        tmp['masteryDegree'] = node_score_dic.get(node.pk, '2.5')
+        knowledges.append(tmp)
+
+    dic["knowledgeAnalysis"] = {"knowledges": knowledges}
+
+    #score info
+    score_info = {}
+    score_info["subject"] = subject.chinese_name
+    score_info["questionNum"] = len(quiz_body)
+    score_info["totalPoint"] = total_score
+    #XXX: difficulty doesn't mean anything here, remove?
+    score_info["difficultyIndex"] = 0
+
+    dic['score_info'] = score_info
+
+    #questions:
+    questions = []
+    question_ids = map(lambda x: x[0], json.loads(quiz.body).values())
+
+    quiz_questions = Question.objects.filter(pk__in=question_ids)
+
+    for question in quiz_questions:
+        question_dic = {}
+        question_dic['id'] = int(id_order_dict[str(question.pk)])
+        question_dic['question'] = question.body
+        question_dic['analysis'] = question.analysis
+        question_dic['option'] = []
+
+        question_dic['knowledge_nodes'] = list(question.knowledge_node.all().values_list('title', flat=True))
+
+        if question.pk in correct_count and correct_count[question.pk]['count'] > 0:
+            question_dic['accuracy'] = correct_count[question.pk]['correct'] / correct_count[question.pk]['count']
+        else:
+            question_dic['accuracy'] = 0
+
+        if question.img:
+            question_dic['image'] = question.img.url[10:]
+ 
+        for option in question.options.all().order_by('order'):
+            option_dic = {"order": option.order, "body": option.body}
+            if option.img:
+                option_dic['image'] = option.img.url[10:]
+            question_dic['option'].append(option_dic)
+            if option.is_correct:
+                question_dic['answer'] = option.order
+
+        questions.append(question_dic)
+
+    def by_qid(t):
+        return t['id']
+
+    questions = sorted(questions, key = by_qid)
+
+    dic['questions'] = questions
+
+
+    #image2
+    #FIXME: here I assume one teacher only teaches one subject in a certain class. Is it possible that he would teach more than 1?
+    quiz_records = QuizRecord.objects.filter(cls=cls,teacher=quiz_record.teacher).order_by("-datetime")
+    quiz_values = list(quiz_records.values("datetime","info"))
+    #print(len(student_quiz_record))
+    if len(quiz_values) > 8:
+        quiz_values = quiz_values[0:8]
+
+    score=[]
+    time=[]
+
+    for r in quiz_values:
+        try:
+            score.append(json.loads(r['info'])['average_score'])
+        except:
+            continue
+        time.append(r['datetime'].strftime('%Y-%m-%d'))
+    time.reverse()
+    score.reverse()
+   
+    dic['image2']={"x":time,"y1":score}
+
+    last_rankings = {}
+    if len(quiz_records) > 0:
+        #print(quiz_records)
+        last_record = quiz_records[0]
+        #print(last_record)
+        ps = json.loads(last_record.info).get('participants', [])
+        for i in range(0, len(ps)):
+            last_rankings[ps[i][0]] = i + 1
+    
+    participants_list = []
+    for i in range(0, len(participants)):
+        participant = participants[i]
+        tmp = {}
+        student_profile = StudentProfile.objects.get(student_no=participant[0])
+        tmp['student_name'] = student_profile.name
+        tmp['score'] = participant[1]
+        tmp['ranking'] = i + 1
+        if participant[0] in last_rankings:
+            tmp['increase'] = last_rankings[participant[0]] - (i + 1)
+        else:
+            tmp['increase'] = '-'
+
+        student_quiz_record = student_profile.studentquizrecord_set.filter(quiz_record=quiz_record)[0]
+        answers = json.loads(student_quiz_record.stats)
+        answer_sheet = {}
+
+        for key in quiz_body:
+            var = answers.get(quiz_body[key][0], '')
+            if var:
+                answer_sheet[key] = var[0]
+            else:
+                answer_sheet[key] = '-'
+
+        tmp['answer_sheet'] = answer_sheet
+        try:
+            student_quiz_paper = student_profile.studentreportpaper_set.filter(quiz=quiz)[0]
+        except:
+            pass
+            
+        try:
+            tmp['quiz_report_url'] = student_quiz_paper.html_uri
+        except:
+            tmp['quiz_report_url'] = '-'
+
+        participants_list.append(tmp)
+
+    dic['participants'] = participants_list
+
+    dic['non_participants'] = list(StudentProfile.objects.filter(student_no__in=non_participants).values_list("name", flat=True))
+
+    #image1
+    image1 = {}
+    # vals2 means portion of nodes
+    vals2 = []
+    vals1 = []
+    labels = []
+    for node_id in node_score_dic:
+        try:
+            node = KnowledgeNode.objects.get(pk = node_id)
+        except:
+            continue
+        labels.append(node.title)
+        vals2.append(round(nodes_dic[node_id]['count'], 1))
+        vals1.append(round(node_score_dic[node_id], 1))
+
+    image1['vals2'] = vals2
+    image1['vals1'] = vals1
+    image1['labels'] = labels
+
+    dic['image1'] = image1
+
+    data = json.dumps(dic)
+    headers={"Content-Type":"application/json"}
+    requests.post(url= settings.HTTP_IP + '/templates/classReport/html',data=data,headers=headers)
+    requests.post(url= settings.HTTP_IP + '/templates/classReport/' + 'pdf',data=data,headers=headers)
+
+    return HttpResponse('OK')
+
+@login_required
+@csrf_exempt
+def check_questions(request):
+    '''
+    
+    '''
+    if request.method =='GET':
+        user = request.user
+        page = request.GET.get('page','1')
+        #questions = Question.objects.filter(id__in=['1010','266'])
+        questions = Question.objects.filter(authenticated = 'U')
+        max_page = int((len(questions.all()) + 24)/25)
+        if int(page) > max_page:
+            page = 1
+        page = int(page)
+        paginator = Paginator(questions, 25)
+        try:
+            questions = paginator.page(page)
+        except:
+            questions = paginator.page(1)
+            page = 1
+
+        questions_list = []
+        for question in questions:
+            # print(quiz_body[body][0])
+            try:
+                options = question.options.all().order_by('order')
+            except:
+                return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
+            options_dict = list(options.values('body','order','img','is_correct'))
+            error_reasons = []
+            options_knowledge_nodes = []
+            true_option=''
+            for option in options:
+                if option.is_correct:
+                    true_option=option.order
+                else:
+                    error_reason = ErrorReason.objects.filter(option=option)
+                    error_reasons.append({'option':option.order,"error_reason":error_reason})
+                option_knowledge_node = KnowledgeNode.objects.filter(option=option)
+                options_knowledge_nodes.append({'option':option.order,"knowledge_nodes":option_knowledge_node})
+            knowledge_nodes = KnowledgeNode.objects.filter(question=question)
+            questions_list.append({'question':question,'options':options,"knowledge_nodes":knowledge_nodes,'true_option':true_option,'option_konwledge_nodes':options_knowledge_nodes,'error_reasons':error_reasons})
+        return render(request, 'quiz/check_questions.html',{'questions':questions_list,'page':page,'max_page':max_page})
+    question_id = request.POST.get('questions_id','')
+    status = request.POST.get('status','')
+    question = Question.objects.get(pk = question_id)
+    try:
+        question = Question.objects.get(pk = question_id)
+    except:
+        return HttpResponse('question no having ')
+    question.authenticated = status
+    question.save()
+    return HttpResponse('OK')
+
+@login_required
+def my_questions(request):
+    '''
+    
+    '''
+    if request.method =='GET':
+        user = request.user
+        status = request.GET.get('status','all')
+        page = request.GET.get('page','1')
+        questions = Question.objects.filter(uploader=user).order_by("id")
+        if status == 'on':
+            questions = questions.filter(authenticated='U').order_by("id")
+        if status == 'failed':
+            questions = questions.filter(authenticated='R').order_by("id")
+        max_page = int((len(questions.all()) + 24)/25)
+        if int(page) > max_page:
+            page = 1
+        page = int(page)
+        paginator = Paginator(questions, 25)
+        try:
+            questions = paginator.page(page)
+        except:
+            questions = paginator.page(1)
+            page = 1
+
+        questions_list = []
+        for question in questions:
+            # print(quiz_body[body][0])
+            try:
+                options = question.options.all().order_by('order')
+            except:
+                return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
+            options_dict = list(options.values('body','order','img','is_correct'))
+            error_reasons = []
+            options_knowledge_nodes = []
+            true_option=''
+            for option in options:
+                if option.is_correct:
+                    true_option=option.order
+                else:
+                    error_reason = ErrorReason.objects.filter(option=option)
+                    error_reasons.append({'option':option.order,"error_reason":error_reason})
+                option_knowledge_node = KnowledgeNode.objects.filter(option=option)
+                options_knowledge_nodes.append({'option':option.order,"knowledge_nodes":option_knowledge_node})
+            knowledge_nodes = KnowledgeNode.objects.filter(question=question)
+            questions_list.append({'question':question,'options':options,"knowledge_nodes":knowledge_nodes,'true_option':true_option,'option_konwledge_nodes':options_knowledge_nodes,'error_reasons':error_reasons})
+        #print(questions_list)
+        return render(request, 'quiz/my_questions.html',{'questions':questions_list, 'status': status, 'page':page, 'max_page':max_page})
+    return render(request, 'quiz/my_questions.html')
+
+@login_required
+@csrf_exempt
+def add_favorites(request):
+    if request.method == "POST":
+        user = request.user
+        question_id = request.POST.get('question_id','')
+        try:
+            question = Question.objects.get(pk=question_id)
+        except:
+            return HttpReponse('question not having')
+        try:
+            teacher_profile = user.teacherprofile
+        except:
+            return HttpResponse('user not having teacher profile')
+        try:
+            favorite = Favorites.objects.get(teacher=teacher_profile)
+            question = favorite.questions.all().filter(pk=question_id)
+            if len(question) > 0:
+                return HttpResponse('favorites having this question')
+            favorite.questions.add(question_id)
+        except:
+            favorite = Favorites(teacher=teacher_profile)
+            #favorite.questions.add(question_id)
+            favorite.save()
+            favorite.questions.add(question_id)
+        return HttpResponse('OK')
+    return HttpResponse('error method')
+
+@login_required
+def my_favorites(request):
+    if request.method == 'GET':
+        user = request.user
+        page = request.GET.get("page",'1')
+        try:
+            teacher_profile = user.teacherprofile
+        except:
+            return HttpResponse('user not having teacher profile')
+        try:
+            favorites = Favorites.objects.get(teacher=teacher_profile)
+        except:
+            favorites = Favorites(teacher=teacher_profile)
+            favorites.save()
+        questions = favorites.questions.all()
+        max_page = int((len(questions.all()) + 24)/25)
+        if int(page) > max_page:
+            page = 1
+        page = int(page)
+        paginator = Paginator(questions, 25)
+        try:
+            questions = paginator.page(page)
+        except:
+            questions = paginator.page(1)
+            page = 1
+
+        questions_list=[]
+        for question in questions:
+            try:
+                options = question.options.all().order_by('order')
+            except:
+                return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
+            for option in options:
+                if option.is_correct:
+                    true_option=option.order
+            knowledge_nodes = KnowledgeNode.objects.filter(question=question)
+            questions_list.append({'question':question,'options':options,"knowledge_nodes":knowledge_nodes,'true_option':true_option})
+        return render(request, 'quiz/my_favorite.html',{'questions':questions_list,'page':page,'max_page':max_page})
+    return render(request, 'quiz/my_favorite.html')
+    
+
+@login_required
+@csrf_exempt
+def remove_favorites(request):
+    if request.method == "POST":
+        user = request.user
+        try:
+            teacher_profile = user.teacherprofile
+        except:
+            return HttpResponse('user not having teacher profile')
+
+        question_id = request.POST.get('question_id','')
+
+        try:
+            favorite = Favorites.objects.get(teacher=teacher_profile)
+        except:
+            return HttpReponse('favorite not having')
+        favorite.questions.remove(question_id)
+        return HttpResponse('OK')
+    return HttpResponse('error method')
+
 

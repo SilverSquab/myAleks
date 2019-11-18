@@ -79,7 +79,7 @@
             $(this).css({ backgroundColor: 'White', color: '#1fc88d' });//鼠标离开之后效果
         });
         var _widht = document.documentElement.clientWidth;  //屏幕宽
-        var _height = document.body.clientHeight; //屏幕高
+        var _height = document.documentElement.clientHeight; //屏幕高
         var boxWidth = $("#mb_con1").width();
         var boxHeight = $("#mb_con1").height();
 		console.log(_widht)

@@ -1,0 +1,30 @@
+{% extends 'quiz/base.html'%}
+{% block "sidebar" %}
+{% endblock %}
+{% block "main" %}
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+{% if not question %}
+<form action="{% url 'answer-question' %}" method="get" > 
+<input name="question_id" placeholder="输入题目编号"/>
+<br/>
+<input type="submit" value="submit"/> 
+</form>
+    {% else %}
+    <form action="{% url 'answer-question' %}" method="post">
+    {% csrf_token %}
+    <h4>{{question.body}}</h4>
+    <input value="{{question.id}}" name="question_id" style="display:none">
+    {% for option in question.options.all %}
+        <input type="radio" value="{{option.id}}" name="option_id">
+        <p><b>{{option.order}}. </b>{{option.body}}</p>
+        {% if option.img %}
+            <img src="{{ option.img.url }}"></img>
+        {% endif %}
+    {% endfor %}
+    <input type="submit" vlue="submit">
+    </form>
+    {% endif %}
+{% endblock%}

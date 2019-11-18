@@ -1,0 +1,198 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>测试情况</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<!-- VENDOR CSS -->
+	<link rel="stylesheet" href="{% static "assets/vendor/bootstrap/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "assets/vendor/font-awesome/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "assets/vendor/linearicons/style.css" %}">
+	<link rel="stylesheet" href="{% static "assets/vendor/chartist/css/chartist-custom.css" %}">
+	<!-- MAIN CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/main.css" %}">
+	<link rel="stylesheet" href="{% static "assets/css/iconfont.css" %}">
+	<!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
+	<!-- <link rel="stylesheet" href="assets/css/demo.css"> -->
+</head>
+
+<body>
+	<!-- WRAPPER -->
+	<div id="wrapper">
+		<!-- NAVBAR -->
+		<nav class="navbar navbar-default navbar-fixed-top">
+			<!-- <div class="brand">
+				<a href="index.html"><img src="assets/img/logo-dark.png" alt="Klorofil Logo" class="img-responsive logo"></a>
+			</div> -->
+			<div class="container-fluid">
+				<div class="navbar-btn">
+					<button type="button" class="btn-toggle-fullwidth"><i class="lnr lnr-arrow-left-circle"></i></button>
+				</div>
+				<form class="navbar-form navbar-left">
+					<div class="input-group">
+						<input type="text" value="" class="form-control" placeholder="查找...">
+						<span class="input-group-btn"><button type="button" class="btn btn-primary">Go</button></span>
+					</div>
+				</form>
+				<div id="navbar-menu">
+					<ul class="nav navbar-nav navbar-right">
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>{{ request.session.username }}</span> <i class="icon-submenu lnr lnr-chevron-down"></i></a>
+							<ul class="dropdown-menu">
+								<li><a href="/teacher/index/"><i class="lnr lnr-user"></i> <span>主页</span></a></li>
+								<li><a href="#"><i class="lnr lnr-envelope"></i> <span>Message</span></a></li>
+								<li><a href="#"><i class="lnr lnr-cog"></i> <span>Settings</span></a></li>
+								<li><a href="/logout/"><i class="lnr lnr-exit"></i> <span>Logout</span></a></li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+		<!-- END NAVBAR -->
+		<!-- LEFT SIDEBAR -->
+		<div id="sidebar-nav" class="sidebar">
+			<div class="sidebar-scroll">
+				<nav>
+					<ul class="nav">
+						<li><a href="/teacher/index/" class=""><i class="lnr lnr-home"></i> <span>主页</span></a></li>
+						<li><a href="/teacher/view_student/" class=""><i class="iconfont icon-chakan"></i> <span>查看学生</span></a></li>
+						<li><a href="/teacher/upload_questions/" class=""><i class="iconfont icon-jiahao"></i> <span>题目录入</span></a></li>
+						<li><a href="/teacher/question_bank/" class=""><i class="iconfont icon-tiku"></i> <span>查看题库</span></a></li>
+						<li>
+							<a href="#subPages" data-toggle="collapse" class="collapse active"><i class="iconfont icon-qiehuan"></i> <span>组卷测试</span> <i class="icon-submenu lnr lnr-chevron-left"></i></a>
+							<div id="subPages" class="collapse in">
+								<ul class="nav">
+									<li><a href="/teacher/compose_quiz/" class=""><i class="iconfont icon-shangchuan"></i> <span>生成试卷</span></a></li>
+									<li><a href="/teacher/view_quiz/" class="active"><i class="iconfont icon-laiyuanqingkuang"></i> <span>测试情况</span></a></li>
+								</ul>
+							</div>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+		<!-- END LEFT SIDEBAR -->
+		<!-- MAIN -->
+		<div class="main">
+			<div class="main-content">
+				<div class="container-fluid">
+					<div id="container1" class="col-md-6" style="max-width:800px;height:400px"></div>
+                    <div id="container2" class="col-md-6" style="min-width:400px;height:400px"></div>
+                </div>
+            </div>
+		</div>
+		<!-- END MAIN -->
+		<div class="clearfix"></div>
+	</div>
+	<!-- END WRAPPER -->
+	<!-- Javascript -->
+	<script src="{% static "assets/vendor/jquery/jquery.min.js" %}"></script>
+	<script src="{% static "assets/vendor/bootstrap/js/bootstrap.min.js" %}"></script>
+	<script src="{% static "assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js" %}"></script>
+	<script src="{% static "assets/scripts/klorofil-common.js" %}"></script>
+	<script src="{% static "assets/scripts/highcharts.js" %}"></script>
+    <script>
+        var chart = Highcharts.chart('container1', {
+            title: {
+                text: 'xxx学校xxx年级近期数学测验平均分对比情况'
+            },
+            xAxis:{
+                tickPositions:[0,1,2,3,4,5]
+            },
+            yAxis: {
+                title: {
+                    text: '平均分'
+                },
+                tickPositions:[80,85,90,95,100]
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle'
+            },
+            credits:{
+              text:''
+            },
+            series: [{
+                name: 'xxx年级1班',
+                data: [90, 88, 89, 89, 97, 91]
+            }, {
+                name: 'xxx年级2班',
+                data: [89, 84, 80, 85, 90, 88]
+            }, {
+                name: 'xxx年级3班',
+                data: [84, 89, 85, 81, 91, 84]
+            }, {
+                name: 'xxx年级4班',
+                data: [82, 80, 83, 81, 85, 82]
+            }, {
+                name: 'xxx年级5班',
+                data: [84, 84, 85, 82, 89, 89]
+            }],
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 500
+                    },
+                    chartOptions: {
+                        legend: {
+                            layout: 'horizontal',
+                            align: 'center',
+                            verticalAlign: 'bottom'
+                        }
+                    }
+                }]
+            }
+        });
+        var chart2 = Highcharts.chart('container2', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'xxx学校xx年级2019年上半年阶段性测试 数学（一）'
+            },
+            xAxis: {
+                type: 'category',
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: '平均分/分'
+                }
+            },
+            credits:{
+              text:''
+            },
+            legend: {
+                enabled: false
+            },
+            tooltip: {
+                pointFormat: '平均分: <b>{point.y:.1f} 分 </b>'
+            },
+            series: [{
+                name: '分数',
+                data: [
+                    ['xx年级1班', 90],
+                    ['xx年级2班', 80],
+                    ['xx年级3班', 85],
+                    ['xx年级4班', 86],
+                    ['xx年级5班', 91],
+                    ['xx年级6班', 81],
+                    ['xx年级7班', 89],
+                    ['xx年级8班', 88]
+                ],
+                dataLabels: {
+                    enabled: true,
+                    color: '#000000',
+                    align: 'center',
+                    format: '{point.y:.1f}', // :.1f 为保留 1 位小数
+                }
+            }]
+        });
+    </script>
+</body>
+</html>

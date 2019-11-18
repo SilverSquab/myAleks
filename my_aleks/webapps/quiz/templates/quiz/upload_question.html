@@ -1,82 +1,140 @@
 {% extends 'teacher/teacher_base.html'%}
 {% load staticfiles %}
+
+
+{% block "stylesheets" %}
+<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+<style>
+    .lineInput {
+        text-align: left;
+        margin: 0.5rem 0 0.5rem 0;
+        padding: .375rem .75rem;
+        background-color:#f8f9fc;
+        border:#e5e5e5 2px solid;
+        border-radius: 5px;
+    }
+    .questionBody{
+        margin-left: 15px;
+    }
+    .input-left{
+        margin-left: 15px;
+    }
+    .input-right{
+        margin-right: 15px;
+    }
+    .blockInput{
+        display:block;
+        margin-left: 40px;
+        width: 90%;
+    }
+    .blockSelect{
+        display:block;
+        margin-left: 40px;
+        width: 20%;
+    }
+    .line-bottom{
+        margin-bottom: 15px;
+    }
+    .hide{
+        display: none;
+    }
+    .div_padding{
+        padding: 10px;
+    }
+
+
+
+</style>
+{% endblock %}
+
+
+
 {% block "main_content" %}
 
-
-<p>公式录入： <span id="math-field" style="width:300px;"></span></p>
+<div class="myBody">
+<p>公式录入： <span id="math-field" style="width:300px;" class="lineInput"></span></p>
 <p>LaTeX代码(不换行)： <span id="latex"></span></p>
 <p>LaTeX代码(换行)： <span id="latexBr"></span></p>
 
 <a href="https://www.cnblogs.com/caomingpei/p/9760652.html">latex 常见公式语法查询</a>
+    <h1>题目录入</h1>
 <form id="question_form">
-   <div class="col-xl-12" style="position:relative;">
-  {{question_form}}
-</div>
+    <hr>
+    <h2>题干</h2>
+    <div class="questionBody">
+        <div class="col-xl-12" style="position:relative;">
+            {{question_form}}
+        </div>
 
-  <div class="col-xl-12" style="position:relative;">
-    搜索知识点(可添加多个知识点，所有知识点会在下方列出)：
-    <input type="text" id="knowledge_node_searchbar" class="nodeSearchBar form-control bg-light">
-    <div class="hint" id="hint1" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:100%;">
-      <table id="table1" style="width:100%;">
-        <tbody class="node_table" style="width:100%;">
-          <tr class="node_item" style="width:100%;"><td></td></tr>
-        
-        </tbody>
-      </table>
+      <div class="col-xl-12" style="position:relative;">
+          <span>搜索知识点(可添加多个知识点，所有知识点会在下方列出)：</span><span id="copyNodeSpan" style="cursor:pointer;color:#91cc8d;float: right;margin-right: 10%">将知识点复制给全部选项</span>
+        <input type="text" id="knowledge_node_searchbar" class="nodeSearchBar form-control bg-light line-bottom blockInput">
+        <div class="hint" id="hint1" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:90%;margin-left: 40px;">
+          <table id="table1" style="width:100%;">
+            <tbody class="node_table" style="width:100%;">
+              <tr class="node_item" style="width:100%;"><td></td></tr>
+
+            </tbody>
+          </table>
+        </div>
+          <!--<div style="margin-bottom: 15px">知识点列表：</div>-->
+        <table id="nodes_table_question" style="width:100%;">
+            <!--<caption align="top">知识点列表</caption>-->
+            <tbody class="node_table_display" style="width:100%;">
+
+            {% if knowledge_nodes %}
+            {% for l in knowledge_nodes %}
+            <tr class="node_item" id="question_{{l.0}}'" style="margin-bottom: 8px;display: block;margin-left: 10px"><td></td><td style="margin-left: 10px">{{l.1}}  &nbsp;&nbsp;  <a edge_id="{{l.0}}" class= "question_delete" style="cursor:pointer;color:#91cc8d">删除</a></td></tr>
+            {% endfor %}
+            {% endif %}
+
+            </tbody>
+          </table>
+      </div>
     </div>
-    <table id="nodes_table_question" style="width:100%;">
-        <tbody class="node_table_display" style="width:100%;">
+    <div class="col-xl-12 hide" id="question-preview1" style="position:relative;">
+        <h4>预览题目:</h4>
+        <div id="body-preview" class="div_padding" style="border: 1px solid #d1d3e2;" ><p> </p></div>
+    </div>
+    <div class="col-xl-12 hide" id="question-preview2" style="position:relative;">
+        <h4>预览解析:</h4>
+        <div id="analysis-preview" class="div_padding" style="border: 1px solid #d1d3e2;" ><p> </p></div>
+    </div>
 
-<!--           <tr class="node_item" style="width:100%;"><td></td></tr>
- -->    
-        {% if knowledge_nodes %}
-        {% for l in knowledge_nodes %}  
-        <tr class="node_item" id="{{l.0}}'"><td>{{l.1}}    <a edge_id="{{l.0}}" class= "question_delete">删除</a></td></tr>
-        {% endfor %}
-        {% endif %}
-        
-        </tbody>
-      </table>
-  </div>
-   <div class="col-xl-12" style="position:relative;">
-    <h1>预览题目</h1>
-  <div id="body-preview" style="border: 1px solid #d1d3e2;"><p> </p></div>
-    <h1>预览解析</h1>
-  <div id="analysis-preview" style="border: 1px solid #d1d3e2;"><p> </p></div>
-</div>
-
-
-
-<br><br>
 </form>
+    <br>
+    <hr>
+    <br>
+
+
   {% for option_form in option_forms %}
+    <h2>选项 {{ option_form.order_of_option }}</h2>
+    <div class="questionBody">
    <div class="col-xl-12" style="position:relative;">
-  <form id="option_form_{{option_form.order_of_option}}">
-    <h1>选项 {{ option_form.order_of_option }}</h1>
+    <form id="option_form_{{option_form.order_of_option}}">
     {{option_form}}
     </form>
   </div>
-  <div class="col-xl-12" style="position:relative;">
-    搜索知识点(可添加多个知识点，所有知识点会在下方列出)：
-    <input type="text" id="knowledge_node_searchbar_{{option_form.order_of_option}}" class="nodeSearchBar form-control bg-light">
-    <div class="hint" id="hint_{{option_form.order_of_option}}" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:100%;">
+
+    <div class="col-xl-12" style="position:relative;">
+        <span>搜索知识点(可添加多个知识点，所有知识点会在下方列出)：</span>
+    <input type="text" id="knowledge_node_searchbar_{{option_form.order_of_option}}" class="nodeSearchBar form-control bg-light line-bottom blockInput">
+    <div class="hint" id="hint_{{option_form.order_of_option}}" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:90%;margin-left: 40px;">
       <table id="nodes_table_search_{{option_form.order_of_option}}" style="width:100%;">
         <tbody class="node_table" style="width:100%;">
-<!--           <tr class="node_item" style="width:100%;"><td></td></tr>
- -->        
         </tbody>
       </table>
     </div>
+        <!--<div style="margin-bottom: 15px">知识点列表：</div>-->
     <table id="nodes_table_{{option_form.order_of_option}}" style="width:100%;">
+        <!--<caption align="top">知识点列表</caption>-->
         <tbody class="node_table_display" style="width:100%;">
 
-<!--           <tr class="node_item" style="width:100%;"><td></td></tr>
- -->        
         {% if nodes_arrs %}
           {%if nodes_arrs|get_item:option_form.order_of_option %}
 
             {% for l in nodes_arrs|get_item:option_form.order_of_option %}
-                <tr class="node_item" id="option_node_{{l.0}}"><td>{{l.1}} <a edge_id="{{l.0}}" option_id="{{option_form.order_of_option}}" class='option_delete'>删除</a></td></tr>
+        <tr class="node_item" id="option_node_{{l.0}}" style="margin-bottom: 8px;display: block;margin-left: 10px"><td></td></td><td >{{l.1}}  &nbsp;&nbsp; <a edge_id="{{l.0}}" option_id="{{option_form.order_of_option}}" class='option_delete' style="cursor:pointer;color:#91cc8d" >删除</a></td></tr>
 
             {% endfor %}
 
@@ -84,15 +142,71 @@
         {% endif %}
         </tbody>
       </table>
-  </div>
+    </div>
+        <div class="hide option-preview-div">
+            <h4>预览选项</h4>
+            <div class="option-preview div_padding" style="border: 1px solid #d1d3e2;"><p> </p></div>
+        </div>
+    </div>
 
-  <h1>预览选项</h1>
-  <div class="option-preview" style="border: 1px solid #d1d3e2;"><p> </p></div>
-  <hr>
-
+    <br>
+    <hr>
+    <br>
   {% endfor %}
+
+
+    <!--题目预览-->
+    <div>
+        <h2>题目预览</h2>
+        <div class="card mb-4">
+            <div class="card-header">
+                <span id="preview-click" style="cursor: pointer;color: #000000">点击预览题目</span>
+            </div>
+            <div class="card-body" >
+                <div id="preview-car-body" class="hide">
+                    <p id="question-body-preview-id"></p>
+                    <div>
+                        <img src="" id="question-img-preview-id">
+                    </div>
+
+                    <div style="float:left;padding-right:50px;padding-left:50px">
+                        <p id="option-A-body-preview-id"> </p>
+                        <img src="" id="option-A-img-preview-id">
+                    </div>
+                    <div style="float:left;padding-right:50px;padding-left:50px">
+                        <p id="option-B-body-preview-id"></p>
+                        <img src="" id="option-B-img-preview-id">
+                    </div>
+                    <div style="float:left;padding-right:50px;padding-left:50px">
+                        <p id="option-C-body-preview-id"></p>
+                        <img src="" id="option-C-img-preview-id">
+                    </div>
+                    <div style="float:left;padding-right:50px;padding-left:50px">
+                        <p id="option-D-body-preview-id"></p>
+                        <img src="" id="option-D-img-preview-id">
+                    </div>
+
+                <div style="width:100%;clear:both">
+                    <hr/>
+                    <p id="analysis-body-preview-id">解析：</p>
+                    <div >
+                        <img src="" id="analysis-img-preview-id">
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+
 <br><br>
 <button id="add_question" class="btn btn-primary">添加题目</button>
+</div>
+
 
 
 {% endblock %}
@@ -118,6 +232,10 @@ var question_id = -1;
 var question_id = {{question_id}};
 {% endif %}
 
+
+
+
+
 var mathFieldSpan = document.getElementById('math-field');
 var latexSpan = document.getElementById('latex');
 
@@ -137,6 +255,8 @@ var mathField = MQ.MathField(mathFieldSpan, {
 });
 
     var nodes_arr = [];
+    var http_id = 'http://47.110.253.251/abc/media/';
+    //var http_id = 'https://pointerai.com/abc/media/';
 
     {% if knowledge_nodes %}
       {% for i in knowledge_nodes %}
@@ -173,21 +293,46 @@ var mathField = MQ.MathField(mathFieldSpan, {
     $(".node_table").on("click", ".node_item", function(){
       //console.log($(this).parent().parent().attr('id'));
       $(this).parent().parent().parent().prev().val($(this).find('td').html());
-      $(this).parent().parent().parent().next().append('<tr class="node_item" style="width:100%;"><td>' + $(this).html() + '</td></tr>');
+      //$(this).parent().parent().parent().next().append('<tr class="node_item" style="width:90%;"><td>' + $(this).html() + '</td></tr>');
 
       var l = $(this).parent().parent().attr("id").split('_');
       var order = l[l.length - 1];
+      var nodeId = $(this).attr("id");
 
+      // console.info($(this).parent().parent().parent().next());
       if(order in nodes_arrs){
-        nodes_arrs[order].push($(this).attr("id"));
+        nodes_arrs[order].push(nodeId);
         //console.log(nodes_arrs[order]);
+          $(this).parent().parent().parent().next().append('<tr class="node_item" style="margin-bottom: 8px;display: block;margin-left: 10px"><td>' + $(this).html() + '</td></tr>');
       }
       else {
-        nodes_arr.push($(this).attr("id"));
+        nodes_arr.push(nodeId);
         //console.log(nodes_arr);
-
+          $(this).parent().parent().parent().next().append('<tr class="node_item" style="margin-bottom: 8px;display: block;margin-left: 10px" id="question_'+nodeId+'"><td>' + $(this).html() + '</td></tr>');
       }
-    })
+    });
+    //复制题干知识点给选项
+    $(document).on("click","#copyNodeSpan",function () {
+        var orders = ['A','B','C','D'];
+        for(var index in orders){
+            for(var node in nodes_arr){
+                if(nodes_arrs[orders[index]].indexOf(nodes_arr[node]) == -1){
+                    nodes_arrs[orders[index]].push(nodes_arr[node]);
+                    $('#nodes_table_'+orders[index]).children('tbody').append('<tr class="node_item" style="margin-bottom: 8px;display: block;margin-left: 10px">' + $('#question_'+nodes_arr[node]).html() + '</tr>');
+                }
+            }
+        }
+        // console.info(nodes_arr)
+        // console.info(nodes_arrs['A'])
+        // console.info(nodes_arrs['B'])
+        // console.info(nodes_arrs['C'])
+        // console.info(nodes_arrs['D'])
+
+    });
+
+
+
+
 
     var old_val = {};
 
@@ -213,7 +358,7 @@ var mathField = MQ.MathField(mathFieldSpan, {
 
           $.ajax({
             method: "GET",
-            url: "{% url "ajax-nodes" %}",
+            url: "{% url 'ajax-nodes' %}",
             data: { subject: $("#id_subject").val(), text: old_val[node_input.attr("id")] }
           })
           .done(function( msg ) {
@@ -251,13 +396,9 @@ var mathField = MQ.MathField(mathFieldSpan, {
 
           q_id = data;
           submit_option(['A', 'B', 'C', 'D']);
-          // submit_option('B');
-          // submit_option('C');
-          // submit_option('D');
-          //window.location.reload();
         }
       })
-    })
+    });
 
 
     function submit_question(){
@@ -272,7 +413,6 @@ var mathField = MQ.MathField(mathFieldSpan, {
       }
       var order = orders[0];
       var form = $("#option_form_"+String(order));
-      //console.log(form.html());
 
       form.ajaxSubmit({
         type:'post',
@@ -281,7 +421,6 @@ var mathField = MQ.MathField(mathFieldSpan, {
         processData: false,
         url: '{% url "ajax-upload-option" %}',
         success: function(data){
-          //alert(data);
           if(data != 'OK'){
             alert("上传失败");
           }
@@ -290,54 +429,139 @@ var mathField = MQ.MathField(mathFieldSpan, {
           }, 200);
         }
       })
-      
     }
+
+
+    //选择正确答案之后隐藏错因
+      $(".option-iserror").click(function () {
+          // console.info($(this).nextAll()[2]);
+          var select = $(this).next().next().next();
+          var select_lable = $(this).next().next();
+          if (this.checked == true){
+              select.addClass("hide");
+              select_lable.addClass("hide");
+          }else{
+              select.removeClass("hide");
+              select_lable.removeClass("hide");
+          }
+      });
+
+        //获取图片地址
+      var getImgUrl = function(evant,img){
+          //获取文件对象
+          let file = evant.files[0];
+          if(!file){
+              return false;
+          }
+          //获取文件阅读器
+          let reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = function(){
+              // console.info(this.result);
+              img.setAttribute("src", this.result);
+          }
+          return true;
+      };
+
+
+      //预览题目
+      $("#preview-click").click(function () {
+          $('#question-body-preview-id').html("题目："+$("#id_question_body").val());
+          if(!getImgUrl(document.getElementById("id_img"),document.getElementById("question-img-preview-id"))){
+                if($("#img-clear_id").prev('a').length != 0){
+                    $("#question-img-preview-id").attr('src',http_id+$("#img-clear_id").prev('a').text())
+                }else{
+                    $("#question-img-preview-id").addClass("hide");
+                }
+          }else{
+            if($("#question-img-preview-id").hasClass("hide")){
+                $("#question-img-preview-id").removeClass("hide");
+            }
+          }
+          var options = ['A','B','C','D'];
+          for(var i in options){
+          // console.info(options[i])
+          // console.info($("#id_option_body_"+options[i]))
+          if(JSON.stringify($("#id_option_body_"+options[i])) == "{}"){
+            // console.info(options[i])
+            continue;
+          }
+              $('#option-'+options[i]+'-body-preview-id').html(options[i]+'.'+$("#id_option_body_"+options[i]).val());
+              if(!getImgUrl(document.getElementById("id_option_img_"+options[i]),document.getElementById("option-"+options[i]+"-img-preview-id"))){
+                    // console.info($("#option_form_"+options[i]).children('a:eq(0)'))
+                  if($("#option_form_"+options[i]).children('a:eq(0)').length != 0){
+                    $("#option-"+options[i]+"-img-preview-id").attr('src',http_id+$("#option_form_"+options[i]).children('a:eq(0)').text())
+                }else{
+                    $("#option-"+options[i]+"-img-preview-id").addClass("hide");
+                }
+              }else{
+                  if($("#option-"+options[i]+"-img-preview-id").hasClass("hide")){
+                    $("#option-"+options[i]+"-img-preview-id").removeClass("hide");
+                  }
+              }
+          }
+          $('#analysis-body-preview-id').html("解析："+$("#id_analysis").val());
+          if(!getImgUrl(document.getElementById("id_analysis_img"),document.getElementById("analysis-img-preview-id"))){
+              if($("#analysis_img-clear_id").prev('a').length != 0){
+                    $("#analysis-img-preview-id").attr('src',http_id+$("#analysis_img-clear_id").prev('a').text())
+                }else{
+                    $("#analysis-img-preview-id").addClass("hide");
+                }
+
+          }else{
+            if($("#analysis-img-preview-id").hasClass("hide")){
+                $("#analysis-img-preview-id").removeClass("hide");
+            }
+          }
+          MathJax.Hub.Typeset()
+
+          $("#preview-car-body").removeClass("hide");
+
+      });
+
 
 
     // mathjax reloads preview model when body is blurred
     $("#id_question_body").blur(function(){
       var body = $(this).val();
-      //console.log(body);
-      $("#body-preview").html(body);
-      MathJax.Hub.Typeset()
-    })
+        $("#question-preview1").removeClass("hide");
+        $("#body-preview").html(body);
+        MathJax.Hub.Typeset()
+    });
 
     $("#id_analysis").blur(function(){
       var body = $(this).val();
-      //console.log(body);
-      $("#analysis-preview").html(body);
-      MathJax.Hub.Typeset()
-    })
+        $("#question-preview2").removeClass("hide");
+        $("#analysis-preview").html(body);
+        MathJax.Hub.Typeset()
+    });
 
     $("textarea[id^='id_option_body']").blur(function(){
-      var preview = $(this).parent().parent().nextAll(".option-preview").first();
-      var body = $(this).val();
-      preview.html(body);
-      MathJax.Hub.Typeset();
-    })
+        var divPreview = $(this).parent().parent().nextAll(".option-preview-div");
+        var preview = divPreview.children(".option-preview");
+        var body = $(this).val();
+        divPreview.removeClass("hide");
+        preview.html(body);
+        MathJax.Hub.Typeset();
+    });
 
 		 $(".question_delete").click(function () {
-		 			
-           //alert('删除')
-           var edge_id =$(this).attr('edge_id')
-           console.log(edge_id)
-           $.get("{% url "ajax-delete-edge-question" %}?question_id="+question_id+'&edge_id='+edge_id,function(data,status){
+           var edge_id =$(this).attr('edge_id');
+           $.get("{% url 'ajax-delete-edge-question' %}?question_id="+question_id+'&edge_id='+edge_id,function(data,status){
            		if(data=="OK"){
-           				alert('删除成功')
+           				alert('删除成功');
+                        window.location.reload();
            		}else{
            				alert('删除失败！')
            		}
            	})
-      })
+      });
         $(".option_delete").click(function () {
-            //alert('删除')
-           var edge_id =$(this).attr('edge_id')
-           var option_order=$(this).attr('option_id')
-           //console.log(option_order)
-           //console.log(edge_id)
-           $.get("{% url "ajax-delete-edge-question" %}?question_id="+question_id+'&edge_id='+edge_id+'&option_order='+option_order,function(data,status){
+           var edge_id =$(this).attr('edge_id');
+           var option_order=$(this).attr('option_id');
+           $.get("{% url 'ajax-delete-edge-question' %}?question_id="+question_id+'&edge_id='+edge_id+'&option_order='+option_order,function(data,status){
            		if(data=="OK"){
-           				alert('删除成功！')
+           				alert('删除成功！');
            				window.location.reload();
            		}else{
            				alert('删除失败！')
@@ -346,4 +570,39 @@ var mathField = MQ.MathField(mathFieldSpan, {
         })
   })
 </script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $('label[for="id_question_body"]').text("请输入题干文本：");
+        $('label[for="id_subject"]').text("学科：");
+        $('label[for="id_img"]').text("上传题干图片：");
+        $('label[for="id_question_type"]').text("题目类型：");
+        $('label[for="id_analysis"]').text("解析：");
+        $('label[for="id_selected"]').text("是否为优选题：");
+        $('label[for="id_analysis_img"]').text('上传解析图片：');
+        var options = ['A','B','C','D'];
+        for(i in options){
+            $('label[for="id_option_img_'+options[i]+'"]').text("上传图片：");
+            $('label[for="id_option_body_'+options[i]+'"]').text("请输入选项文本：");
+            $('label[for="id_option_is_correct_'+options[i]+'"]').text("是否为正确答案：");
+            $('label[for="id_option_error_reason_'+options[i]+'"]').text("错误类型：");
+        }
+
+        $('#id_selected').after("<br>");
+        $('#id_img').after("<br>");
+        $('.option_img').after("<br>");
+        $('.option-iserror').after("<br>");
+
+
+
+
+
+
+
+    })
+    
+</script>
+
 {% endblock %}

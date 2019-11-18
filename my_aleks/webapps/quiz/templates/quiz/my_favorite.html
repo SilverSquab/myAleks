@@ -1,0 +1,187 @@
+{% extends 'teacher/teacher_base.html'%}
+{% load staticfiles %}
+{% block "stylesheets" %}
+    <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+    <script type="text/javascript"
+        src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    <script type="text/x-mathjax-config">
+	    MathJax.Hub.Config({
+	        tex2jax: {inlineMath: [['$', '$'], ['/[', '/]'],['\\(', '\\)'], ['\\ce{', '\}']]},
+	        messageStyle: "none"
+	    });
+	</script>
+
+<style>
+    .cardFontSize{
+        font-size: 16px;
+    }
+
+    @media screen and (max-width: 500px)  {
+        .cardFontSize{
+            font-size: 12px;
+        }
+    }
+
+</style>
+
+{% endblock %}
+
+{% block "main_content" %}
+
+<!-- Begin Page Content -->
+
+<!-- Page Heading -->
+
+
+<!-- Page Heading -->
+<!--试卷信息-->
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">收藏夹</h1>
+</div>
+<!-- <button class="btn btn-primary" id="search-btn" style = "margin-bottom: 20px" type="button">审核中</button>
+<button class="btn btn-primary" id="search-btn" style = "margin-bottom: 20px" type="button">审核失败</button> -->
+<!--题目卡片-->
+{% if questions %}
+<div class="card mb-4" style="width: 100%;float: right">
+    <div class="card-body">
+        <!-- <hr style="height: 5px"/> -->
+        <div class="row cardFontSize" id="question-container">
+            {% for q in questions %}
+            <div class="col-lg-12">
+                <!-- Default Card Example -->
+                <div class="card mb-4">
+                    <div class="card-header" question_id = "{{q.question.id}}">                              
+                        <h6 class="m-0 font-weight-bold text-primary"style="line-height: 1.5rem;float:left;width:50%">
+                            知识点：{% for k in q.knowledge_nodes %} {{k.title}}； {% endfor %}
+                        </h6>
+                        <!-- <a href="/abc/quiz/upload-question/?question_id={{q.question.id}}" style="color:white; float:left; margin-right:10px" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">编辑试题</a> -->
+                        <a id= "delete" question_id="{{q.question.id}}" style=" float:right; color:white" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">移出</a>
+                    </div>
+                    <div class="card-body">
+                        <p>{{q.question.body}}</p>
+                        {% if q.question.img %}
+                            <div>
+                            	<img class="question_img" src="{{TEMPLATES_IP}}/evaluation-img/{{q.question.img}}">
+                            </div>
+                        {% endif %}
+                        {% for o in q.options %}
+                            <div style="float:left;padding-right:50px;padding-left:50p">
+                        	    <p>{{o.order}}.{{o.body}} {{o.knowledgenode_id}}</p>
+                        	    {% if o.img %}
+                            	    <img class="question_img" src="{{TEMPLATES_IP}}/evaluation-img/{{o.img}}">
+                        	    {% endif %}
+
+                            </div>
+                    	{% endfor %}
+                        <div style="width:100%;clear:both">
+                            <hr/>
+                            <p>【正确答案】：{{q.true_option}}</p>
+                           <!--  <P>【错因分析】：{% for r in  q.error_reasons %}{{r.option}}：{% for error in r.error_reason %}{{error}}；{% endfor %}{% endfor %}</p>
+                            <p>【题干知识点】：{% for k in q.knowledge_nodes %} {{k.title}}； {% endfor %}</p>
+                            <p>【选项知识点】：{% for k in q.option_konwledge_nodes %}{{k.option}}：{% for node in k.knowledge_nodes %}{{node}}；{% endfor %}{% endfor %}</p> -->
+                            <p>【解析】：{{q.question.analysis}}</p>
+                            {% if q.question.analysis_img %}
+                                <div>
+                                    <img class="question_img" src="{{TEMPLATES_IP}}/evaluation-img/{{q.question.analysis_img}}">
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+<!-- 
+        <hr style="height: 5px"/> -->
+        <div style="text-align: center;">
+            {% if page != 1%}
+            <span style="margin: 10px; cursor: pointer" id="previous_page">上一页</span>
+            {% endif %}
+            <span style="margin-left: 10px"span>{{page}}</span>/<span style="margin-right: 10px">{{max_page}}</span>
+            {% if page < max_page %}
+            <span style="margin: 10px; cursor: pointer" id="next_page">下一页</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+<!-- /.container-fluid -->
+{% endblock %}
+{% block "scripts" %}
+<script type="text/javascript" async src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Ajax.config.path["mhchem"] = "https://cdnjs.cloudflare.com/ajax/libs/mathjax-mhchem/3.3.2";
+    MathJax.Hub.Config({
+        TeX: {
+            extensions: ["[mhchem]/mhchem.js"],
+        }
+    });
+</script>
+
+
+<script src="{% static "assets/js/image.js" %}" type="text/javascript"></script>
+<script type="text/javascript">
+	window.onload=function(){
+        MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("question-container")]);
+        // MathJax.Hub.Typeset();
+	}
+	//当前页数
+    var page = {{page}}
+    //最大页数
+    var max_page ={{max_page}}
+    //上一页
+    $(document).on('click', '#previous_page', function () {
+        page = page-1
+        $(location).attr('href', '/abc/quiz/my-favorites/?page='+page);
+    });
+    //下一页
+    $(document).on('click', '#next_page', function () {
+        page = page+1
+        $(location).attr('href', '/abc/quiz/my-favorites/?page='+page);
+    });
+    //移出题目
+    $(document).on('click', '#delete', function () {
+        var question_id = $(this).attr('question_id');
+        console.log(question_id)
+        $.post("{% url "remove-favorites" %}",{"question_id":question_id},function(data,status){
+            if (data=="OK"){
+                window.location.reload();
+            }else{
+                alert('移除失败！')
+            }
+        })
+    });
+    $(document).ready(function() {
+    	changeImageSize()
+    })
+ //    $(document).ready(function() {
+ //    	$('.question_img').each(function() {
+ //    		var client_width = document.documentElement.clientWidth
+ //    		console.info(client_width)
+	// 	    var maxWidth = client_width*0.2; // 图片最大宽度
+	// 	    var maxHeight = 300;    // 图片最大高度
+	// 	    var ratio = 0.2;  // 缩放比例
+	// 	    var width = $(this).width();    // 图片实际宽度
+	// 	    var height = $(this).height();  // 图片实际高度
+ 
+	// 	    // 检查图片是否超宽
+	// 	    if(width > maxWidth){
+	// 	        ratio = maxWidth / width;   // 计算缩放比例
+	// 	        $(this).css("width", maxWidth); // 设定实际显示宽度
+	// 	        height = height * ratio;    // 计算等比例缩放后的高度 
+	// 	        $(this).css("height", height);  // 设定等比例缩放后的高度
+	// 	    }
+ 
+	// 	    // 检查图片是否超高
+	// 	    if(height > maxHeight){
+	// 	        ratio = maxHeight / height; // 计算缩放比例
+	// 	        $(this).css("height", maxHeight);   // 设定实际显示高度
+	// 	        width = width * ratio;    // 计算等比例缩放后的高度
+	// 	        $(this).css("width", width * ratio);    // 设定等比例缩放后的高度
+	// 	    }
+	// 	});
+	// });
+    
+</script>
+{% endblock %}

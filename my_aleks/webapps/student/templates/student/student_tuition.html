@@ -1,0 +1,132 @@
+{% extends 'teacher/teacher_base.html'%}
+{% load staticfiles %}
+
+{% block "stylesheets" %}
+<style>
+    .table11_6 table {
+        width:90%;
+        margin:15px auto;
+        border:0;
+    }
+    .table11_6 th {
+        background-color:#96C7ED;
+        color:#000000;
+        height:5%;
+    }
+    .table11_6,.table11_6 th,.table11_6 td {
+        font-size:0.95em;
+        text-align:center;
+        padding:4px;
+        border-collapse:collapse;
+    }
+    .table11_6 th,.table11_6 td {
+        border: 1px solid #73b4e7;
+        border-width:1px 0 1px 0;
+        border:2px inset #ffffff;
+    }
+    .table11_6 tr {
+        border: 1px solid #ffffff;
+    }
+    .table11_6 tr:nth-child(odd){
+        background-color:#dcecf9;
+    }
+    .table11_6 tr:nth-child(even){
+        background-color:#ffffff;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block "main_content" %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">课堂点到信息表</h1>
+</div>
+    <!--<table border="1" cellspacing="0" cellpadding="0" width="700px" height="600px" align="center" style="margin-bottom: 30px">
+        <tr>
+            <td  align="center" width="15%">姓&nbsp;&nbsp;&nbsp;名</td>
+            <td width="15%"></td>
+            <td  align="center" width="15%">性&nbsp;&nbsp;&nbsp;别</td>
+            <td width="10%"></td>
+            <td width="15%" align="center">年&nbsp;&nbsp;&nbsp;龄</td>
+            <td width="10%"></td>
+            <td rowspan="3" align="center"><img src="" /></td>
+        </tr>
+        <tr>
+            <td align="center" width="15%">学号</td>
+            <td width="15%"></td>
+            <td align="center" width="15%">班级</td>
+            <td width="10%"></td>
+            <td width="15%" align="center">老师</td>
+            <td width="10%"></td>
+
+        </tr>
+        <tr>
+            <td width="15%" align="center">自我介绍</td>
+            <td colspan="5"></td>
+
+        </tr>
+        <tr>
+            <td width="15%" align="center">剩余上课次数</td>
+            <td colspan="3"></td>
+            <td colspan="2" align="center">是否缴费</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td width="15%" align="center">家庭详细地址</td>
+            <td colspan="6"></td>
+        </tr>
+        <tr>
+            <td width="15%" rowspan="2" align="center">家长信息</td>
+            <td align="center" >姓名</td>
+            <td colspan="2"></td>
+            <td align="center" colspan="2">联系方式</td>
+            <td></td>
+        </tr>
+        &lt;!&ndash;<tr>
+            <td align="center">职务</td>
+            <td colspan="2"></td>
+            <td align="center" colspan="2">职称</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td rowspan="6" align="center">个人简历</td>
+            <td colspan="6" rowspan="6"></td>
+        </tr>&ndash;&gt;
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr>
+            <td rowspan="2" align="center" colspan="7">
+                <div >
+                    <button id="roll_call" class="btn btn-primary">点到</button>
+                    <button id="next" class="btn btn-primary">下一个</button>
+                </div>
+            </td>
+        </tr>
+        <tr></tr>
+    </table>-->
+<table class=table11_6 align="center">
+    <tr>
+        <th>SAMPLE</th><th>SAMPLE</th><th>SAMPLE</th>
+    </tr>
+    <tr>
+        <td>SAMPLE</td><td>SAMPLE</td><td>SAMPLE</td>
+    </tr>
+    <tr>
+        <td>SAMPLE</td><td>SAMPLE</td><td>SAMPLE</td>
+    </tr>
+    <tr>
+        <td>SAMPLE</td><td>SAMPLE</td><td>SAMPLE</td>
+    </tr>
+    <tr>
+        <td>SAMPLE</td><td>SAMPLE</td><td>SAMPLE</td>
+    </tr>
+</table>
+
+{% endblock %}
+{% block "scripts" %}
+
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'quiz/base.html'%}
+{% block "sidebar" %}
+{% endblock %}
+{% block "main" %}
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <form action="{% url 'upload-question' %}" method="post">
+    {% csrf_token %}
+    <h2 style="color: red">题面</h2>
+    {{ question_form }}
+    <br/>
+    <h2 style="color:red">选项</h2>
+    <div id="Opt1">
+    {{ option_form }}
+    </div>
+    <br/>
+    分界线<hr/>
+    <div id="Opt2">
+    {{ option_form }}
+    </div>
+    <br/>
+    分界线<hr/>
+
+    <div id="Opt3">
+    {{ option_form }}
+    </div>
+    <br/>
+    分界线<hr/>
+    
+    <div id="Opt4">
+    {{ option_form }}
+    </div>
+    <br/>
+    <input class="btn-warning" type="submit" value="submit">
+    </form>
+{% endblock %}
+{% block "scripts" %}
+<script>
+$(document).ready(function(){
+
+    var ids = ["#Opt1", "#Opt2", "#Opt3", "#Opt4"]
+    for(i in ids)
+    {
+        var s = $(ids[i]).find("*");
+        s.each(function(){
+            if($(this).attr("id"))
+            {
+                original_id = $(this).attr("id");
+                $(this).attr("id", 'opt' + i + '_' + original_id);
+            }
+            if($(this).attr("for"))
+            {
+                original_for = $(this).attr("for");
+                $(this).attr("for", 'opt' + i + '_' + original_for);
+            }
+            if($(this).attr("name"))
+            {
+                original_name = $(this).attr("name");
+                $(this).attr("name", 'opt' + i + '_' + original_name);
+            }
+        })
+    }
+//#s.each(function(){
+//    })
+
+})
+</script>
+{% endblock %}

@@ -10,4 +10,5 @@ urlpatterns=[
     url(r'^student-register', views.student_register, name="student-register"),
 
     url(r'^ajax-get-student-profile', views.ajax_get_student_profile, name="ajax-get-student-profile"),
+    url(r'^student-profile-tuition', views.student_profile_tuition, name="student-profile-tuition"),
 ]

@@ -26,7 +26,7 @@ SECRET_KEY = 'h6!-f&*-3t3@2@ct0(&&w^qeqb@$8neo48_j%umvwd$nrb4tk='
 DEBUG = True
 
 ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', '192.168.1.110']
-
+HTTP_IP = 'http://47.110.253.251'
 
 # Application definition
 
@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'webapps.quiz',
     'webapps.practice',
     'webapps.user',
+    'webapps.notification',
+    'webapps.parent',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -75,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'webapps.user.views.templates_ip_setting',
             ],
         },
     },

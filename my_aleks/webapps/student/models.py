@@ -17,6 +17,8 @@ class StudentProfile(models.Model):
 
     student_no = models.CharField(max_length=20, blank=True, null=True, db_index=True)
 
+    grade = models.IntegerField(default=9)
+
     MALE = 'M'
     FEMALE = 'F'
     GENDER_CHOICES = (
@@ -90,3 +92,12 @@ class StudentReportPaper(models.Model):
     datetime = models.DateField(blank=True, null=True)
     new = models.BooleanField(default=True)
     
+
+class Tuition(models.Model):
+    remaining_no = models.IntegerField(default=0)
+    student = models.ForeignKey(StudentProfile, blank=False, null=False)
+    cls = models.ForeignKey('school.Cls', blank=False, null=False)
+    school = models.ForeignKey('school.School', blank=True, null=True)
+    fee = models.IntegerField(default=0)
+    paid = models.BooleanField(default=False)
+    expired = models.BooleanField(default=False)

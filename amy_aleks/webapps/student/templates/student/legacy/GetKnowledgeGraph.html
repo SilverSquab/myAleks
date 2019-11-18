@@ -1,0 +1,91 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>题目解析</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<!-- VENDOR CSS -->
+	<link rel="stylesheet" href="{% static "assets/vendor/bootstrap/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "assets/vendor/font-awesome/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "assets/vendor/linearicons/style.css" %}">
+	<link rel="stylesheet" href="{% static "assets/vendor/chartist/css/chartist-custom.css" %}">
+	<!-- MAIN CSS -->
+	<link rel="stylesheet" href="{% static "assets/css/main.css" %}">
+	<link rel="stylesheet" href="{% static "assets/css/iconfont.css" %}">
+	<!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
+	<!-- <link rel="stylesheet" href="assets/css/demo.css"> -->
+</head>
+
+<body>
+	<!-- WRAPPER -->
+	<div id="wrapper">
+		<!-- NAVBAR -->
+		<nav class="navbar navbar-default navbar-fixed-top">
+			<!-- <div class="brand">
+				<a href="index.html"><img src="assets/img/logo-dark.png" alt="Klorofil Logo" class="img-responsive logo"></a>
+			</div> -->
+			<div class="container-fluid">
+				<div class="navbar-btn">
+					<button type="button" class="btn-toggle-fullwidth"><i class="lnr lnr-arrow-left-circle"></i></button>
+				</div>
+				<form class="navbar-form navbar-left">
+					<div class="input-group">
+						<input type="text" value="" class="form-control" placeholder="查找...">
+						<span class="input-group-btn"><button type="button" class="btn btn-primary">Go</button></span>
+					</div>
+				</form>
+				<div id="navbar-menu">
+					<ul class="nav navbar-nav navbar-right">
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>{{ request.session.username }}</span> <i class="icon-submenu lnr lnr-chevron-down"></i></a>
+							<ul class="dropdown-menu">
+								<li><a href="/student/index/"><i class="lnr lnr-user"></i> <span>主页</span></a></li>
+								<li><a href="#"><i class="lnr lnr-envelope"></i> <span>Message</span></a></li>
+								<li><a href="#"><i class="lnr lnr-cog"></i> <span>Settings</span></a></li>
+								<li><a href="/logout/"><i class="lnr lnr-exit"></i> <span>Logout</span></a></li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+		<!-- END NAVBAR -->
+		<!-- LEFT SIDEBAR -->
+		<div id="sidebar-nav" class="sidebar">
+			<div class="sidebar-scroll">
+				<nav>
+					<ul class="nav">
+						<li><a href="/student/index/" class=""><i class="lnr lnr-home"></i> <span>主页</span></a></li>
+						<li><a href="/student/get_assessment/" class=""><i class="iconfont icon-chakan"></i> <span>查看评估</span></a></li>
+						<li><a href="/student/get_practice_session_record/" class=""><i class="iconfont icon-5"></i> <span>做题记录</span></a></li>
+						<li>
+							<a href="#subPages2" data-toggle="collapse" class="collapse active"><i class="lnr lnr-file-empty"></i> <span>练习</span> <i class="icon-submenu lnr lnr-chevron-left"></i></a>
+							<div id="subPages2" class="collapse in">
+								<ul class="nav">
+									<li><a href="/student/practice/" class=""><i class="iconfont icon-zhangjielianxi"></i> <span>开始练习</span></a></li>
+									<li><a href="/student/get_knowledge_graph/" class="active"><i class="iconfont icon-banshou_Line"></i> <span>题目解析</span></a></li>
+								</ul>
+							</div>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+		<!-- END LEFT SIDEBAR -->
+		<!-- MAIN -->
+		<div class="main">
+			
+		</div>
+		<!-- END MAIN -->
+		<div class="clearfix"></div>
+	</div>
+	<!-- END WRAPPER -->
+	<!-- Javascript -->
+	<script src="{% static "assets/vendor/jquery/jquery.min.js" %}"></script>
+	<script src="{% static "assets/vendor/bootstrap/js/bootstrap.min.js" %}"></script>
+	<script src="{% static "assets/scripts/klorofil-common.js" %}"></script>
+</body>
+</html>

@@ -485,8 +485,8 @@ MathJax.Hub.Config({
 
                           if (typeof a.order == "undefined" || a.order == null || a.order == "") return -1;
                           if (typeof b.order == "undefined" || b.order == null || b.order == "") return 1;
-                          var aText = a.order.split("、")[0];
-                          var bText = b.order.split("、")[0];
+                          var aText = a.order.split("、")[0].split(".")[1];
+                          var bText = b.order.split("、")[0].split(".")[1];
                           if (typeof aText == "undefined" || aText == null || aText == "") return -1;
                           if (typeof bText == "undefined" || bText == null || bText == "") return 1;
                           return parseFloat(aText) - parseFloat(bText);

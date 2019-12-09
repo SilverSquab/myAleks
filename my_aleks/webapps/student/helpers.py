@@ -2,7 +2,7 @@ from .models import *
 from webapps.school.models import School, Cls
 
 #消课
-def reduce_cls(tuition_id):
+def reduce_cls_wrapper(tuition_id):
     t = Tuition.objects.get(pk=tuition_id)
     if not t.paid or t.expired:
         return {'result': False, 'reason': 'tuition unpaid or expired'}
@@ -12,10 +12,10 @@ def reduce_cls(tuition_id):
         t.save()
         return {'result': False, 'reason': 'no remaining classes'}
 
-    t.reamining_no -= 1
+    t.remaining_no -= 1
     if t.remaining_no <= 0:
         t.expired = True
-        t.save()
+    t.save()
     return {'result': True}
 
 def create_tuition(student_id, total_fee, cls_id, remaining_no):

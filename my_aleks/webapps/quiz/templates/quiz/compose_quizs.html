@@ -9,7 +9,12 @@
         font-size: 15px;
         text-decoration: none;
     }
-
+	.book-name{
+		color: #666 !important;
+	}
+	.book-name:hover{
+		color: orange !important;
+	}
     a:hover {
         font-size: 17px;
         color: #999999;
@@ -35,23 +40,17 @@
 
     /* 书籍弹框*/
 
-    ul {
+    .containor ul {
         margin: 0;
         padding: 0;
         list-style-type: none;
-    }
-
-    .containor {
-        width: 1000px;
-        height: auto;
-        position: relative;
-        margin: 0 auto;
-
+		width: 100%;
     }
 
     .nav_left ul {
         width: 100%;
         height: auto;
+		cursor: pointer;
     }
 
     .nav_left ul li {
@@ -184,9 +183,14 @@
         font-weight: 400;
         color:#858694;
     }
-
-
-
+    #bookDiv{
+        -webkit-border-radius: 8px;
+        -moz-border-radius: 8px;
+        border-radius: 8px;
+        -webkit-box-shadow: #ccc 0px 0px 10px;
+        -moz-box-shadow: #ccc 0px 0px 10px;
+        box-shadow: #ccc 0px 0px 10px;
+    }
 
 </style>
 {% endblock %}
@@ -199,18 +203,18 @@
 
 
 <!-- Page Heading 标题头部 -->
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">组卷选题</h1>
+<div class="app-title">
+    <h4>组卷选题</h4>
     <span></span>
-    <span href="javascript:void(0);" class="d-none d-sm-inline-block btn  btn-sm btn-primary shadow-sm infoWin"
-          data-toggle="modal" data-target="#myModal" style="cursor: pointer;height: 240px;width:50px"><span style="font-size: 17px">点击查看选题篮<i class="fas fa-fw fa-arrow-right"></i></span><br/><span style="font-size: 9px">已选:<span id="questionNumber">0</span></span></span>
+    <span href="javascript:void(0);" class="d-none d-sm-inline-block btn  btn-sm btn-success shadow-sm infoWin"
+          data-toggle="modal" data-target="#myModal" style="cursor: pointer;height: 240px;width:50px"><span style="font-size: 16px">点击查看选题篮<i class="fas fa-fw fa-arrow-right"></i></span><br/><span style="font-size: 9px">已选:<br/><span id="questionNumber">0</span></span></span>
 </div>
 
 
 <!-- 模态框（Modal） -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="width: 1200px">
+        <div class="modal-content" style="width: 1000px">
             <div class="modal-header">
                 <h4 id="myModalLabel" class="h4 mb-0 text-gray-800" style="float: left">
                     选题篮
@@ -224,16 +228,25 @@
                         <h6 class="m-0 font-weight-bold text-primary">已选题目</h6>
                     </div>
                     <div class="card-body">
-                        试卷标题:<input type="text"  id="questionInput" placeholder="请输入题目">&nbsp;&nbsp;
-                        测试类型:<select id="questionSelect"><option value="small">随堂测</option><option value="full">综合测评</option></select>
-                        <button class="pull-right btn btn-primary" id="submit-quiz" style="margin: 0.5rem 0 0.5rem 1rem;">保存试卷</button>
-                        测试班级:<input type="text"  placeholder="请选择班级" class="dropdown-toggle" data-toggle="dropdown"aria-haspopup="true" aria-expanded="false" readonly="readonly"  id="classInput" >
-                            <ul class="dropdown-menu dropdown-menu-left">
-                                <li class="classCheckLi" id="select">
-                                </li>
-                            </ul>
-                        <button type="button" class="btn btn-primary" id="publish">保存并发布</button>
-
+						<div class="row">
+							<div class="col-lg-3">
+                        		<input type="text" class="form-control" id="questionInput" placeholder="请输入题目">&nbsp;&nbsp;
+							</div>
+							<div class="col-lg-3">
+                        		<select id="questionSelect" class="form-control"><option value="small">随堂测</option><option value="full">综合测评</option></select>
+							</div>
+							<div class="col-lg-3">
+								<input type="text" class="form-control" placeholder="请选择测试班级" class="dropdown-toggle" data-toggle="dropdown"aria-haspopup="true" aria-expanded="false" readonly="readonly"  id="classInput" >
+									<ul class="dropdown-menu dropdown-menu-left">
+										<li class="classCheckLi" id="select">
+										</li>
+									</ul>
+							</div>
+							<div class="col-lg-3">
+                        		<button class="btn btn-primary mt-2 mr-2" id="submit-quiz">保存试卷</button>
+                        		<button type="button" class="btn btn-success mt-2" id="publish">保存并发布</button>
+							</div>
+						</div>
                         <div class="table-responsive">
                             <table class="table table-bordered" id="selected_questions" width="100%" cellspacing="0">
                                 <thead>
@@ -242,7 +255,7 @@
                                     <th>题目</th>
                                     <th style="width: 250px;">知识点</th>
                                     <th style="width: 150px;">
-                                        <button class="pull-right btn btn-primary" id="marking-btn">启用计分</button>
+                                        <button class="pull-right btn btn-info btn-sm" id="marking-btn">启用计分</button>
                                     </th>
 
                                     <th style="width: 150px">操作</th>
@@ -264,49 +277,52 @@
 
 
 <!--目录+题目页面-->
-<div class="col-lg-12" style="clear: both">
-    <div class="card mb-4 containor" id='bookTreeBox' style="width: 25%;float: left">
-        <div class="card-body ">
+<div class="row">
+	<div class="col-lg-3">
+    <div class="tile containor" id='bookTreeBox' style="min-height: 191px;">
+        <div class="tile-body ">
             <!--课本名称-->
             <div class="nav_left">
                 <ul>
-                    <li class="book-li" data-id="2">当前课本：无</li>
+                    <li class="book-li" data-id="2">当前课本：无 &nbsp;&nbsp;&nbsp;<i class="fa fa-pencil-square-o" id='update_book' aria-hidden="true" title="点击修改教材"></i></li>
                 </ul>
-                <hr style="height: 5px"/>
             </div>
-            <div class="nav_right">
+            <div class="nav_right border-warnings">
                 <div class="sub hide overY" data-id="2" id = "bookDiv">
 
                 </div>
             </div>
             <!--  章节树-->
-            <div id="book-tree">
+            <div id="book-tree" class="tile-footer">
                 <div style="text-align: center">未选择教材！</div>
             </div>
         </div>
     </div>
+	</div>
     <!-- 题目页面-->
-    <div class="card mb-4" style="width: 73%;float: right">
-        <div class="card-body">
+	<div class="col-lg-9">
+    <div class="tile">
+		<div class="title border-bottom mb-2 pb-2">
+			<button class="btn btn-info" id="questionType-btn" type="button" >
+                <i class="fas fa-search fa-sm"><span class="questionTypeButton">查询优选题</span></i>
+            </button>
+		</div>
+        <div class="tile-body">
             <!--<h6>试题列表:<span style="cursor: pointer"></span></h6>-->
             <!--<form id="form1" >题目范围：
                 <input type="radio"  name="node" checked  value="true" />显示全部&nbsp;&nbsp;
                 <input type="radio"  name="node" value="false" />只显示优选题
             </form>-->
-            <button class="btn btn-primary" id="questionType-btn" type="button" >
-                <i class="fas fa-search fa-sm"><span class="questionTypeButton">查询优选题</span></i>
-            </button>
-            <hr style="height: 5px"/>
             <div class="row" id="question-container">
                 <div style="text-align: center;width: 100%">暂无试题！</div>
             </div>
-            <div style="text-align: center">
-                <span style="padding: 10px;cursor: pointer" id="down_page">上一页</span>|<span style="padding-left: 10px" id="page">1</span>/<span style="padding-right:10px" id="maxpage">1</span>|<span style="padding: 10px;cursor: pointer" id="up_page">下一页</span><input style="width:30px" id="pageInput" /><a  id="jump-page" style="padding: 10px;cursor: pointer" type="button">跳转</a>
+            <div class="tile-footer text-center">
+                <button class="btn btn-link" style="padding: 10px;cursor: pointer" id="down_page">上一页</button>|<span style="padding-left: 10px" id="page">1</span>/<span class="pr-1" id="maxpage">1</span>|<button class="btn btn-link p-1" id="up_page">下一页</button>   &nbsp;&nbsp;<input  id="pageInput" style="width: 30px;height: 20px"><button class="btn btn-link p-1" id="jump-page">跳页</button>
             </div>
         </div>
     </div>
-</div>
-
+	</div>
+	</div>
 
 <!-- /.container-fluid -->
 {% endblock %}
@@ -328,7 +344,7 @@
 <script src="{% static "assets/js/jquery.sendQuiz.msgbox.js" %}" type="text/javascript"></script>
 <script type="text/javascript">
     var school='{{school}}'
-    var maxpage = 5;
+    var maxpage = 1;
     var page = 1;
     //节id
     var section_id = '';
@@ -358,40 +374,72 @@
                 var questions = JSON.parse(data);
                 var question_body_html = ''
                 for (question_id in questions) {
+					var questionIds = []
+					for (var index = 0; index < checkQuestionList.length; index++) {
+							if(checkQuestionList[index].id == question_id && !questionIds.includes(question_id)){
+								questionIds.push(question_id)
+							}
+					}
                     question_body_html += '<div class="col-lg-12">'
                         + '<div class="card mb-4" question-id="' + question_id + '">'
                         + '<div class="card-header">'
-                        + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> '
-                        //+ '<a href="/abc/quiz/upload-question/?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
-                        + '<a id= "favorite" question_id="'+question_id+'" style=" float:right; color:white" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">收藏</a>'
-                        + '</div>'
+                        // + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> '
+						+'<div class="toggle-flip" style="float:left"><label><input type="checkbox"'+(questionIds.includes(question_id)? " checked": "")+' id="' + question_id + '"><span class="flip-indecator" data-toggle-on="已选择" onclick="checkQuestionFunction(' + question_id + ')" data-toggle-off="选择"></span></label></div>'
+                        //+ '<a href="{% url "upload-question" %}?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
+                        + '<a id= "favorite" question_id="'+question_id+'" style="float:right; color:white; cursor:pointer"><i class="fa fa-fw fa-2x fa-heart '
+                        if (questions[question_id]['favorite']) {
+                        	question_body_html +='text-danger" id="id_'+question_id+'"></i></a>'
+                        }else{
+                        	question_body_html +='text-muted" id="id_'+question_id+'"></i></a>'
+                        }
+                        question_body_html += '</div>'
                         question_body_html += '<div class="card-body">'
-                        + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '</p>'
+
+                        + '<p class="question-body">' 
+                         if (questions[question_id]['type']=='multi-choice') {
+                                    question_body_html +='（单选题）'
+                                }
+                                if (questions[question_id]['type']=='completion') {
+                                    question_body_html +='（填空题）'
+                                }
+                        question_body_html += questions[question_id]['body'] + '</p>'
+
                         if (questions[question_id]['img_url']){
                             question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['img_url']+'"></p>'
                         }
-                        question_body_html += '<div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
-                        if (questions[question_id]['options']['A']['img_url']){
-                            question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['A']['img_url']+'"></p>'
+
+                        if (questions[question_id]['type']=='multi-choice') {
+                            question_body_html += '<div style="float:left;padding-right:50px">'
+                            + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
+                            if (questions[question_id]['options']['A']['img_url']){
+                                question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['A']['img_url']+'"></p>'
+                            }
+                            question_body_html += '</div><div style="float:left;padding-right:50px">'
+                            + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
+                            if (questions[question_id]['options']['B']['img_url']){
+                                question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['B']['img_url']+'"></p>'
+                            }
+                            question_body_html += '</div><div style="float:left;padding-right:50px">'
+                            + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
+                            if (questions[question_id]['options']['C']['img_url']){
+                                question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
+                            }
+                            question_body_html += '</div><div style="float:left;padding-right:50px">'
+                            + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
+                            if (questions[question_id]['options']['D']['img_url']){
+                                question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
+                            }
+                            question_body_html += '</div>'
                         }
-                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
-                        if (questions[question_id]['options']['B']['img_url']){
-                            question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['B']['img_url']+'"></p>'
-                        }
-                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
-                        if (questions[question_id]['options']['C']['img_url']){
-                            question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
-                        }
-                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
-                        if (questions[question_id]['options']['D']['img_url']){
-                            question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
-                        }
-                        question_body_html += '</div>'
-                        + '</div></div></div>'
+                        question_body_html += '</div></div></div>'
+						
+						for (let index = 0; index < checkQuestionList.length; index++) {
+							$('#'+[checkQuestionList[index].id]).checked = false
+							if(checkQuestionList[index].id == question_id){
+								$('#'+question_id)[0].checked = true
+							}
+							
+						}
                 }
                 $("#question-container").html(question_body_html);
                 MathJax.Hub.Typeset();
@@ -420,40 +468,67 @@
                 var questions = JSON.parse(data);
                 var question_body_html = ''
                 for (question_id in questions) {
+					var questionIds = []
+					for (var index = 0; index < checkQuestionList.length; index++) {
+							if(checkQuestionList[index].id == question_id && !questionIds.includes(question_id)){
+								questionIds.push(question_id)
+							}
+					}
                     question_body_html += '<div class="col-lg-12">'
                         + '<div class="card mb-4" question-id="' + question_id + '">'
                         + '<div class="card-header">'
-                        + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> '
-                        //+ '<a href="/abc/quiz/upload-question/?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
-                         + '<a id= "favorite" question_id="'+question_id+'" style=" float:right; color:white" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">收藏</a>'
-                        + '</div>'
+                        // + '<button class="btn btn-danger select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> '
+						+'<div class="toggle-flip" style="float:left"><label><input type="checkbox"'+(questionIds.includes(question_id)? " checked": "")+' id="' + question_id + '"><span class="flip-indecator" data-toggle-on="已选择" onclick="checkQuestionFunction(' + question_id + ')" data-toggle-off="选择"></span></label></div>'
+                        //+ '<a href="{% url "upload-question" %}?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
+                         + '<a id= "favorite" question_id="'+question_id+'" style="float:right; color:white; cursor:pointer"><i class="fa fa-fw fa-2x fa-heart '
+                         if (questions[question_id]['favorite']) {
+                         
+                         	question_body_html +='text-danger" id="id_'+question_id+'"></i></a>'
+                         }else{
+                         
+                         	question_body_html +='text-muted" id="id_'+question_id+'"></i></a>'
+                         }
+                        question_body_html += '</div>'
                         question_body_html += '<div class="card-body">'
-                        + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '</p>'
+
+                        + '<p class="question-body">' 
+                         if (questions[question_id]['type']=='multi-choice') {
+                                    question_body_html +='（单选题）'
+                                }
+                                if (questions[question_id]['type']=='completion') {
+                                    question_body_html +='（填空题）'
+                                }
+                        question_body_html += questions[question_id]['body'] + '</p>'
+
                         if (questions[question_id]['img_url']){
                             question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['img_url']+'"></p>'
                         }
-                        question_body_html += '<div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
-                        if (questions[question_id]['options']['A']['img_url']){
-                            question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['A']['img_url']+'"></p>'
+
+                        if (questions[question_id]['type']=='multi-choice') {
+                            question_body_html += '<div style="float:left;padding-right:50px">'
+                            + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
+                            if (questions[question_id]['options']['A']['img_url']){
+                                question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['A']['img_url']+'"></p>'
+                            }
+                            question_body_html += '</div><div style="float:left;padding-right:50px">'
+                            + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
+                            if (questions[question_id]['options']['B']['img_url']){
+                                question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['B']['img_url']+'"></p>'
+                            }
+                            question_body_html += '</div><div style="float:left;padding-right:50px">'
+                            + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
+                            if (questions[question_id]['options']['C']['img_url']){
+                                question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
+                            }
+                            question_body_html += '</div><div style="float:left;padding-right:50px">'
+                            + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
+                            if (questions[question_id]['options']['D']['img_url']){
+                                question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
+                            }
+                            question_body_html += '</div>'
                         }
-                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
-                        if (questions[question_id]['options']['B']['img_url']){
-                            question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['B']['img_url']+'"></p>'
-                        }
-                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
-                        if (questions[question_id]['options']['C']['img_url']){
-                            question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
-                        }
-                        question_body_html += '</div><div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
-                        if (questions[question_id]['options']['D']['img_url']){
-                            question_body_html += '<p><img class="question_img" src="{{TEMPLATES_IP}}'+questions[question_id]['options']['C']['img_url']+'"></p>'
-                        }
-                        question_body_html += '</div>'
-                        + '</div></div></div>'
+
+                        question_body_html += '</div></div></div>'
                 }
                 $("#question-container").html(question_body_html);
                 MathJax.Hub.Typeset();
@@ -485,7 +560,7 @@
         //修改选中的字体样式颜色
         $('.tree_body').css('color','');
         $('.tree_body_chapter').css('color','');
-        $('span[tree_body_id="'+section_id+'"]').css('color','#27BFEE');
+        $('span[tree_body_id="'+section_id+'"]').css('color','#009688');
         findQustionListBySection(1);
         findPageBySection();
     });
@@ -503,7 +578,6 @@
         findQuestionListByChapter(1);
         findPageByChapter();
     });
-
 
     //跳页查询
     $(document).on('click','#jump-page',function(){
@@ -586,7 +660,7 @@
                         + '<div class="card mb-4" question-id="' + question_id + '">'
                         + '<div class="card-header">'
                         + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> ' 
-                        //+ '<a href="/abc/quiz/upload-question/?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
+                        //+ '<a href="{% url "upload-question" %}?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
                         + '</div>'
                     question_body_html += '<div class="card-body">'
                         + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '}</p>'
@@ -623,38 +697,6 @@
             alert("已到尾页");
             return
         }
-        // console.log(page)
-        /*$.get("{% url "ajax-get-questions-by-section" %}?section_id=" + section_id + "&page=" + page+"&selected="+isExcellent, function (data, status) {
-            if (status == "success") {
-                // console.log(data)
-                var questions = JSON.parse(data);
-                var question_body_html = ''
-                for (question_id in questions) {
-                    question_body_html += '<div class="col-lg-12">'
-                        + '<div class="card mb-4" question-id="' + question_id + '">'
-                        + '<div class="card-header">'
-                        + '<button class="btn btn-primary select-btn" type="button" onclick="checkQuestionFunction(' + question_id + ')">选择题目</button> ' 
-                        //+ '<a href="/abc/quiz/upload-question/?question_id=' + question_id + '"' + 'id="edit-' + question_id + '"' + ' type="button">编辑题目</a>'
-                        + '</div>'
-                    question_body_html += '<div class="card-body">'
-                        + '<p class="question-body">（单选题）' + questions[question_id]['body'] + '}</p>'
-                        + '<div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>A、' + questions[question_id]['options']['A']['body'] + ' </p>'
-                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>B、' + questions[question_id]['options']['B']['body'] + ' </p>'
-                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>C、' + questions[question_id]['options']['C']['body'] + ' </p>'
-                        + '</div><div style="float:left;padding-right:50px;padding-left:50p">'
-                        + '<p>D、' + questions[question_id]['options']['D']['body'] + ' </p>'
-                        + '</div>'
-                        + '</div></div></div>'
-                }
-                // console.log(question_body_html)
-                $("#question-container").html(question_body_html);
-                $("#page").html(page);
-                MathJax.Hub.Typeset();
-            }
-        });*/
         if(isChapter){
             findQuestionListByChapter(page);
         }else{
@@ -688,19 +730,19 @@
                 for (chapter in chapters_order_by_order) {
                     // console.info(chapters_order_by_order[chapter])
                     tree_html += '<div style="clear: both;overflow：hidden;">'
-                        + '<span  tree_book_sign="treeBookSection"   tree_body_id=' + '"' + chapters_order_by_order[chapter].id + '"' + ' class="tree_body_chapter" style="white-space: nowrap; display: inline-block;width: '+hisTableWid+'px;overflow: hidden;text-overflow: ellipsis"><img src="{% static "assets/img/add.png" %}"  class="tree_img" did=' + '"' + chapters_order_by_order[chapter].id + '"' + '/>&nbsp;&nbsp;'+ chapters_order_by_order[chapter].order + '、' + chapters_order_by_order[chapter].chinese_name + '</span>'
+                        + '<span  tree_book_sign="treeBookSection" tree_body_id=' + '"' + chapters_order_by_order[chapter].id + '"' + ' class="tree_body_chapter" style="white-space: nowrap; display: inline-block;width: '+hisTableWid+'px;overflow: hidden;text-overflow: ellipsis"><img src="{% static "assets/img/add.png" %}"  class="tree_img" did=' + '"' + chapters_order_by_order[chapter].id + '"' + '/>&nbsp;&nbsp;'+ chapters_order_by_order[chapter].order + '、' + chapters_order_by_order[chapter].chinese_name + '</span>'
                         + '</div>'
                         + '<div class="tree2" id=' + '"' + chapters_order_by_order[chapter].id + '"' + ' style="clear: both;overflow：hidden;">'
                     //对节进行排序
                     var sections_order_by_order = chapters_order_by_order[chapter].sections.sort(
                         function (a, b) {
 
-                            if (typeof a.order == "undefined" || a.order == null || a.order == "") return -1
-                            if (typeof b.order == "undefined" || b.order == null || b.order == "") return 1
-                            var aText = a.order.split("、")[0];
-                            var bText = b.order.split("、")[0];
-                            if (typeof aText == "undefined" || aText == null || aText == "") return -1
-                            if (typeof bText == "undefined" || bText == null || bText == "") return 1
+                            if (typeof a.order == "undefined" || a.order == null || a.order == "") return -1;
+                            if (typeof b.order == "undefined" || b.order == null || b.order == "") return 1;
+                            var aText = a.order.split("、")[0].split(".")[1];
+                            var bText = b.order.split("、")[0].split(".")[1];
+                            if (typeof aText == "undefined" || aText == null || aText == "") return -1;
+                            if (typeof bText == "undefined" || bText == null || bText == "") return 1;
                             return parseFloat(aText) - parseFloat(bText);
                         }
                     );
@@ -710,18 +752,18 @@
                             tree_html +='<span tree_book_sign="treeBookSign" tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body" style="white-space: nowrap; display: inline-block;width: '+hisTableWid+'px;overflow: hidden;text-overflow: ellipsis;">'+ '<img src="{% static "assets/img/none.png" %}" class="tree_img" did=' + '"' + sections_order_by_order[section].id + '"' + '/>&nbsp;&nbsp;' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
                            /* tree_html += '<div class="tree2" id=' + '"' + sections_order_by_order[section].id + '"' + ' style="clear: both">'
                             for (part in sections_order_by_order[section].parts) {
-                                tree_html += '<img src="{% static "assets/img/none.png" %}" class="tree_img_none"/><span tree_body_id=' + '"' + sections_order_by_order[section].parts[part].section + '"' + ' class="tree_body">' + sections_order_by_order[section].parts[part]['chinese_name'] + '</span><br>'
+                                tree_html += '<img src="{% static "assets/img/none.png" %}" class="tree_img"/><span tree_body_id=' + '"' + sections_order_by_order[section].parts[part].section + '"' + ' class="tree_body">' + sections_order_by_order[section].parts[part]['chinese_name'] + '</span><br>'
                             }
                             tree_html += '</div>'*/
                         } else {
-                            tree_html += '<span tree_book_sign="treeBookSign" tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body" style="white-space: nowrap; display: inline-block;width: '+hisTableWid+'px;overflow: hidden;text-overflow: ellipsis;"><img src="{% static "assets/img/none.png" %}" class="tree_img_none"  />&nbsp;&nbsp;' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
+                            tree_html += '<span tree_book_sign="treeBookSign" tree_body_id=' + '"' + sections_order_by_order[section].id + '"' + ' class="tree_body" style="white-space: nowrap; display: inline-block;width: '+hisTableWid+'px;overflow: hidden;text-overflow: ellipsis;"><img src="{% static "assets/img/none.png" %}" class="tree_img"  />&nbsp;&nbsp;' + sections_order_by_order[section].order + '、' + sections_order_by_order[section].chinese_name + '</span><br>'
                         }
                     }
                     tree_html += '</div>'
                 }
                 // console.log(tree_html)
                 $("#book-tree").html(tree_html);
-                $(".book-li").html('当前课本：' +subjectList[book_data.subject] + book_data.chinese_name)
+                $(".book-li").html('当前课本：' +subjectList[book_data.subject] + book_data.chinese_name+'&nbsp;&nbsp;&nbsp;<i class="fa fa-pencil-square-o" aria-hidden="true"></i>')
 
                 $('#bookTreeBox').css('font-size',15)
 
@@ -752,83 +794,145 @@
     //鼠标悬于书名上方
     $('.containor').on('mouseenter', function () {
         $(".nav_right").removeClass('hide');
+		//$(".sub").removeClass('hide');
     }).on('mouseleave', function () {
         $(".nav_right").addClass('hide');
         $(".sub").addClass('hide');
     }).on('mouseenter', '.book-li', function (e) {
         $.get("{% url 'ajax-get-all-textbooks' %}", function (data, status) {
             if (status == "success") {
-            		$.get("{% url 'ajax-subjects' %}", function (data1, status) {
-            				if (status == "success") {
-            						var subject = JSON.parse(data1);
-            						var subjects={}
-            						for (index in subject){
-            								subjects[subject[index][0]]=subject[index][1]
-            						}
-				                var books = JSON.parse(data)
-                                // console.info(books)
-                                var booksOnSubjectList = {}
-                                for(var item in books){
-                                    if(!booksOnSubjectList[books[item].subject]){
-                                        booksOnSubjectList[books[item].subject] = [];
-                                    }
-                                    booksOnSubjectList[books[item].subject].push(books[item]);
-                                }
+        		$.get("{% url 'ajax-subjects' %}", function (data1, status) {
+    				if (status == "success") {
+    						var subject = JSON.parse(data1);
+    						var subjects={}
+    						for (index in subject){
+    								subjects[subject[index][0]]=subject[index][1]
+    						}
+		                var books = JSON.parse(data)
+                        // console.info(books)
+                        var booksOnSubjectList = {}
+                        for(var item in books){
+                            if(!booksOnSubjectList[books[item].subject]){
+                                booksOnSubjectList[books[item].subject] = [];
+                            }
+                            booksOnSubjectList[books[item].subject].push(books[item]);
+                        }
 
-                                for(var key in booksOnSubjectList){
-                                    // console.info(booksOnSubjectList[key])
-                                    booksOnSubjectList[key] = booksOnSubjectList[key].sort(function (last,next) {
-                                        // return last.name.toString() > next.name.toString()
-                                        return last.order - next.order
-                                    })
-                                }
-                                // console.info(booksOnSubjectList)
-                                //暂时不显示化学教材
-                                delete(booksOnSubjectList[8])
+                        for(var key in booksOnSubjectList){
+                            // console.info(booksOnSubjectList[key])
+                            booksOnSubjectList[key] = booksOnSubjectList[key].sort(function (last,next) {
+                                // return last.name.toString() > next.name.toString()
+                                return last.order - next.order
+                            })
+                        }
+                        // console.info(booksOnSubjectList)
+                        //暂时不显示化学教材
+                        delete(booksOnSubjectList[8])
 
-                                var htmlString = "";
-                                for(var key in booksOnSubjectList){
-                                    htmlString += '<dl>\n' +
-                                        '                        <dt><a>'+subjects[key]+ '<i> &gt;</i></a></dt>\n' +
-                                        '                        <dd id="book">\n'
-                                    for(var index in booksOnSubjectList[key] ){
-                                        htmlString +=  '<a class="book-name" book_id=' + '"' + booksOnSubjectList[key][index]["id"] + '"' + ' subject=' + '"' + booksOnSubjectList[key][index]['subject'] + '"' +'>' + booksOnSubjectList[key][index]['name'] + '</a>'
-                                    }
-                                    htmlString += "</dd></dl>"
-                                }
+                        var htmlString = "";
+                        for(var key in booksOnSubjectList){
+                            htmlString += '<dl>\n' +
+                                '                        <dt><a>'+subjects[key]+ '<i> &gt;</i></a></dt>\n' +
+                                '                        <dd id="book">\n'
+                            for(var index in booksOnSubjectList[key] ){
+                                htmlString +=  '<a class="book-name" book_id=' + '"' + booksOnSubjectList[key][index]["id"] + '"' + ' subject=' + '"' + booksOnSubjectList[key][index]['subject'] + '"' +'>' + booksOnSubjectList[key][index]['name'] + '</a>'
+                            }
+                            htmlString += "</dd></dl>"
+                        }
 
 
-                                subjectList = subjects
-				                $("#bookDiv").html(htmlString)
-				                var li_data = $(this).attr('data-id');
-				                //2取不到
-				                li_data = '2'
-				                $(".sub").addClass('hide');
-				                $('.sub[data-id="' + li_data + '"]').removeClass('hide');
-		              	}
+                        subjectList = subjects
+		                $("#bookDiv").html(htmlString)
+		                var li_data = $(this).attr('data-id');
+		                //2取不到
+		                li_data = '2'
+		                $(".sub").addClass('hide');
+		                $('.sub[data-id="' + li_data + '"]').removeClass('hide');
+              	   }
               })
             }
         })
     });
+    //点击编辑图标修改书名
+    $(document).on('click', '#update_book', function () {
+        $.get("{% url 'ajax-get-all-textbooks' %}", function (data, status) {
+            if (status == "success") {
+                $.get("{% url 'ajax-subjects' %}", function (data1, status) {
+                    if (status == "success") {
+                            var subject = JSON.parse(data1);
+                            var subjects={}
+                            for (index in subject){
+                                    subjects[subject[index][0]]=subject[index][1]
+                            }
+                        var books = JSON.parse(data)
+                        // console.info(books)
+                        var booksOnSubjectList = {}
+                        for(var item in books){
+                            if(!booksOnSubjectList[books[item].subject]){
+                                booksOnSubjectList[books[item].subject] = [];
+                            }
+                            booksOnSubjectList[books[item].subject].push(books[item]);
+                        }
 
+                        for(var key in booksOnSubjectList){
+                            // console.info(booksOnSubjectList[key])
+                            booksOnSubjectList[key] = booksOnSubjectList[key].sort(function (last,next) {
+                                // return last.name.toString() > next.name.toString()
+                                return last.order - next.order
+                            })
+                        }
+                        // console.info(booksOnSubjectList)
+                        //暂时不显示化学教材
+                        delete(booksOnSubjectList[8])
+
+                        var htmlString = "";
+                        for(var key in booksOnSubjectList){
+                            htmlString += '<dl>\n' +
+                                '                        <dt><a>'+subjects[key]+ '<i> &gt;</i></a></dt>\n' +
+                                '                        <dd id="book">\n'
+                            for(var index in booksOnSubjectList[key] ){
+                                htmlString +=  '<a class="book-name" book_id=' + '"' + booksOnSubjectList[key][index]["id"] + '"' + ' subject=' + '"' + booksOnSubjectList[key][index]['subject'] + '"' +'>' + booksOnSubjectList[key][index]['name'] + '</a>'
+                            }
+                            htmlString += "</dd></dl>"
+                        }
+
+
+                        subjectList = subjects
+                        $("#bookDiv").html(htmlString)
+                        var li_data = $(this).attr('data-id');
+                        //2取不到
+                        li_data = '2'
+                        $(".sub").addClass('hide');
+                        $('.sub[data-id="' + li_data + '"]').removeClass('hide');
+                   }
+              })
+            }
+        })
+    })
     //选择题目的点击事件
     var checkQuestionFunction = function (questionId) {
         //判断是否已选
-        var flag = false;
-        for (var i = 0; i < checkQuestionList.length; i++) {
-            if (checkQuestionList[i].id == questionId) {
-                flag = true;
-            }
-        }
-        if (flag) {
-            alert("该题已选");
-            return;
-        }
-        //加该题
         var questionBody = $("div[question-id=" + questionId + "] .question-body").html();
         var subject = nowSubject.split('、')[1];
         var item = {'body': questionBody, 'subject': subject, 'id': questionId,'score':0};
-        checkQuestionList.push(item);
+		var flag = false;
+		var index = -1;
+			for (var i = 0; i < checkQuestionList.length; i++) {
+				if (checkQuestionList[i].id == questionId) {
+					index = i
+					flag = true
+				}
+			}
+		if(flag && index > -1){
+			checkQuestionList.splice(index,1)
+		}else{
+			checkQuestionList.push(item);
+		}
+        // if (flag) {
+        //     alert("该题已选");
+        //     return;
+        // }
+        //加该题
         var questionNumber = document.getElementById("questionNumber");
         questionNumber.innerText = checkQuestionList.length + "";
     };
@@ -842,7 +946,7 @@
                 '<td>' + (parseInt(i) + 1)+ '</td>\n' +
                 '<td>' + checkQuestionList[i].body + '</td>\n' +
                 '<td>' + checkQuestionList[i].subject + '</td>\n' +
-                '<td><input type="number" class="form-control score_input" disabled placeholder="'+ checkQuestionList[i].score +'"  onblur="inputValue('+checkQuestionList[i].id +',this)" ></td>\n' +
+                '<td><input type="number" min="0" class="form-control score_input" disabled placeholder="'+ checkQuestionList[i].score +'"  onblur="inputValue('+checkQuestionList[i].id +',this)" ></td>\n' +
                 '<td><a href="#" onclick="deleteCheckQuestion(' + checkQuestionList[i].id + ')">删除</a></td>\n' +
                 '</tr>';
         }
@@ -862,6 +966,7 @@
         for (var i = 0; i < checkQuestionList.length; i++) {
             if (checkQuestionList[i].id == questionId) {
                 checkQuestionList.splice(i, 1);
+				$('#'+questionId)[0].checked = false
                 var questionNumber = document.getElementById("questionNumber");
                 questionNumber.innerText = checkQuestionList.length + "";
                 var html = '';
@@ -870,7 +975,7 @@
                         '<td>' + (parseInt(i) + 1) + '</td>\n' +
                         '<td>' + checkQuestionList[i].body + '</td>\n' +
                         '<td>' + checkQuestionList[i].subject + '</td>\n' +
-                        '<td><input type="number" class="form-control score_input"  disabled  placeholder="'+ checkQuestionList[i].score +'"  onblur="inputValue('+ checkQuestionList[i].id +',this)"></td>\n' +
+                        '<td><input type="number" min="0" class="form-control score_input"  disabled  placeholder="'+ checkQuestionList[i].score +'"  onblur="inputValue('+ checkQuestionList[i].id +',this)"></td>\n' +
                         '<td><a href="#" onclick="deleteCheckQuestion(' + checkQuestionList[i].id + ')">删除</a></td>\n' +
                         '</tr>';
                 }
@@ -955,7 +1060,7 @@
         $.ajax({
             method: "POST",
             url: "{% url 'compose-quiz' %}",
-            data: data,
+            data: JSON.stringify(data),
             success:function (data,status) {
                 data=JSON.parse(data)
                 //console.log(data)
@@ -967,7 +1072,7 @@
 
                         });
                     });
-                    var htmlString = '<p style="text-indent:35px;line-height:30px">该试卷已经保存成功，如需查看具体详情，请前往<a href="{{TEMPLATES_IP}}/abc/teacher/my-quizes/">我的试卷>>>></a></p>';
+                    var htmlString = '<p style="text-indent:35px;line-height:30px">该试卷已经保存成功，如需查看具体详情，请前往<a href="{% url "my-quizes" %}">我的试卷>>>></a></p>';
                     $('#myModal').modal('hide');//完后隐藏模态框
                     $.setInformation.Confirm("试卷保存",htmlString)
                 }else{
@@ -991,7 +1096,7 @@
         $.ajax({
             method: "POST",
             url: "{% url "ajax-save-quiz-and-publish" %}",
-            data: data,
+            data: JSON.stringify(data),
             success:function (data,status) {
                 var htmlString = '';
                 var title = '';
@@ -1046,7 +1151,7 @@
                                 }
                             });
                         },function () {
-                            window.location.href="{{TEMPLATES_IP}}/abc/teacher/my-quizes/";
+                            window.location.href="{% url "my-quizes" %}";
                         })
                     }
                 }
@@ -1094,8 +1199,10 @@
         console.log(question_id)
         $.post("{% url "add-favorites" %}",{"question_id":question_id},function(data,status){
             if (data=="OK"){
+				$('#id_'+question_id)[0].className="fa fa-fw fa-2x fa-heart text-danger";
                 alert('收藏成功！')
             }else if (data =='favorites having this question') {
+				$('#id_'+question_id)[0].className="fa fa-fw fa-2x fa-heart text-danger";
                 alert('已收藏！')
             }else{
                 alert('收藏失败！')
@@ -1293,10 +1400,10 @@
             <div class="card mb-4">\
               <div class="card-header">\
                         <button class="btn btn-primary select-btn" type="button">选择题目</button>  {question_id}\
-                        <a href="/abc/quiz/upload-question/?question_id={question_id}" id="edit-{question_id}" type="button">编辑题目</a>  \
+                        <a href="{% url "upload-question" %}?question_id={question_id}" id="edit-{question_id}" type="button">编辑题目</a>  \
               </div>\
                 <div class="card-body">\
-                  <p class="question-body">（单选题）{question_body}</p>\
+                  <p class="question-body text-muted">（单选题）{question_body}</p>\
                   <p>A. {optionA} </p>\
                   <p>B. {optionB}</p>\
                   <p>C. {optionC}</p>\
@@ -1337,7 +1444,7 @@
                   <td>{order}</td>\
                   <td>{body}</td>\
                   <td>{nodes}</td>\
-                  <td><input type="number" class="form-control score_input" placeholder="分值" disabled></td>\
+                  <td><input type="number" min="0" class="form-control score_input" placeholder="分值" disabled></td>\
                   <td><a href="#">删除</a></td>\
                 </tr>';
             d = {};

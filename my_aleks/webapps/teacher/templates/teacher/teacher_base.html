@@ -15,270 +15,99 @@
   <!-- Custom fonts for this template-->
   <link href={% static "assets/vendor/fontawesome-free/css/all.min.css" %} rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
   <!-- Custom styles for this template-->
   <link href="{% static "assets/css/sb-admin-2.min.css" %}" rel="stylesheet">
+  <link href="{% static "assets/css/custom-style.css" %}" rel="stylesheet">
   <link rel="stylesheet" href="{% static "assets/vendor/mathquill/mathquill.css" %}"/>
   <link rel="icon" href="{{TEMPLATES_IP}}/evaluation-img/favicon.ico" type="image/x-icon" />
   {% block "stylesheets" %}
   {% endblock %}
 </head>
 
-<body id="page-top">
+<body id="page-top" class="app sidebar-mini">
 
+	{% block "topbar" %}
+		<header class="app-header">
+			<a class="app-header__logo" href="/abc/teacher/view-teacher-profile/" style="font-family:PingFang SC">指针AI教师版</a>
+      <!-- Sidebar toggle button--><a class="app-sidebar__toggle" href="#" data-toggle="sidebar" aria-label="Hide Sidebar"><i class="fa fa-th-large"></i></a>
+			 <ul class="app-nav">
+        <!-- User Menu-->
+        <li class="dropdown"><a class="app-nav__item" href="#" data-toggle="dropdown" aria-label="Open Profile Menu"><i class="fa fa-user fa-lg"></i></a>
+          <ul class="dropdown-menu settings-menu dropdown-menu-right">
+            <li><a class="dropdown-item" href="{% url "my-teacher_profile" %}"><i class="fa fa-cog fa-lg"></i> 个人主页</a></li>
+            <li><a class="dropdown-item" href="{% url "my-questions" %}"><i class="fa fa-user fa-lg"></i> 我的试题</a></li>
+            <li><a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal"><i class="fas fa-sign-out-alt fa-lg"></i> 退出登录</a></li>
+          </ul>
+        </li>
+      </ul>
+		</header>
+	{% endblock %}
     <!-- Page Wrapper -->
     <div id="wrapper">
 
     <!-- Sidebar -->
     {% block "sidebar" %}
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-        <!-- Sidebar - Brand -->
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
-        <div class="sidebar-brand-text mx-3">指针AI 教师版 </div>
-        </a>
-         <li class="nav-item active">
-             <a class="nav-link" href="{% url "my-teacher_profile" %}">
-             <i class="fa fa-fw fa-home"></i>
-             <span>首页</span></a>
-         </li>
-
-        <!-- Divider -->
-        <hr class="sidebar-divider">
-
-        <!-- Heading -->
-        <div class="sidebar-heading">
-        班级
+	<div class="app-sidebar__overlay" data-toggle="sidebar"></div>
+	<aside class="app-sidebar">
+		<div class="app-sidebar__user"><img class="app-sidebar__user-avatar" src="{% static "assets/img/user.jpg" %}" alt="User Image" height="48" width="48">
+        <div>
+          <p class="app-sidebar__user-name">{{user}}</p>
+		  <p class="app-sidebar__user-designation">{{teacher}}</p>
         </div>
-
-      <!-- Nav Item - Pages Collapse Menu -->
-        <li class="nav-item">
-            <a class="nav-link" href="{% url "teacher-index" %}">
-                <i class="fas fa-fw fa-tachometer-alt"></i>
-                <span>班级学情</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="{% url "my-classes" %}">
-                <i class="fas fa-users fa-fw"></i>
-                <span>班级管理</span>
-            </a>
-        </li>
-        <!-- Nav Item - Utilities Collapse Menu -->
-
-        <!-- Divider -->
-        <hr class="sidebar-divider">
-        <!-- Heading -->
-        <div class="sidebar-heading">
-        测评
-        </div>
-        <!-- Nav Item - Pages Collapse Menu -->
-        <li class="nav-item">
-            <a class="nav-link" href="{% url "compose-quiz" %}">
-                <i class="fas fa-tools fa-fw"></i>
-                <span>组卷工具</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url "mark-quiz" %}">
-                <i class="fas fa-fw fa-search"></i>
-                 <span>批改试卷</span>
-            </a>
-        </li>
-
-        <!-- Nav Item - Charts -->
-        <li class="nav-item">
-            <a class="nav-link" href="{% url "my-quizes" %}">
-                <i class="fas fa-fw fa-folder-open"></i>
-                <span>我的试卷</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url "quiz-records" %}">
-                <i class="fas fa-fw fa-file"></i>
-                <span>测评记录</span>
-            </a>
-        </li>
-        <div class="sidebar-heading">
-        试题
-        </div>
-
-        <li class="nav-item">
-            <a class="nav-link" href="{% url "get-questions" %}">
-                <i class="fa fa-fw fa-list-ul"></i>
-                <span>试题库</span>
-            </a>
-        </li>
-        <!--
-        <li class="nav-item">
-            <a class="nav-link" href="{% url "check-questions" %}">
-                <i class="fa fa-fw fa-check"></i>
-                <span>试题审核</span>
-            </a>
-        </li>
-        -->
-        <li class="nav-item">
-            <a class="nav-link" href="{% url "my-favorites" %}">
-                <i class="fa fa-fw fa-heart"></i>
-                <span>收藏夹</span>
-            </a>
-        </li>
-      <!-- Divider -->
-      <hr class="sidebar-divider d-none d-md-block">
-
-      <!-- Sidebar Toggler (Sidebar) -->
-      <div class="text-center d-none d-md-inline">
-          <button class="rounded-circle border-0" id="sidebarToggle"></button>
       </div>
-
-    </ul>
+	  <ul class="app-menu">
+		  <li><a class="app-menu__item" href="{% url "my-teacher_profile" %}"><i class="app-menu__icon fa fa-dashboard"></i><span class="app-menu__label">首页</span></a></li>
+		  <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fas fa-users"></i><span class="app-menu__label">班级</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+          <ul class="treeview-menu">
+            <li><a class="treeview-item" href="{% url "teacher-index" %}"><i class="icon fa fa-circle-o"></i>班级学情</a></li>
+            <li><a class="treeview-item" href="{% url "my-classes" %}"><i class="icon fa fa-circle-o"></i>班级管理</a></li>
+          </ul>
+		  <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-file"></i><span class="app-menu__label">测评</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+          <ul class="treeview-menu">
+            <li><a class="treeview-item" href="{% url "compose-quiz" %}"><i class="icon fa fa-circle-o"></i> 组卷工具</a></li>
+            <li><a class="treeview-item" href="{% url "mark-quiz" %}"><i class="icon fa fa-circle-o"></i>批改试卷</a></li>
+			<li><a class="treeview-item" href="{% url "my-quizes" %}"><i class="icon fa fa-circle-o"></i>我的试卷</a></li>
+			<li><a class="treeview-item" href="{% url "quiz-records" %}"><i class="icon fa fa-circle-o"></i>测评记录</a></li>
+          </ul>
+		  <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-list-ul"></i><span class="app-menu__label">试题</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+          <ul class="treeview-menu">
+              <li><a class="treeview-item" href="{% url "get-questions" %}"><i class="icon fa fa-circle-o"></i> 试题库</a></li>
+              <li><a class="treeview-item" href="{% url "my-favorites" %}"><i class="icon fa fa-circle-o"></i>收藏夹</a></li>
+          </ul>
+      </li>
+          <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-graduation-cap"></i><span class="app-menu__label">教学管理</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+              <ul class="treeview-menu">
+                  <li><a class="treeview-item" href="{% url "student-tuition" %}"><i class="icon fa fa-circle-o"></i> 课堂点到</a></li>
+                  <li><a class="treeview-item" href="{% url "my-schedule" %}"><i class="icon fa fa-circle-o"></i>课程安排</a></li>
+              </ul>
+          </li>
+	  </ul>
+	</aside>
     {% endblock %}
     <!-- End of Sidebar -->
 
     <!-- Content Wrapper -->
-    <div id="content-wrapper" class="d-flex flex-column">
+    <main class="app-content" style="width: 100%;position: relative;padding-bottom: 4.5rem;">
         <!-- Main Content -->
-        <div id="content">
-
-        <!-- Topbar -->
-        {% block "topbar" %}
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-
-          <!-- Sidebar Toggle (Topbar) -->
-    <!--          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">-->
-    <!--            <i class="fa fa-bars"></i>-->
-    <!--          </button>-->
-
-          <!-- Topbar Search -->
-    <!--          <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">-->
-    <!--            <div class="input-group">-->
-    <!--              <input type="text" class="form-control bg-light border-0 small" placeholder="搜索" aria-label="Search" aria-describedby="basic-addon2">-->
-    <!--              <div class="input-group-append">-->
-    <!--                <button class="btn btn-primary" type="button">-->
-    <!--                  <i class="fas fa-search fa-sm"></i>-->
-    <!--                </button>-->
-    <!--              </div>-->
-    <!--            </div>-->
-    <!--          </form>-->
-
-          <!-- Topbar Navbar -->
-            <ul class="navbar-nav ml-auto">
-
-                <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-        <!--            <li class="nav-item dropdown no-arrow d-sm-none">-->
-        <!--                <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-        <!--                    <i class="fas fa-search fa-fw"></i>-->
-        <!--                 </a>-->
-        <!--              &lt;!&ndash; Dropdown - Messages &ndash;&gt;-->
-        <!--                <div class="dropdown-menu dropdown-menu-right p-3 shadow animated&#45;&#45;grow-in" aria-labelledby="searchDropdown">-->
-        <!--                    <form class="form-inline mr-auto w-100 navbar-search">-->
-        <!--                        <div class="input-group">-->
-        <!--                            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">-->
-        <!--                            <div class="input-group-append">-->
-        <!--                                <button class="btn btn-primary" type="button">-->
-        <!--                                    <i class="fas fa-search fa-sm"></i>-->
-        <!--                                </button>-->
-        <!--                            </div>-->
-        <!--                        </div>-->
-        <!--                    </form>-->
-        <!--                </div>-->
-        <!--            </li>-->
-
-                <!-- Nav Item - Alerts -->
-<!--                <li class="nav-item dropdown no-arrow mx-1">-->
-<!--                    <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-<!--                        <i class="fas fa-bell fa-fw"></i>-->
-<!--                        &lt;!&ndash; Counter - Alerts &ndash;&gt;-->
-<!--                        <span class="badge badge-danger badge-counter">3+</span>-->
-<!--                    </a>-->
-<!--                    &lt;!&ndash; Dropdown - Alerts &ndash;&gt;-->
-<!--                    <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated&#45;&#45;grow-in" aria-labelledby="alertsDropdown">-->
-<!--                        <h6 class="dropdown-header">通知中心</h6>-->
-<!--                        <p></p>-->
-<!--                        <p style="margin: 20px">1、今天有调课计划，请及时查看。</p>-->
-<!--                        <p style="margin: 20px">2、您上传的题目未通过审核请自行前往查看。</p>-->
-<!--                        <a class="dropdown-item text-center small text-gray-500" href="#">更多通知</a>-->
-<!--                      </div>-->
-<!--                </li>-->
-                <li class="nav-item dropdown no-arrow mx-1">
-                    <a class="nav-link dropdown-toggle" href="/abc/quiz/my-favorites" title="收藏夹" >
-                        <i class="fas fa-bell fa-heart"></i>
-                    </a>
-                </li>
-
-                <!-- Nav Item - Messages -->
-
-                <!--<li class="nav-item dropdown no-arrow mx-1">
-                  <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-envelope fa-fw"></i>-->
-                    <!-- Counter - Messages -->
-
-                    <!-- <span class="badge badge-danger badge-counter">7</span> -->
-                  <!--</a>-->
-                  <!-- Dropdown - Messages -->
-                  <!--<div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
-                    <h6 class="dropdown-header">
-                      消息中心
-                    </h6>
-
-                    <a class="dropdown-item text-center small text-gray-500" href="#">更多消息</a>
-                  </div>
-                </li>
-
-                <div class="topbar-divider d-none d-sm-block"></div>-->
-
-                <!-- Nav Item - User Information -->
-                <li class="nav-item dropdown no-arrow">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.username }}</span>
-                        <span id ="user_img"><img class="img-profile rounded-circle" src="{% static "assets/img/user.jpg" %}"></span>
-                    </a>
-                    <!-- Dropdown - User Information -->
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                        <a class="dropdown-item" href="{% url "my-teacher_profile" %}">
-                            <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                            个人主页
-                        </a>
-                        <a class="dropdown-item" href="{% url "my-questions" %}">
-                            <i class="fa fa-fw fa-list-ul fa-sm mr-2 text-gray-400"></i>
-                            我的试题
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                            退出登录
-                        </a>
-                    </div>
-                </li>
-            </ul>
-
-        </nav>
-        {% endblock %}
-        <!-- End of Topbar -->
-
         <!-- Begin Page Content -->
-        <div class="container-fluid">
             {% block "main_content" %}
             {% endblock %}
-        </div>
         <!-- /.container-fluid -->
-
-        </div>
-      <!-- End of Main Content -->
-
       <!-- Footer -->
-        <footer class="sticky-footer bg-white">
+        <footer class="sticky-footer bg-white" style="position: absolute; bottom:0; left:0; right: 0;padding:1rem 0;">
             <div class="container my-auto">
                 <div class="copyright text-center my-auto">
                     <span>Copyright &copy; 指针AI</span>
                 </div>
                 <div class="copyright text-center my-auto" style="padding-top:10px">
-                    <span>杭州指针智汇教育科技有限公司</span><span style="padding-left:20px">客服电话：13586349923</span>
+                    <span>杭州指针智汇教育科技有限公司</span><span style="padding-left:20px">客服电话：0571-8971-6769</span>
                 </div>
             </div>
         </footer>
       <!-- End of Footer -->
-    </div>
+    </main>
     <!-- End of Content Wrapper -->
     </div>
   <!-- End of Page Wrapper -->
@@ -320,11 +149,9 @@
       //每次加载页面完成后执行
         $(document).ready(function () {
             $.get("{% url "ajax-get-user-img" %}",function(data,status){
-
                 if(data=='user no have teacherProfile'){
-
                 }else{
-                    $('#user_img').html('<img class="img-profile rounded-circle" src="http://47.110.253.251'+data+'">')
+                    $('.app-sidebar__user-avatar')[0].src = "http://47.110.253.251"+data
                 }
             })
         })
@@ -333,6 +160,35 @@
   {% block "scripts" %}
   {% endblock %}
 
+	<script>
+		(function () {
+	"use strict";
+
+	var treeviewMenu = $('.app-menu');
+
+	// Toggle Sidebar
+	$('[data-toggle="sidebar"]').click(function(event) {
+		event.preventDefault();
+		$('.app').toggleClass('sidenav-toggled');
+	});
+
+	// Activate sidebar treeview toggle
+	$("[data-toggle='treeview']").click(function(event) {
+		event.preventDefault();
+		if(!$(this).parent().hasClass('is-expanded')) {
+			treeviewMenu.find("[data-toggle='treeview']").parent().removeClass('is-expanded');
+		}
+		$(this).parent().toggleClass('is-expanded');
+	});
+
+	// Set initial active toggle
+	$("[data-toggle='treeview.'].is-expanded").parent().toggleClass('is-expanded');
+
+	//Activate bootstrip tooltips
+	$("[data-toggle='tooltip']").tooltip();
+
+})();
+	</script>
 </body>
 
 </html>

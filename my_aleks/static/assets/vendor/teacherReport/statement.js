@@ -194,17 +194,17 @@ var drawGraphs = function(labels,data){
 }
 
 //查看报告
-$(document).on('click','.tdOnReport .text',function(){
-   var name = $(this).attr("name");
-    var url = 'http://47.110.253.251/templates-static/templates/html/'+name+'.html'
-    window.open(url);
-})
+//$(document).on('click','.tdOnReport .text',function(){
+//   var name = $(this).attr("name");
+//    var url = 'http://47.110.253.251/templates-static/templates/html/'+name+'.html'
+//    window.open(url);
+//})
 //下载pdf文档
-$(document).on('click','.tdOnDownload .text',function(){
-    var name = $(this).attr("name");
-    var url = 'http://47.110.253.251/templates-static/templates/pdf/'+name+'.pdf'
-    window.open(url);
-})
+//$(document).on('click','.tdOnDownload .text',function(){
+//    var name = $(this).attr("name");
+//    var url = 'http://47.110.253.251/templates-static/templates/pdf/'+name+'.pdf'
+//    window.open(url);
+//})
 
 
 

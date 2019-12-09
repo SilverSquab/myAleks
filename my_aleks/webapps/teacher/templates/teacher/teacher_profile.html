@@ -5,486 +5,655 @@
 
 
 {% block "stylesheets" %}
-<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css"
+	rel="stylesheet">
 <style>
-    .mySpan{
-        color:#5f5f5f;
-    }
-    .myInput {
-        outline:none;
-        background:transparent;
-        border:none;
-        outline:medium;
-    }
-    .hide{
-        display: none;
-    }
-    .jumpText{
-        color:#1FC88D;
-        cursor: pointer;
-    }
-    td form{
-        position: relative;
-        width: 200px;
-        height: 200px;
-    }
-    #imgUpload{
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 200px;
-        opacity: 0;
-        cursor: pointer;
-    }
-    input[type="submit"]{
-        outline: none;
-        border-radius: 5px;
-        cursor: pointer;
-        background-color: #31B0D5;
-        border: none;
-        width: 60px;
-        height: 25px;
-        font-size: 16px;
-    }
-    .teacherImg{
-        height: 100%;
-        width: 100%;
-    }
-    .oneDiv{
-        width: 95%;
-        margin:0 auto;
-        margin-bottom: 30px;
-    }
-    .towDiv{
-        width: 95%;
-        margin:0 auto;
-        padding: 5px;
-        border-style:solid;
-        border-width:1px;
-        border-color:#e8e9ed;
-        margin-bottom: 30px;
-    }
-    .threeDiv{
-        width: 95%;
-        margin:0 auto;
-    }
-    .myInformationTable{
-        margin-left: 30px;
-    }
-    .myCLassDiv{
-        display: inline-block;
-        width: 30%;
-        border-style:solid;
-        border-width:1px;
-        border-color:#e8e9ed;
-        padding: 20px;
-    }
-    .myCertificate{
-        padding: 20px;
-        width: 60%;
-        display: inline-block;
-        float: right;
-        border-style:solid;
-        border-width:1px;
-        border-color:#e8e9ed;
-    }
-    .myCard{
-        display: inline-block;
-        float: right;
-        width: 70%;
-        margin-left: 10%;
-        margin-top: 30px;
-    }
-    .cardBox{
-        width: 25%;
-        display: inline-block;
-        margin-right: 5%;
-        cursor: pointer;
-    }
-    .myImg{
-        display: inline-block;
-        width: 12%;
-    }
-    .myCertificateBox{
-        display: inline-block;
-        width: 30%;
-        margin: 10px;
-    }
-    .CertificateImg{
-        width: 200px;
-        height: 200px;
-    }
+	.mySpan {
+		color: #5f5f5f;
+	}
+
+	.width-300{
+		width: 300px;
+	}
+	.myInput {
+		outline: none;
+		background: transparent;
+		border: none;
+		outline: medium;
+	}
+
+	.hide {
+		display: none;
+	}
+
+	.jumpText {
+		color: #1FC88D;
+		cursor: pointer;
+	}
+
+	td form {
+		position: relative;
+		width: 110px;
+		height: 110px;
+	}
+	#fileForm{
+		position: relative;
+		width: 150px;
+		height: 200px;
+	}
+	.uploadImg{
+		position: relative;
+		width: 80px;
+		height: 80px;
+	}
+
+	#imgUpload {
+	position: absolute;
+    left: 0;
+    top: 0;
+    height: 80px;
+    opacity: 0;
+    cursor: pointer;
+    border-radius: 50%;
+	}
+	#FileUpload {
+	position: absolute;
+    left: 0;
+    top: 0;
+    height: 200px;
+    opacity: 0;
+    cursor: pointer;
+    border-radius: 50%;
+	}
+
+	input[type="submit"] {
+		outline: none;
+		border-radius: 5px;
+		cursor: pointer;
+		background-color: #31B0D5;
+		border: none;
+		width: 60px;
+		height: 25px;
+		font-size: 16px;
+	}
+
+	.teacherImg {
+		height: 100%;
+		width: 100%;
+	}
+
+	.oneDiv {
+		width: 95%;
+		margin: 0 auto;
+		margin-bottom: 30px;
+	}
+	.img-profile{
+		width: 100px;
+		height: 100px;
+	}
+
+	.towDiv {
+		width: 95%;
+		margin: 0 auto;
+		padding: 5px;
+		border-style: solid;
+		border-width: 1px;
+		border-color: #e8e9ed;
+		margin-bottom: 30px;
+	}
+
+	.threeDiv {
+		width: 95%;
+		margin: 0 auto;
+	}
 
 
+	.myCLassDiv {
+		display: inline-block;
+		width: 30%;
+		border-style: solid;
+		border-width: 1px;
+		border-color: #e8e9ed;
+		padding: 20px;
+	}
 
+	.myCertificate {
+		/* padding: 20px;
+		display: inline-block;
+		float: right;
+		border-style: solid;
+		border-width: 1px;
+		border-color: #e8e9ed; */
+	}
+
+	.myCard {
+		display: inline-block;
+		float: right;
+		width: 70%;
+		margin-left: 10%;
+		margin-top: 30px;
+	}
+
+	.cardBox {
+		width: 25%;
+		display: inline-block;
+		margin-right: 5%;
+		cursor: pointer;
+	}
+
+	.myImg {
+		display: inline-block;
+		width: 12%;
+	}
+
+	.myCertificateBox {
+		display: inline-block;
+		width: 30%;
+		margin: 10px;
+	}
+
+	.CertificateImg {
+		width: 200px;
+		height: 200px;
+	}
 </style>
 {% endblock %}
 
 
 {% block "main_content" %}
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">我的信息</h1>
+<div class="app-title">
+	<h4 class="h4">首页</h4>
 </div>
 
-
-
-
-<!--第一行，头像、快捷跳转标签-->
-<div class="oneDiv">
-    <div class="myImg">
-        <form id="myForm">
-            <input type="file" id="imgUpload" name="imgUpload" accept=".png,.jpg,.jpeg" onchange="prev(this)" class="hide">
-            {% if teacherProfile.teacher.img %}
-            <img id="imgUpdate" class="img-profile rounded-circle teacherImg" src="{{HTTP_IP}}/abc/media/{{teacherProfile.teacher.img}}">
-            {% else %}
-            <img id="imgUpDown" class="img-profile rounded-circle teacherImg" src="{% static 'assets/img/user.jpg' %}">
-            {% endif %}
-            <br>
-            <span id="submitSpan" class="hide">点击更换图片<input id="submitBtn" type="submit" value="提交"></span>
-        </form>
-    </div>
-    <div class="myCard">
-        <div class="cardBox" onclick="jump('quiz/my-favorites/')">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                我的收藏
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fa fa-fw fa-heart text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="cardBox" onclick="jump('teacher/my-quizes/')">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                我的试卷
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-fw fa-folder-open text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="cardBox" onclick="jump('quiz/quiz-records/')">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                我的考试
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-fw fa-file text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+<!-- 快捷区 -->
+<div class="row">
+	<div class="col-xl-3 col-md-6 mb-4">
+		<div class="card border-left-info shadow h-100 py-2 hover" style="cursor: pointer"
+			onclick="jump('teacher/my-classes/')">
+			<div class="card-body">
+				<div class="row no-gutters align-items-center">
+					<div class="col mr-2">
+						<div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+							我的班级
+						</div>
+						<div class="h5 mb-0 font-weight-bold text-info">{{teacherProfile.menuNum.classNum}}</div>
+					</div>
+					<div class="col-auto">
+						<i class="fa fa-fw fa-2x fa-sitemap text-info"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xl-3 col-md-6 mb-4" onclick="jump('teacher/my-quizes/')" style="cursor: pointer">
+		<div class="card border-left-success shadow h-100 py-2">
+			<div class="card-body">
+				<div class="row no-gutters align-items-center">
+					<div class="col mr-2">
+						<div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+							我的试卷
+						</div>
+						<div class="h5 mb-0 font-weight-bold text-success">{{teacherProfile.menuNum.quizNum}}</div>
+					</div>
+					<div class="col-auto">
+						<i class="fas fa-fw fa-2x fa-folder-open text-success"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xl-3 col-md-6 mb-4" onclick="jump('quiz/get-questions')" style="cursor: pointer">
+		<div class="card border-left-warning shadow h-100 py-2">
+			<div class="card-body">
+				<div class="row no-gutters align-items-center">
+					<div class="col mr-2">
+						<div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+							我的题库
+						</div>
+						<div class="h5 mb-0 font-weight-bold text-warning">{{teacherProfile.menuNum.questionNum}}</div>
+					</div>
+					<div class="col-auto">
+						<i class="fas fa-fw fa-2x fa-file text-warning"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xl-3 col-md-6 mb-4" onclick="jump('quiz/my-favorites/')" style="cursor: pointer">
+		<div class="card border-left-danger shadow h-100 py-2">
+			<div class="card-body">
+				<div class="row no-gutters align-items-center">
+					<div class="col mr-2">
+						<div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+							我的收藏
+						</div>
+						<div class="h5 mb-0 font-weight-bold text-danger">{{teacherProfile.menuNum.favorites}}</div>
+					</div>
+					<div class="col-auto">
+						<i class="fa fa-fw fa-2x fa-heart text-danger"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
-<!--个人信息展示-->
-<div class="towDiv">
-    <table class="myInformationTable">
-        <tr height="10">
-            <td></td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <span style="font-weight:bold;" teacherId="{{teacherProfile.teacher.id}}" id="profileSpan">个人信息</span>&nbsp;&nbsp;
-                <span class="jumpText" id="updateClick">修改信息</span>
-                <span class="hide jumpText" id="affirmClick">保存</span>&nbsp;&nbsp;<span class="hide jumpText" id="cancelClick">取消</span>
-            </td>
-        </tr>
-        <tr>
-        <tr height="10"><td></td></tr>
-        <td width="50%">姓名 : <span><input readonly id="name" class="myInput" value="{{teacherProfile.teacher.name}}"></span></td>
-        </tr>
-        <tr>
-        <tr height="10"><td></td></tr>
-        <td width="50%">学科 : <span style="color: #000000">{{teacherProfile.subject}}</span></td>
-        </tr>
+<!-- 个人信息 -->
+<div class="row mt-3">
+	<div class="col-lg-6">
+		<div class="tile mb-4">
+			<div class="tile-title-w-btn border-bottom pb-2">
+              	<h4 class="title h5 text-primary">个人信息</h4>
+            	<a href="#" id="updateClick">修改</a>
+                <a href='#' id="affirmClick" class="hide">保存</a>
+			</div>
+			<div class="tile-body height-400">
+				<div class="row">
+					<div class="col-12">
+					<table class="myInformationTable table table-bordered" teacherId="{{teacherProfile.teacher.id}}" id="profileSpan">
+						<tr>
+							<td>
+								<form id="myForm" >
+                                    <input type="file" id="imgUpload" name="imgUpload" accept=".png,.jpg,.jpeg" onchange="prev(this)" class="hide">
+                                    {% if teacherProfile.teacher.img %}
+                                    <img id="imgUpdate" class="img-profile rounded-circle "  src="{{HTTP_IP}}/abc/media/{{teacherProfile.teacher.img}}">
+                                    {% else %}
+                                    <img id="imgUpDown" class="img-profile rounded-circle " src="{% static 'assets/img/user.jpg' %}">
+                                    {% endif %}
+                                    <p id="submitSpan" class="hide" style="font-size:10px;color: red; margin-left: 20px ">点击图片即可修改</p>
+                                </form>
+								<!-- {% if teacherProfile.teacher.img %}
+								<img id="imgUpdate" class="img-profile rounded-circle teacherImg"
+									src="{{HTTP_IP}}/abc/media/{{teacherProfile.teacher.img}}">
+								{% else %}
+								<img id="imgUpDown" class="img-profile rounded-circle teacherImg" src="{% static "assets/img/user.jpg" %}">
+								{% endif %} -->
+							</td>
+						</tr>
+						<tr>
+							<td>姓名 : <span><input readonly id="name" class="width-300 myInput"
+										value="{{teacherProfile.teacher.name}}" style="display: inline-block;width: 30%;background-color:#FFF; " ></span></td>
+						</tr>
+						<tr>
+							<td>学科 : <span style="color: #000000">{{teacherProfile.subject}}</span></td>
+						</tr>
 
-        <tr>
-        <tr height="10"><td></td></tr>
-        <td width="50%">所属机构 : <span style="color: #000000">{{teacherProfile.school}}</span></td>
-        </tr>
+						<tr>
+							<td>所属机构 : <span style="color: #000000">{{teacherProfile.school}}</span></td>
+						</tr>
 
-        <tr>
-        <tr height="10"><td></td></tr>
-        <td width="50%">联系电话 : <span><input readonly id="phone" class="myInput" value="{{teacherProfile.teacher.phone}}"></span></td>
-        </tr>
+						<tr>
+							<td>联系电话 : <span><input readonly id="phone" class="myInput"
+										value="{{teacherProfile.teacher.phone}}" style="display: inline-block;width: 30%;background-color:#FFF; " ></span></td>
+						</tr>
 
-        <tr>
-        <tr height="10"><td></td></tr>
-        <td width="50%">个人介绍 : <span><input readonly id="info" class="myInput" type="text" value="{{teacherProfile.teacher.info}}"></span></td>
-        </tr>
-    </table>
+						<tr>
+							<td>个人介绍 : <span><input readonly id="info" class="myInput"
+										type="text"
+										value="{{teacherProfile.teacher.info}}" style="display: inline-block;width: 30%;background-color:#FFF;" ></span></td>
+						</tr>
+					</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- <div class="myCertificate tile mb-4">
+			<div class="tile-title border-bottom">
+			<h3>我的证件&nbsp;&nbsp;
+				<span class="jumpText" id="uploadCertificateImg">上传证书</span>
+				<span class="hide jumpText" id="affirmCertificateImg">保存</span>&nbsp;&nbsp;<span
+					class="hide jumpText"
+					id="cancelCertificateImg">取消</span>
+			</h3>
+			</div>
+			<div id="myCertificateDiv">
+				{% if teacherProfile.teacherFiles %}
+				{% for teacherFile in teacherProfile.teacherFiles %}
+				<div class="myCertificateBox">
+					<img class="CertificateImg"
+						src="{{HTTP_IP}}/abc/media/{{teacherFile.img}}">
+					<br>
+					<span style="margin: 5px 0 0 5px">{{teacherFile.description}}</span>
+				</div>
+				{% endfor %}
+				{% else %}
+				<div>您还没有上传证件，快点击上传吧</div>
+				{% endif%}
+			</div>
+			<div style="margin:20px" id="inputFrom" class="hide">
+				<span style="margin-top: 10px">证件描述 : <input id="description"></span>
+				<span style="margin-top: 10px">证件照片 : <input id="inputCertificateImg"
+						type="file"
+						accept=".png,.jpg,.jpeg"></span>
+			</div>
+		</div> -->
+	</div>
+	<div class="col-lg-6">
+		<div class="tile mb-4">
+			<div class="tile-title-w-btn border-bottom pb-2">
+				<h4 class="title h5 text-primary">我的班级</h4>
+			</div>
+			<div class="tile-body table-responsive height-400">
+				<table class="table table-hover table-bordered" cellpadding="0" cellspacing="0">
+					<thead>
+						<th><span style="font-weight:bold;">年级</span></th>
+						<th colspan="2"><span style="font-weight:bold;">班级</span></th>
+					</tr>
+					{% if teacherProfile.classes %}
+					{% for cls in teacherProfile.classes %}
+					<tr>
+						<td><span style="margin-right: 10px" class="classGrade mySpan">{{cls.grade}}</span>
+						</td>
+						<td colspan="2">
+							<span><a href="{%url 'school-get-class-detail'%}?clsId={{cls.id}}">{{cls.name}}</a></span></td>
+					</tr>
+					{% endfor %}
+					{% else %}
+					<tr class="text-center">
+						<td colspan="2">
+							<div class="p-3 red">您还没有班级，快去添加吧~</div>
+						</td>
+					</tr>
+					{% endif %}
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-12">
+		<div class="tile mb-4">
+			<div class="tile-title-w-btn border-bottom pb-2">
+				<h4 class="title h5 text-primary">我的证件</h4>
+				<a id="update" class="hide" style="color: #009688; cursor: pointer;">上传</a>
+			</div>
+			<div class="tile-body table-responsive height-400">
+				{% if teacherProfile.teacherFiles %}
+				{% for teacherFile in teacherProfile.teacherFiles %}
+				<div style=" float: left;">
+					<div style="border-style:dashed;border-width: 1px;border-color: #e5e5e5;padding: 5px;width: 162px; float: left;margin: 5px">
+						<img class="CertificateImg"
+							src="{{HTTP_IP}}/abc/media/{{teacherFile.img}}" style="width: 150px; cursor: pointer;">
+					</div>
+
+					<p style="margin: 10px 0 10px 0; text-align: center;">{{teacherFile.description}}</p>
+				</div>
+				{% endfor %}
+				<div style=" float: left;">
+					<div style="border-style:dashed;border-width: 1px;border-color: #e5e5e5;padding: 5px;width: 162px; margin: 5px">
+						<form id="fileForm" style="display: inline-block;">
+							<input type="file" id="FileUpload" name="FileUpload" accept=".png,.jpg,.jpeg" onchange="file_prev(this)" style="display: inline-block;">
+							<img class="CertificateImg" id="FileUpdate" 
+								src="{% static 'assets/img/addIcon.png' %}" style="width: 150px;">
+						</form>
+					</div>
+					<p style="margin: 10px 0 10px 0; text-align: center;">
+						<span>
+							<!-- 点击上传
+							<input type="text" class="hide"> -->
+							<input readonly id="description" class="myInput"
+										type="text"
+										style="display: inline-block;width: 140px;background-color:#FFF;text-align: center;" placeholder='点击上传' >
+						</span>
+					</p>
+				</div>
+				{% else %}
+				<div>您还没有上传证件，快点击上传吧</div>
+				<div style=" float: left;">
+					<div style="border-style:dashed;border-width: 1px;border-color: #e5e5e5;padding: 5px;width: 162px; margin: 5px">
+						<form id="fileForm" style="display: inline-block;">
+							<input type="file" id="FileUpload" name="FileUpload" accept=".png,.jpg,.jpeg" onchange="file_prev(this)" style="display: inline-block;">
+							<img class="CertificateImg" id="FileUpdate" 
+								src="{% static 'assets/img/addIcon.png' %}" style="width: 150px;">
+						</form>
+					</div>
+					<p style="margin: 10px 0 10px 0; text-align: center;">
+						<span>
+							<!-- 点击上传
+							<input type="text" class="hide"> -->
+							<input readonly id="description" class="myInput"
+										type="text"
+										style="display: inline-block;width: 140px;background-color:#FFF;text-align: center;" placeholder='点击上传' >
+						</span>
+					</p>
+				</div>	
+				{% endif%}
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-6">
+	</div>
 </div>
-<!--班级和个人证书展示-->
-<div class="threeDiv">
-    <div class="myCLassDiv">
-        <table border="0" cellpadding="0" cellspacing="0" width="480">
-            <tr height="10">
-                <td></td>
-            </tr>
-            <tr>
-                <td colspan="2" ><span style="font-weight:bold;">相关班级</span></td>
-            </tr>
-            {% if teacherProfile.classes %}
-            {% for cls in teacherProfile.classes %}
-            <tr>
-            <tr height="10"><td></td></tr>
-            <td colspan="2"><span style="margin-right: 10px" class="classGrade mySpan">{{cls.grade}}</span> <span><a href="{%url 'teacher-index'%}?classId={{cls.id}}">{{cls.name}}</a></span></td>
-            </tr>
-            {% endfor %}
-            {% else %}
-            <tr>
-            <tr height="10"><td></td></tr>
-            <td colspan="2"> <div>您还没有班级，快去添加吧~</div></td>
-            </tr>
-            {% endif %}
-
-        </table>
-    </div>
-    <div class="myCertificate">
-        <div style="font-weight:bold;" >我的证件&nbsp;&nbsp;
-            <span class="jumpText" id="uploadCertificateImg">上传证书</span>
-            <span class="hide jumpText" id="affirmCertificateImg">保存</span>&nbsp;&nbsp;<span class="hide jumpText" id="cancelCertificateImg">取消</span>
-        </div>
-        <div id="myCertificateDiv">
-            {% if teacherProfile.teacherFiles %}
-            {% for teacherFile in teacherProfile.teacherFiles %}
-            <div class="myCertificateBox">
-                <img  class="CertificateImg"  src="{{HTTP_IP}}/abc/media/{{teacherFile.img}}">
-                <br>
-                <span style="margin: 5px 0 0 5px">{{teacherFile.description}}</span>
-            </div>
-            {% endfor %}
-            {% else %}
-            <div>您还没有上传证件，快点击上传吧</div>
-            {% endif%}
-        </div>
-        <div style="margin:20px" id="inputFrom" class="hide">
-            <span style="margin-top: 10px">证件描述 : <input  id="description"></span>
-            <span style="margin-top: 10px">证件照片 : <input id="inputCertificateImg" type="file" accept=".png,.jpg,.jpeg" ></span>
-        </div>
-
-
-
-    </div>
-
-</div>
-
-
-
-
-
-
-
-
 
 {% endblock %}
 
 
 {% block "scripts" %}
 <script type="text/javascript">
-    //存储当前用户的用户名、电话号码、介绍
-    var nameNow = '';
-    var phoneNow = '';
-    var infoNow = '';
+	//存储当前用户的用户名、电话号码、介绍
+	var nameNow = '';
+	var phoneNow = '';
+	var infoNow = '';
 
-    var gradeUpdate = function(grade){
-        switch (parseInt(grade)) {
-            case 1 : return "小学一年级--------";
-            case 2 : return "小学二年级--------";
-            case 3 : return "小学三年级--------";
-            case 4 : return "小学四年级--------";
-            case 5 : return "小学五年级--------";
-            case 6 : return "小学六年级--------";
-            case 7 : return "初中一年级--------";
-            case 8 : return "初中二年级--------";
-            case 9 : return "初中三年级--------";
-            case 10 : return "高中一年级--------";
-            case 11 : return "高中二年级--------";
-            case 12 : return "高中三年级--------";
-        }
-    };
-    //上传证书
-    $("#uploadCertificateImg").click(function () {
-        $("#uploadCertificateImg").addClass("hide");
-        $("#affirmCertificateImg").removeClass("hide");
-        $("#cancelCertificateImg").removeClass("hide");
-        $("#myCertificateDiv").addClass("hide");
-        $("#myCertificateDiv").addClass("hide");
-        $("#inputFrom").removeClass("hide");
-    });
-    //取消
-    $("#cancelCertificateImg").click(function () {
-        $("#uploadCertificateImg").removeClass("hide");
-        $("#affirmCertificateImg").addClass("hide");
-        $("#cancelCertificateImg").addClass("hide");
-        $("#myCertificateDiv").removeClass("hide");
-        $("#myCertificateDiv").removeClass("hide");
-        $("#inputFrom").addClass("hide");
-    });
-    //提交
-    $("#affirmCertificateImg").click(function () {
-        var data = new FormData();
-        if(!$('#inputCertificateImg')[0].files[0]){
-            alert("请先选择图片");
-            return
-        }
-        data.append('img', $('#inputCertificateImg')[0].files[0]);
-        data.append('description',$("#description").val());
-        data.append('profile_id',$("#profileSpan").attr("teacherId"));
-        $.ajax({
-            type:"POST",
-            url:"{% url 'ajax-upload-teacherfile' %}",
-            data:data,
-            // dataType:"json",
-            cache: false,
-            processData: false,
-            contentType: false,
-            success:function (res) {
-                console.info(res);
-                if(res == "OK"){
-                    alert("上传成功")
-                    window.location.reload();
-                }else{
-                    alert(res)
-                }
-            }
-        })
-    });
-
+	var gradeUpdate = function (grade) {
+		switch (parseInt(grade)) {
+			case 1: return "小学一年级";
+			case 2: return "小学二年级";
+			case 3: return "小学三年级";
+			case 4: return "小学四年级";
+			case 5: return "小学五年级";
+			case 6: return "小学六年级";
+			case 7: return "初中一年级";
+			case 8: return "初中二年级";
+			case 9: return "初中三年级";
+			case 10: return "高中一年级";
+			case 11: return "高中二年级";
+			case 12: return "高中三年级";
+		}
+	};
+	
+	//取消
+	// $("#cancelCertificateImg").click(function () {
+	// 	$("#uploadCertificateImg").removeClass("hide");
+	// 	$("#affirmCertificateImg").addClass("hide");
+	// 	$("#cancelCertificateImg").addClass("hide");
+	// 	$("#myCertificateDiv").removeClass("hide");
+	// 	$("#myCertificateDiv").removeClass("hide");
+	// 	$("#inputFrom").addClass("hide");
+	// });
+	//上传证书
+	$("#update").click(function () {
+		var data = new FormData();
+		if (!$('#FileUpload')[0].files[0]) {
+			alert("请先选择图片");
+			return
+		}
+		//alert("上传证书")
+		data.append('img', $('#FileUpload')[0].files[0]);
+		data.append('description', $("#description").val());
+		data.append('profile_id', $("#profileSpan").attr("teacherId"));
+		$.ajax({
+			type: "POST",
+			url: "{% url 'ajax-upload-teacherfile' %}",
+			data: data,
+			// dataType:"json",
+			cache: false,
+			processData: false,
+			contentType: false,
+			success: function (res) {
+				console.info(res);
+				if (res == "OK") {
+					alert("上传成功")
+					$("#description").val("");
+					window.location.reload();
+				} else {
+					alert(res)
+				}
+			}
+		})
+	});
+	//点击查看证书
+	$(".CertificateImg").click(function () {
+		var img_url=$(this).attr("src");
+		$(location).attr('href', img_url);
+	})
 
 
+	//个人信息展开修改
+	$("#updateClick").click(function () {
+		$("table input").removeClass("myInput");
+		$("table input").removeAttr("readonly");
+		$("table input").addClass("form-control");
+		$("#updateClick").addClass("hide");
+		$("#affirmClick").removeClass("hide");
+		$("#cancelClick").removeClass("hide");
+		$("#submitSpan").removeClass("hide");
+		$("#imgUpload").removeClass("hide");
+		nameNow = $("#name").val();
+		phoneNow = $("#phone").val();
+		infoNow = $("#info").val();
+	});
+	// //取消修改
+	// $("#cancelClick").click(function () {
+	// 	$("table input").addClass("myInput");
+	// 	$("table input").attr("readonly", "true");
+	// 	$("table input").removeClass("form-control");
+	// 	$("#updateClick").removeClass("hide");
+	// 	$("#affirmClick").addClass("hide");
+	// 	$("#cancelClick").addClass("hide");
+	// 	$("#submitSpan").addClass("hide");
+	// 	$("#imgUpload").addClass("hide");
+	// 	$("#name").val(nameNow);
+	// 	$("#phone").val(phoneNow);
+	// 	$("#info").val(infoNow);
+	// });
+	//确认修改个人信息
+	$("#affirmClick").click(function () {
+		var data = {
+			name: $("#name").val(),
+			phone: $("#phone").val(),
+			info: $("#info").val()
+		};
+		// console.info(data);
+		$.post("{% url 'ajax-update-teacher' %}", JSON.stringify(data), function (data, status) {
+			if (data == 'success') {
+				alert("修改成功");
+				//window.location.reload();
+			} else {
+				alert("修改失败");
+			}
+		})
+		
+		var data = new FormData();
+		if ($('#imgUpload')[0].files[0]) {
+			data.append('img', $('#imgUpload')[0].files[0]);
+			data.append('profile_id', $("#profileSpan").attr("teacherId"));
+			$.ajax({
+				type: "POST",
+				url: "{% url 'upload-teacher-img' %}",
+				data: data,
+				// dataType:"json",
+				cache: false,
+				processData: false,
+				contentType: false,
+				success: function (res) {
+					console.info(res);
+					if (res == "OK") {
+						alert("上传成功")
+						window.location.reload();
+					} else {
+						alert(res)
+					}
+				}
+			})
+		}
 
-    //展开修改
-    $("#updateClick").click(function () {
-       $("table input").removeClass("myInput");
-       $("table input").removeAttr("readonly");
-       $("#updateClick").addClass("hide");
-       $("#affirmClick").removeClass("hide");
-       $("#cancelClick").removeClass("hide");
-       $("#submitSpan").removeClass("hide");
-       $("#imgUpload").removeClass("hide");
-       nameNow = $("#name").val();
-       phoneNow = $("#phone").val();
-       infoNow = $("#info").val();
-    });
-    //取消修改
-    $("#cancelClick").click(function () {
-        $("table input").addClass("myInput");
-        $("table input").attr("readonly","true");
-        $("#updateClick").removeClass("hide");
-        $("#affirmClick").addClass("hide");
-        $("#cancelClick").addClass("hide");
-        $("#submitSpan").addClass("hide");
-        $("#imgUpload").addClass("hide");
-        $("#name").val(nameNow);
-        $("#phone").val(phoneNow);
-        $("#info").val(infoNow);
-    });
-    //确认修改
-    $("#affirmClick").click(function () {
-       var data = {
-           name: $("#name").val(),
-           phone:$("#phone").val(),
-           info:$("#info").val()
-       };
-       console.info(data);
-       $.post("{% url 'ajax-update-teacher' %}",JSON.stringify(data),function (data,status) {
-           if(data == 'success'){
-               alert("修改成功");
-               window.location.reload();
-           }else{
-               alert("修改失败");
-           }
-       })
-    });
-    //上传图片
-    $('#submitBtn').on('click', function () {
-        var data = new FormData();
-        if(!$('#imgUpload')[0].files[0]){
-            alert("请先选择图片");
-            return
-        }
-        data.append('img', $('#imgUpload')[0].files[0]);
-        data.append('profile_id',$("#profileSpan").attr("teacherId"));
-        $.ajax({
-            type:"POST",
-            url:"{% url 'upload-teacher-img' %}",
-            data:data,
-            // dataType:"json",
-            cache: false,
-            processData: false,
-            contentType: false,
-            success:function (res) {
-                console.info(res);
-                if(res == "OK"){
-                    alert("上传成功")
-                    window.location.reload();
-                }else{
-                    alert(res)
-                }
-            }
-        })
+	});
+	//上传图片
+	// $('#submitBtn').on('click', function () {
+	// 	var data = new FormData();
+	// 	if (!$('#imgUpload')[0].files[0]) {
+	// 		alert("请先选择图片");
+	// 		return
+	// 	}
+	// 	data.append('img', $('#imgUpload')[0].files[0]);
+	// 	data.append('profile_id', $("#profileSpan").attr("teacherId"));
+	// 	$.ajax({
+	// 		type: "POST",
+	// 		url: "{% url 'upload-teacher-img' %}",
+	// 		data: data,
+	// 		// dataType:"json",
+	// 		cache: false,
+	// 		processData: false,
+	// 		contentType: false,
+	// 		success: function (res) {
+	// 			console.info(res);
+	// 			if (res == "OK") {
+	// 				alert("上传成功")
+	// 				window.location.reload();
+	// 			} else {
+	// 				alert(res)
+	// 			}
+	// 		}
+	// 	})
 
 
-    });
-    //修改展示图片
-    function prev(event){
-        console.info(event)
-        //获取展示图片的区域
-        var img = document.getElementById("imgUpdate");
-        if(!img){
-            img = document.getElementById("imgUpDown");
-        }
-        //获取文件对象
-        let file = event.files[0];
-        //获取文件阅读器
-        let reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = function(){
-            //给img的src设置图片url
-            img.setAttribute("src", this.result);
-        }
-    }
-    $("#uploadCertificateImg").click(function () {
-    });
+	// });
+	//修改展示个人头像图片
+	function prev(event) {
+		console.info(event)
+		//获取展示图片的区域
+		var img = document.getElementById("imgUpdate");
+		if (!img) {
+			img = document.getElementById("imgUpDown");
+		}
+		//获取文件对象
+		let file = event.files[0];
+		//获取文件阅读器
+		let reader = new FileReader();
+		reader.readAsDataURL(file);
+		reader.onload = function () {
+			//给img的src设置图片url
+			img.setAttribute("src", this.result);
+		}
+	}
+	//上传文件展示图片
+	function file_prev(event) {
+		console.info(event)
+		//获取展示图片的区域
+		var img = document.getElementById("FileUpdate");
+		//获取文件对象
+		let file = event.files[0];
+		//获取文件阅读器
+		let reader = new FileReader();
+		reader.readAsDataURL(file);
+		reader.onload = function () {
+			//给img的src设置图片url
+			img.setAttribute("src", this.result);
+		}
+		$("#description").removeClass("myInput");
+		$("#description").removeAttr("readonly");
+		$("#description").addClass("form-control");
+		$("#description").attr('placeholder','请输入文件描述')
+		$("#update").removeClass("hide");
+	}
+	$("#uploadCertificateImg").click(function () {
+	});
 
-    var jump = function(url){
-        $(location).attr('href', '/abc/'+url);
-    };
+	var jump = function (url) {
+		$(location).attr('href', '/abc/' + url);
+	};
 
 
-    
-    $(document).ready(function () {
-        var graderList = document.getElementsByClassName("classGrade");
-        for(item in graderList){
-            graderList[item].innerText = gradeUpdate(graderList[item].innerText);
-        }
-        // console.info(graderList);
-    });
-    
-    
-    
-    
+
+	$(document).ready(function () {
+		var graderList = document.getElementsByClassName("classGrade");
+		for (item in graderList) {
+			graderList[item].innerText = gradeUpdate(graderList[item].innerText);
+		}
+		// console.info(graderList);
+	});
+
+
+
+
 
 </script>
 {% endblock %}
-

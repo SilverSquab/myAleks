@@ -29,16 +29,18 @@
 
 
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">测试详情</h1>
+		  <div class="app-title">
+          <h4>测试详情</h4>
+		  </div>
 <!--           <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below. For more information about DataTables, please visit the <a target="_blank" href="https://datatables.net">official DataTables documentation</a>.</p>
  -->
           <!-- DataTales Example -->
-          <div class="card shadow mb-4 classFontSize">
-            <div class="card-header py-3">
+          <div class="tile shadow classFontSize">
+            <div class="tile-title border-bottom pb-3">
               <h6 class="m-0 font-weight-bold text-primary">{{info.title}}</h6>
               <!--<a href='{% url "quiz-page"%}?quiz_record_id={{quiz_record_id}}' class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i>测试卷面</a>-->
             </div>
-            <div style="padding-left:20px; padding-top:10px;">
+            <div class="border-bottom mb-3">
             {% if quiz_record_paper_uri %}
             <div style='float:right'>
              <a href = '{{TEMPLATES_ID}}/templates-static/templates/pdf/{{quiz_record_paper_uri}}'style="margin-right:20px;color:white" id='quiz_record_paper' class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">班级报告</a>
@@ -51,11 +53,11 @@
             <p>科目：{{subject}}</p>
             <p>班级：{{cls}}</p>
             <p>未参加人数：{{non_participants_num}}</p>
-            <p> <a style='color:#1fc88d;cursor:pointer' id='add_quiz_record_paper'>点击生成班级报告>>>></a></p>
+            <p> <a style='color:#009688;cursor:pointer' id='add_quiz_record_paper'>点击生成班级报告>></a></p>
             </div>
-            <div class="card-body">
+            <div class="tile-body">
               <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                   <thead>
                     <tr>
                       <th>学号</th>
@@ -70,19 +72,19 @@
                   <tbody>
                     {% for student in students %}
                     <tr>
-                      <th>{{student.student_no}}</th>
-                      <th>{{student.name}}</th>
-                      <th>{{student.score}}</th>
-                      <th>{{student.rank}}</th>
-                      <th>{{student.time}}</th>
-                      <th>{{student.status}}</th>
-                      <th>
+                      <td>{{student.student_no}}</td>
+                      <td>{{student.name}}</td>
+                      <td>{{student.score}}</td>
+                      <td>{{student.rank}}</td>
+                      <td>{{student.time}}</td>
+                      <td>{{student.status}}</td>
+                      <td>
                       {% if student.student_quiz_record_id %}
                         <a href="{% url "student-quiz-record" %}?student_quiz_record_id={{student.student_quiz_record_id}}">详情</a>
                       {% else %}
                         ——
                       {% endif %}
-                      </th>
+                      </td>
                     </tr>
                     {% endfor %}
 
@@ -111,7 +113,7 @@
             $.get("{% url "get-class-quiz-report" %}?cls_id=" + cls_id + "&quiz_record_id={{quiz_record_id}}", function (data, status) {
                 if(data=="OK"){
                     alert('班级报告生成成功！')
-                    //window.location.reload();
+                    window.location.reload();
                 }else{
                     alert('班级报告生成失败！')
                 }

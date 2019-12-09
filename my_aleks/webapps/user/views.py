@@ -26,7 +26,7 @@ def login_view(request):
                 next_url = request.GET.get("next","/abc/school/school-profile/")
             return redirect(next_url)
         else:
-            return render(request, "Login.html", {"next": next_url})
+            return render(request, "Login.html", {"next": next_url,"error":"username or password is error"})
 
 
 def logout_view(request):

@@ -48,9 +48,9 @@
     <!-- <input type="button" style="border-top: 0; border-left: 5px; border-right: 5px; border-bottom: 5px " value="全部"/> -->
         <!-- <div> -->
         <!-- <div style="float:left;margin-top: 30px;width: 1px;height: 30px; background: darkgray;"></div>  -->
-        <span style="cursor:pointer; margin: 20px; {% if status == 'all' %} color: #1fc88d; {% endif %}" id="all" >全部</span>
-        <span style="cursor:pointer; margin: 20px;  {% if status == 'on' %} color: #1fc88d; {% endif %}" id="on">审核中</span>
-        <span style="cursor:pointer; margin: 20px;  {% if status == 'failed' %}color: #1fc88d;{% endif %}" id="failed">审核失败</span>
+        <span style="cursor:pointer; margin: 20px; {% if status == 'all' %} color: #009688; {% endif %}" id="all" >全部</span>
+        <span style="cursor:pointer; margin: 20px;  {% if status == 'on' %} color: #009688; {% endif %}" id="on">审核中</span>
+        <span style="cursor:pointer; margin: 20px;  {% if status == 'failed' %}color: #009688;{% endif %}" id="failed">审核失败</span>
         <!-- </div> -->
 <!--     <div style="border-color: black; width: 1px; height: 30px; border-width: 1px"></div>-->    
         <hr style="height: 5px"/>
@@ -63,11 +63,14 @@
                         <h6 class="m-0 font-weight-bold text-primary"style="line-height: 1.5rem;float:left;width:50%">
                             <span>题目编号：{{q.question.id}}</span>
                         </h6>
-                        <a href="/abc/quiz/upload-question/?question_id={{q.question.id}}" style="color:white; float:right; margin-right:10px" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">编辑试题</a>
+                        <a href="{% if q.question.question_type == "multi-choice" %}{% url "upload-question" %}{% endif %}{% if q.question.question_type == "completion" %}{% url "upload-completion" %}{% endif %}?question_id={{q.question.id}}" style="color:white; float:right; margin-right:10px" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">编辑试题</a>
                         <!-- <a id= "delete" question_id="{{q.question.id}}" style=" float:left; color:white" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">删除试题</a> -->
                     </div>
                     <div class="card-body">
-                        <p>{{q.question.body}}</p>
+                        <p>{% if q.question.question_type == 'multi-choice' %}（单选题）{% endif %}
+                            {% if q.question.question_type == 'completion' %}（填空题）{% endif %}
+                            {{q.question.body}}
+                        </p>
                         {% if q.question.img %}
                             <div>
                             	<img class="question_img" src="{{TEMPLATES_IP}}/evaluation-img/{{q.question.img}}">
@@ -84,7 +87,7 @@
                     	{% endfor %}
                         <div style="width:100%;clear:both">
                             <hr/>
-                            <p>【正确答案】：{{q.true_option}}</p>
+                            <p>【正确答案】：{{q.true_option}}{{q.answer.body}}</p>
                             <!-- <P>【错因分析】：{% for r in  q.error_reasons %}{{r.option}}：{% for error in r.error_reason %}{{error}}；{% endfor %}{% endfor %}</p> -->
                             <p>【涉及知识点】：{% for k in q.knowledge_nodes %} {{k.title}}； {% endfor %}</p>
                             <!-- <p>【选项知识点】：{% for k in q.option_konwledge_nodes %}{{k.option}}：{% for node in k.knowledge_nodes %}{{node}}；{% endfor %}{% endfor %}</p> -->
@@ -103,12 +106,13 @@
         {% if max_page > 0%}
         <div style="text-align: center;">
             {% if page != 1%}
-            <span style="margin: 10px; cursor: pointer" id="previous_page">上一页</span>
+            <span style="margin: 10px; cursor: pointer;color:#009688" id="previous_page">上一页</span>
             {% endif %}
             <span style="margin-left: 10px"span>{{page}}</span>/<span style="margin-right: 10px">{{max_page}}</span>
             {% if page < max_page %}
-            <span style="margin: 10px; cursor: pointer" id="next_page">下一页</span>
+            <span style="margin: 10px; cursor: pointer;color:#009688" id="next_page">下一页</span>
             {% endif %}
+            <input style="width:30px" id="pageInput" /><a  id="jump-page" style="padding: 10px;cursor: pointer;color:#009688" type="button">跳转</a>
         </div>
         {% endif %}
     </div>
@@ -138,34 +142,40 @@
     $(document).on('click', '#previous_page', function () {
         page = page-1
         var s = $("#h1").attr("status")
-        $(location).attr('href', '/abc/quiz/my-questions/?page='+page+'&status='+s);
+        $(location).attr('href', '{% url "my-questions" %}?page='+page+'&status='+s);
     });
     //下一页点击事件
     $(document).on('click', '#next_page', function () {
         page = page+1
         var s = $("#h1").attr("status")
-        $(location).attr('href', '/abc/quiz/my-questions/?page='+page+'&status='+s);
+        $(location).attr('href', '{% url "my-questions" %}?page='+page+'&status='+s);
+    });
+    //跳页查询
+	$(document).on('click','#jump-page',function(){
+        var jumpPage = $("#pageInput").val();
+        var s = $("#h1").attr("status")
+        $(location).attr('href', '{% url "my-questions" %}?page='+jumpPage+'&status='+s);
     });
     //全部
     $(document).on('click', '#all', function () {
         // $(this).css('color','#1fc88d')
         // $('#failed').css('color','')
         // $('on').css('color','')
-        $(location).attr('href', '/abc/quiz/my-questions/?status=all&page=1');
+        $(location).attr('href', '{% url "my-questions" %}?status=all&page=1');
     });
     //审核中
     $(document).on('click', '#on', function () {
         // $(this).css('color','#1fc88d')
         // $('#failed').css('color','')
         // $('#all').css('color','')
-        $(location).attr('href', '/abc/quiz/my-questions/?status=on&page=1');
+        $(location).attr('href', '{% url "my-questions" %}?status=on&page=1');
     });
     //审核失败页面
     $(document).on('click', '#failed', function () {
         // $(this).css('color','#1fc88d')
         // $('#all').css('color','')
         // $('#on').css('color','')
-        $(location).attr('href', '/abc/quiz/my-questions/?status=failed&page=1');
+        $(location).attr('href', '{% url "my-questions" %}?status=failed&page=1');
     });
     //图片大小设定
     $(document).ready(function() {

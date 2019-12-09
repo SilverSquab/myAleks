@@ -36,18 +36,17 @@
 
 <!-- Page Heading -->
 <!--试卷信息-->
-
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">收藏夹</h1>
+<div class="app-title">
+    <h4 class="h4">收藏夹</h4>
 </div>
 <!-- <button class="btn btn-primary" id="search-btn" style = "margin-bottom: 20px" type="button">审核中</button>
 <button class="btn btn-primary" id="search-btn" style = "margin-bottom: 20px" type="button">审核失败</button> -->
 <!--题目卡片-->
 {% if questions %}
-<div class="card mb-4" style="width: 100%;float: right">
-    <div class="card-body">
+<div class="mb-4" style="width: 100%;float: right">
+    <div class="">
         <!-- <hr style="height: 5px"/> -->
-        <div class="row cardFontSize" id="question-container">
+        <div class="row" id="question-container">
             {% for q in questions %}
             <div class="col-lg-12">
                 <!-- Default Card Example -->
@@ -56,11 +55,13 @@
                         <h6 class="m-0 font-weight-bold text-primary"style="line-height: 1.5rem;float:left;width:50%">
                             知识点：{% for k in q.knowledge_nodes %} {{k.title}}； {% endfor %}
                         </h6>
-                        <!-- <a href="/abc/quiz/upload-question/?question_id={{q.question.id}}" style="color:white; float:left; margin-right:10px" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">编辑试题</a> -->
-                        <a id= "delete" question_id="{{q.question.id}}" style=" float:right; color:white" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">移出</a>
+                        <a id= "delete" title="移除" question_id="{{q.question.id}}" style=" float:right; color:white" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm"><i class="fa fa-lg fa-times mr-0"></i></a>
                     </div>
                     <div class="card-body">
-                        <p>{{q.question.body}}</p>
+                        <p>{% if q.question.question_type == 'multi-choice' %}（单选题）{% endif %}
+                            {% if q.question.question_type == 'completion' %}（填空题）{% endif %}
+                            {{q.question.body}}
+                        </p>
                         {% if q.question.img %}
                             <div>
                             	<img class="question_img" src="{{TEMPLATES_IP}}/evaluation-img/{{q.question.img}}">
@@ -77,7 +78,7 @@
                     	{% endfor %}
                         <div style="width:100%;clear:both">
                             <hr/>
-                            <p>【正确答案】：{{q.true_option}}</p>
+                            <p>【正确答案】：{{q.true_option}}{{q.answer.body}}</p>
                            <!--  <P>【错因分析】：{% for r in  q.error_reasons %}{{r.option}}：{% for error in r.error_reason %}{{error}}；{% endfor %}{% endfor %}</p>
                             <p>【题干知识点】：{% for k in q.knowledge_nodes %} {{k.title}}； {% endfor %}</p>
                             <p>【选项知识点】：{% for k in q.option_konwledge_nodes %}{{k.option}}：{% for node in k.knowledge_nodes %}{{node}}；{% endfor %}{% endfor %}</p> -->
@@ -97,12 +98,13 @@
         <hr style="height: 5px"/> -->
         <div style="text-align: center;">
             {% if page != 1%}
-            <span style="margin: 10px; cursor: pointer" id="previous_page">上一页</span>
+            <a id="previous_page" href="#">上一页</a>
             {% endif %}
             <span style="margin-left: 10px"span>{{page}}</span>/<span style="margin-right: 10px">{{max_page}}</span>
             {% if page < max_page %}
-            <span style="margin: 10px; cursor: pointer" id="next_page">下一页</span>
+            <a  id="next_page" href="#">下一页</a>
             {% endif %}
+            <input style="width:30px" id="pageInput" /><a  id="jump-page" style="padding: 10px;cursor: pointer;color:#009688" type="button">跳转</a>
         </div>
     </div>
 </div>
@@ -133,12 +135,17 @@
     //上一页
     $(document).on('click', '#previous_page', function () {
         page = page-1
-        $(location).attr('href', '/abc/quiz/my-favorites/?page='+page);
+        $(location).attr('href', '{% url "my-favorites" %}?page='+page);
     });
     //下一页
     $(document).on('click', '#next_page', function () {
         page = page+1
-        $(location).attr('href', '/abc/quiz/my-favorites/?page='+page);
+        $(location).attr('href', '{% url "my-favorites" %}?page='+page);
+    });
+    //跳页查询
+	$(document).on('click','#jump-page',function(){
+        var jumpPage = $("#pageInput").val();
+        $(location).attr('href', '{% url "my-favorites" %}?page='+jumpPage);
     });
     //移出题目
     $(document).on('click', '#delete', function () {

@@ -48,15 +48,15 @@
         $("#mb_con").css({ zIndex: '999999', width: '80%', position: 'fixed',//弹框的宽
             backgroundColor: 'White', borderRadius: '15px'
         });
-        $("#mb_tit").css({ display: 'block', fontSize: '20px', color: '#1fc88d', padding: '10px 15px',//字体颜色
+        $("#mb_tit").css({ display: 'block', fontSize: '20px', color: '#009688', padding: '10px 15px',//字体颜色
             backgroundColor: 'white', borderRadius: '15px 15px 0 0',//顶部title颜色
-            borderBottom: '3px solid #1fc88d', fontWeight: 'bold'//线条颜色
+            borderBottom: '3px solid #009688', fontWeight: 'bold'//线条颜色
         });
         $("#mb_msg").css({ padding: '20px', lineHeight: '20px',
             borderBottom: '1px dashed #DDD', fontSize: '13px'//虚线分界线颜色
         });
         $("#mb_ico").css({ display: 'block', position: 'absolute', right: '10px', top: '9px',
-            border: '1px solid #1fc88d', width: '18px', height: '18px', textAlign: 'center',//关闭图标外圈颜色
+            border: '1px solid #009688', width: '18px', height: '18px', textAlign: 'center',//关闭图标外圈颜色
             lineHeight: '16px', cursor: 'pointer', borderRadius: '12px', fontFamily: '微软雅黑'
         });
         $("#mb_btnbox").css({ margin: '15px 0 10px 0', textAlign: 'center' });
@@ -67,7 +67,7 @@
         $("#mb_ico").hover(function () {
             $(this).css({ backgroundColor: '#1fc88d', color: 'White' });//鼠标悬停效果
         }, function () {
-            $(this).css({ backgroundColor: 'White', color: '#1fc88d' });//鼠标离开之后效果
+            $(this).css({ backgroundColor: 'White', color: '#009688' });//鼠标离开之后效果
         });
         var _widht = document.documentElement.clientWidth;  //屏幕宽
         var _height = document.documentElement.clientHeight; //屏幕高

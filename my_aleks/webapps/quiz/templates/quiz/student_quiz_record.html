@@ -23,24 +23,36 @@
 <!-- Page Heading -->
 <!--试卷信息-->
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">学生测评详情</h1>
+<div class="app-title">
+    <h4>学生测评详情</h4>
 </div>
-<p>试卷名称:{{quizInfo.info.title}}</p>
-<p>科目：{{quizInfo.subject}}</p>
-<p>学生姓名：{{student.name}}</p>
+<div class="tile">
+	<div class="tile-body">
+		<div class="row">
+			<div class="col-lg-4">
+				<h5>试卷名称:{{quizInfo.info.title}}</h5>
+			</div>
+			<div class="col-lg-4">
+				<h5>科目：{{quizInfo.subject}}</h5>
+			</div>
+			<div class="col-lg-4">
+				<h5>学生姓名：{{student.name}}</h5>
+			</div>
+		</div>
+	</div>
+</div>
 <!--题目卡片-->
 <div class="row" id="question-container">
     {% for q in questions %}
     <div class="col-lg-12">
         <!-- Default Card Example -->
-        <div class="card mb-4">
-            <div class="card-header">                              
+        <div class="tile mb-4">
+            <div class="tile-title border-bottom">                              
                 <h6 class="m-0 font-weight-bold text-primary"style="line-height: 1.5rem;">
                     知识点：{% for k in q.knowledge_nodes %} {{k.title}}； {% endfor %}
                 </h6>                            
             </div>
-            <div class="card-body">
+            <div class="tile-body">
                 <p>{{q.question.body}}</p>
                     {% if q.question.img %}
                         <div>

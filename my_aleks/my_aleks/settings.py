@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     #'xadmin',
     #'crispy_forms',
     'webapps.teacher',
+    'webapps.schedule',
     'webapps.plan',
     'webapps.textbook',
     'webapps.school',

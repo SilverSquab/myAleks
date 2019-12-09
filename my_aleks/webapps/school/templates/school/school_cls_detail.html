@@ -46,62 +46,70 @@
 
 <!-- Page Heading -->
 <!--试卷信息-->
-<div class="container-fluid classFontSize">
+<div class="app-title">
+	  <h4>班级信息</h4>
+</div>
 	  <!-- Page Heading -->
-	  <h1 class="h3 mb-2 text-gray-800">班级信息</h1>
 	  <!-- 班级基本信息 -->
 	  <div class="row" id="question-container">
-	      <div class="col-lg-6">
-            <p>班级名称：{{clsInfo.name}}</p>
-            <p>年级：{{clsInfo.grade}}</p>
-            <p>老师：{{clsInfo.teacher__name}}</p>
-            <p>学科：{{clsInfo.subject}}</p>
-          </div>
-          <div class="col-lg-6">
-            {% if planInfo.info %}
-                <p>套餐信息：{{planInfo.info}}</p>
-            {% else %}
-                <p>套餐信息：暂无</p>
-            {% endif %}
-            {% if planInfo.description %}
-                <p>描述：{{planInfo.description}}</p>
-            {% else %}
-                <p>描述：暂无</p>
-            {% endif %}
-            {% if planInfo.resources %}
-			  <p>内容资源：<span id="resourceList">{{planInfo.resources}}</span></p>
-            {% else %}
-                <p>内容资源：暂无</p>
-            {% endif %}
-          </div>
+		  <div class="col-lg-12">
+		  <div class="tile">
+			  <div class="tile-body">
+				  <div class="row">
+					   <div class="col-lg-4">
+                            <p>班级名称：{{clsInfo.name}}</p>
+                            <p>年级：{{clsInfo.grade}}</p>
+                            <p>老师：{{clsInfo.teacher__name}}</p>
+                            <p>学科：{{clsInfo.subject}}</p>
+                        </div>
+                        <div class="col-lg-5">
+                            {% if planInfo.info %}
+                                <p>套餐信息：{{planInfo.info}}</p>
+                            {% else %}
+                                <p>套餐信息：暂无</p>
+                            {% endif %}
+                            {% if planInfo.description %}
+                                <p>描述：{{planInfo.description}}</p>
+                            {% else %}
+                                <p>描述：暂无</p>
+                            {% endif %}
+                            {% if planInfo.resources %}
+                			  <p>内容资源：<span id="resourceList">{{planInfo.resources}}</span></p>
+                            {% else %}
+                                <p>内容资源：暂无</p>
+                            {% endif %}
+                        </div>
+                       {% if  base_template == 'school/school_base.html' and not planInfo.resources %}
+                            <div class="col-lg-3">
+                                <button class="btn btn-primary" style="float: right;" id="buy" type="button">
+                                    <i>选择套餐</i>
+                                </button>
+                            </div>
+                        {% endif %}
+				  </div>
+			  </div>
+             
+		  </div>
+		  </div>
 	  </div>
-	{% if  base_template == 'school/school_base.html' and not planInfo.resources %}
-        <div class="input-group-append" style="float: none;">
-            <button class="btn btn-primary" id="buy" type="button">
-                <i>选择套餐</i>
-            </button>
-        </div>
-	{% endif %}
-
-	  <p></p>
 	  <!-- 学生列表表格-->
-	  <div class="card shadow mb-4">
-
-	    <div class="card-header py-3">
-	      <h6 class="m-0 font-weight-bold text-primary">学生列表</h6>
+	  <div class="row">
+		  <div class="col-lg-12">
+	  <div class="tile">
+	    <div class="tile-title border-bottom">
+	      <sapn class="m-0 font-weight-bold text-primary">学生列表</sapn>
+			<!--<button class="btn btn-primary" type="button" id="classCallBtn" style="float: right;">班级点名</button>-->
 	    </div>
 
-	    <div class="card-body">
+	    <div class="tile-body">
 	      <div class="table-responsive">
-
 	        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-
 	          <thead>
 	            	<tr>
                       <th>学号</th>
 	                  <th>姓名</th>
-	                  <th>学情档案</th>
-	                  <th>支付状态</th>
+	                  <th class="searchTr">学情档案</th>
+	                  <th class="searchTr">支付状态</th>
 	                  <th>操作</th>
 	                </tr>
 	          </thead>
@@ -111,17 +119,18 @@
 	                    <tr id="{{stu.student_no}}">
                           <td>{{stu.student_no}}</td>
 	                      <td>{{stu.name}}</td>
-	                      <td><a href="{% url "teacher-index" %}?classId={{clsInfo.id}}&studentId={{stu.id}}">查看学情档案</a></td>
-	                      <td stuPlanId="{{stu.stuPlanId}}">{% if stu.payStatus %}已支付{% else %}未支付{% if  base_template == 'school/school_base.html' %}（ <a href="#" name="pays">代支付</a>）{% endif %}{% endif %}</td>
-	                      <td><a href="#" name="delete">删除</a></td>
+	                      <td class="searchTr"><a href="{% url 'teacher-index' %}?classId={{clsInfo.id}}&studentId={{stu.id}}&template={{base_template}}">查看学情档案</a></td>
+	                      <td class="searchTr" stuPlanId="{{stu.stuPlanId}}">{% if stu.payStatus %}已支付{% else %}未支付{% if  base_template == 'school/school_base.html' %}（ <a href="#" name="pays">代支付</a>）{% endif %}{% endif %}</td>
+	                      <td class="searchTr"><a href="#" name="delete">删除</a></td>
+							<!--<td class="searchTrShow hide"><span style="cursor: pointer;color: #009688" name="search">点到</span></td>-->
 	                    </tr>
 	                {% endfor %}
 	                <tr>
-	                    <div style="padding-bottom: 20px">
+	                    <div style="padding-bottom: 20px" class="searchTr">
                             学生学号：
-                            <input type="text" class="inputHeight"  fontSize="16px"; name="stuId" Placeholder="请输入学生学号"/><br class="hide">
+                            <input type="text" class="inputHeight form-control" style='display:inline-block'  fontSize="16px"; name="stuId" Placeholder="请输入学生学号"/><br class="hide">
                             联系电话：
-                            <input type="telephone" class="inputHeight" fontSize="16px"; name="stuPhone" Placeholder="请输入学生电话" pattern="[0-9]{11}" title="请填写正确的电话"/><br class="hide">
+                            <input type="telephone" class="inputHeight form-control" style='display:inline-block' fontSize="16px"; name="stuPhone" Placeholder="请输入学生电话" pattern="[0-9]{11}" title="请填写正确的电话"/><br class="hide">
                             <button class="btn btn-primary" type="button" id="addStu">搜索学生
                             </button>
                         </div>
@@ -129,7 +138,8 @@
 	          </tbody>
 	        </table>
 	      </div>
-	    </div>
+		   </div>
+	  </div>
 	  </div>
 </div>
 
@@ -142,10 +152,33 @@
 	<script src="{% static "assets/js/jquery.addStu.msgbox.js" %}" type="text/javascript"></script>
 	<script type="text/javascript">
 		$(document).ready(function () {
-        var clsId = '{{clsInfo.id}}'
+        var clsId = '{{clsInfo.id}}';
+			/*//存储点到状态
+			var isSearch = false;
+			//点到按钮事件
+			$('#classCallBtn').click(function () {
+				if(isSearch){
+					$('.searchTr').removeClass('hide');
+					$('.searchTrShow').addClass('hide');
+					$('#classCallBtn').text('班级点名');
+				}else{
+					$('.searchTr').addClass('hide');
+					$('.searchTrShow').removeClass('hide');
+					$('#classCallBtn').text('结束点名');
+				}
+				isSearch = !isSearch;
+			});
+			//学生消课接口
+			$("span[name='search']").click(function () {
+				var stuId = $(this).parent().parent().attr("id");
+				var that = this;
+
+			});*/
+
+
         //购买套餐点击事件
         $("#buy").click(function () {
-             $.get("{% url "ajax-get-plan-templates" %}" ,function(data,status){
+             $.get("{% url 'ajax-get-plan-templates' %}" ,function(data,status){
                  if (status =="success"){
                     //console.log(data);
                      var planInfo = $.parseJSON(data);
@@ -188,7 +221,7 @@
          $("#addStu").click(function () {
             var stuId=$("input[name='stuId']").val()//学生id
             var phone=$("input[name='stuPhone']").val()
-            $.get("{% url "ajax-get-student-profile" %}?student_no="+stuId+"&phone="+phone ,function(data,status){
+            $.get("{% url 'ajax-get-student-profile' %}?student_no="+stuId+"&phone="+phone ,function(data,status){
                 //console.log("date"+data)
                 //console.log("status"+status)
                 if (status != "success"){
@@ -291,7 +324,7 @@
             {
                 background:"#D7ECF1",
                 position:"absolute",
-                zIndex:10,
+                zIndex:9999999,
                 width:"380px",
                 height:"48px",
                 left:"50%",

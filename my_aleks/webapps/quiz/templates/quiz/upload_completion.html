@@ -1,0 +1,566 @@
+{% extends 'teacher/teacher_base.html'%}
+{% load staticfiles %}
+
+
+{% block "stylesheets" %}
+<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+<style>
+    .lineInput {
+        text-align: left;
+        margin: 0.5rem 0 0.5rem 0;
+        padding: .375rem .75rem;
+        background-color:#f8f9fc;
+        border:#e5e5e5 2px solid;
+        border-radius: 5px;
+    }
+    .questionBody{
+        margin-left: 15px;
+    }
+    .input-left{
+        margin-left: 15px;
+    }
+    .input-right{
+        margin-right: 15px;
+    }
+    .blockInput{
+        display:block;
+        margin-left: 40px;
+        width: 90%;
+    }
+    .blockSelect{
+        display:block;
+        margin-left: 40px;
+        width: 20%;
+    }
+    .line-bottom{
+        margin-bottom: 15px;
+    }
+    .hide{
+        display: none;
+    }
+    .div_padding{
+        padding: 10px;
+    }
+
+
+
+</style>
+{% endblock %}
+
+
+
+{% block "main_content" %}
+<div class="app-title">
+	<h4>编辑题目</h4>
+  <a href="{% url 'upload-question' %}">上传单选题</a>
+</div>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="tile">
+			<div class="tile-body">
+<div class="myBody">
+<p>公式录入： <span id="math-field" style="width:300px;" class="lineInput"></span></p>
+<p>LaTeX代码(不换行)： <span id="latex"></span></p>
+<p>LaTeX代码(换行)： <span id="latexBr"></span></p>
+
+<a href="https://www.cnblogs.com/caomingpei/p/9760652.html" class="btn btn-link">latex 常见公式语法查询</a>
+    <h4>题目录入</h4>
+<form id="question_form">
+    <hr>
+    <h5>题干</h5>
+    <div class="questionBody">
+        <div class="col-xl-12" style="position:relative;">
+            {{question_form}}
+        </div>
+
+      <div class="col-xl-12" style="position:relative;">
+          <span>搜索知识点(可添加多个知识点，所有知识点会在下方列出)：</span>
+          <!-- <span id="copyNodeSpan" style="cursor:pointer;color:#009688;float: right;margin-right: 10%">将知识点复制给全部选项</span> -->
+        <input type="text" id="knowledge_node_searchbar" class="nodeSearchBar form-control bg-light line-bottom blockInput">
+        <div class="hint" id="hint1" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:90%;margin-left: 40px;">
+          <table id="table1" style="width:100%;">
+            <tbody class="node_table" style="width:100%;">
+              <tr class="node_item" style="width:100%;"><td></td></tr>
+
+            </tbody>
+          </table>
+        </div>
+          <!--<div style="margin-bottom: 15px">知识点列表：</div>-->
+        <table id="nodes_table_question" style="width:100%;">
+            <!--<caption align="top">知识点列表</caption>-->
+            <tbody class="node_table_display" style="width:100%;">
+
+            {% if knowledge_nodes %}
+            {% for l in knowledge_nodes %}
+            <tr class="node_item" id="question_{{l.0}}'" style="margin-bottom: 8px;display: block;margin-left: 10px"><td></td><td style="margin-left: 10px">{{l.1}}  &nbsp;&nbsp;  <a edge_id="{{l.0}}" class= "question_delete" style="cursor:pointer;color:#009688">删除</a></td></tr>
+            {% endfor %}
+            {% endif %}
+
+            </tbody>
+          </table>
+      </div>
+    </div>
+    <div class="col-xl-12 hide" id="question-preview1" style="position:relative;">
+        <h4>预览题目:</h4>
+        <div id="body-preview" class="div_padding" style="border: 1px solid #d1d3e2;" ><p> </p></div>
+    </div>
+    <div class="col-xl-12 hide" id="question-preview2" style="position:relative;">
+        <h4>预览解析:</h4>
+        <div id="analysis-preview" class="div_padding" style="border: 1px solid #d1d3e2;" ><p> </p></div>
+    </div>
+
+</form>
+    <br>
+    <hr>
+    <br>
+
+    
+    <h6 class="h6">答案</h6>
+      <div class="questionBody">
+        <div class="col-xl-12" style="position:relative;">
+          <form id="answer_form">
+              <label for="question_answer_body" value="123">请输入选项文本：</label>
+              <textarea class="bg-light form-control line-bottom blockInput" cols="40" id="question_answer_body" {% if completion_answer %} answer_id='{{completion_answer.id}}' {% endif %} maxlength="1000" name="body" rows="5">{{completion_answer.body}}</textarea>
+              <br>
+              <label for="id_option_error_reason_A">错误类型：</label>
+              <select multiple="multiple" class="bg-light form-control blockSelect line-bottom" id="question_answer_error_reason" name="error_reason">
+                  {% for error in error_reasons %}
+                    <option value="{{error.id}}" {% if error in answer_error_reasons %} selected="selected"{% endif %}>{{error.description}}</option>
+                  {% endfor %}
+              </select>
+          </form>
+          <div class="col-xl-12 hide" id="answer-preview" style="position:relative;">
+            <h4>预览答案</h4>
+          <div id="body-preview" class="div_padding" style="border: 1px solid #d1d3e2;" ><p> </p></div>
+    </div>
+        </div>
+      </div>
+    <!--题目预览-->
+    <div>
+        <h4>题目预览</h4>
+        <div class="card mb-4">
+            <div class="card-header">
+                <span id="preview-click" style="cursor: pointer;color: #000000">点击预览题目</span>
+            </div>
+            <div class="card-body" >
+                <div id="preview-car-body" class="hide">
+                    <p id="question-body-preview-id"></p>
+                    <div>
+                        <img src="" id="question-img-preview-id">
+                    </div>
+                    <p id="question_answer_preview"> </p>
+                <div style="width:100%;clear:both">
+                    <hr/>
+                    <p id="analysis-body-preview-id">解析：</p>
+                    <div >
+                        <img src="" id="analysis-img-preview-id">
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+
+<button id="add_question" class="btn btn-primary">添加题目</button>
+</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block "scripts" %}
+<script type="text/javascript" async
+    src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Ajax.config.path["mhchem"] =
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjax-mhchem/3.3.2";
+MathJax.Hub.Config({
+  TeX: {
+    extensions: ["[mhchem]/mhchem.js"]
+  }
+});
+</script>
+<script src="https://cdn.bootcss.com/jquery.form/4.2.2/jquery.form.js"></script>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+
+var question_id = -1;
+
+{% if question_id %}
+var question_id = {{question_id}};
+{% endif %}
+
+
+
+
+
+var mathFieldSpan = document.getElementById('math-field');
+var latexSpan = document.getElementById('latex');
+var latexBrSpan = document.getElementById('latexBr');
+var MQ = MathQuill.getInterface(2); // for backcompat
+var mathField = MQ.MathField(mathFieldSpan, {
+  spaceBehavesLikeTab: true, // configurable
+  handlers: {
+    edit: function() { // useful event handlers
+      latexSpan.textContent = '\\(' + mathField.latex() + '\\)'; // simple API
+
+      latexBrSpan.textContent = '\\[' + mathField.latex() + '\\]'; // simple API
+
+    }
+  }
+});
+
+    var nodes_arr = [];
+    var http_id = 'http://47.110.253.251/abc/media/';
+    //var http_id = 'https://pointerai.com/abc/media/';
+
+    {% if knowledge_nodes %}
+      {% for i in knowledge_nodes %}
+        nodes_arr.push('{{i.0}}')
+      {% endfor %}
+    {% endif %}
+
+    var nodes_arrs = {'A':[], 'B':[], 'C':[], 'D':[]};
+
+    {% if nodes_id_arrs %}
+    var nodes_arrs = {{nodes_id_arrs | safe}};
+    {% endif %}
+    
+
+
+    var q_id;
+
+    //知识点搜索框
+    // searchbar focus in and out
+    $(".nodeSearchBar").focus(function(){
+      $(this).next().css("display", "block");
+    })
+
+
+    $(".nodeSearchBar").blur(function(){
+      var t = $(this);
+      setTimeout(function(){
+        t.next().css("display", "none");
+      }, 750);
+
+    })
+
+    // table item on click
+    $(".node_table").on("click", ".node_item", function(){
+      $(this).parent().parent().parent().prev().val($(this).find('td').html());
+
+      var l = $(this).parent().parent().attr("id").split('_');
+      var order = l[l.length - 1];
+      var nodeId = $(this).attr("id");
+
+      if(order in nodes_arrs){
+        nodes_arrs[order].push(nodeId);
+          $(this).parent().parent().parent().next().append('<tr class="node_item" style="margin-bottom: 8px;display: block;margin-left: 10px"><td>' + $(this).html() + '</td></tr>');
+      }
+      else {
+        nodes_arr.push(nodeId);
+          $(this).parent().parent().parent().next().append('<tr class="node_item" style="margin-bottom: 8px;display: block;margin-left: 10px" id="question_'+nodeId+'"><td>' + $(this).html() + '</td></tr>');
+      }
+    });
+
+    //复制题干知识点给选项
+    // $(document).on("click","#copyNodeSpan",function () {
+    //     var orders = ['A','B','C','D'];
+    //     for(var index in orders){
+    //         for(var node in nodes_arr){
+    //             if(nodes_arrs[orders[index]].indexOf(nodes_arr[node]) == -1){
+    //                 nodes_arrs[orders[index]].push(nodes_arr[node]);
+    //                 $('#nodes_table_'+orders[index]).children('tbody').append('<tr class="node_item" style="margin-bottom: 8px;display: block;margin-left: 10px">' + $('#question_'+nodes_arr[node]).html() + '</tr>');
+    //             }
+    //         }
+    //     }
+    // });
+
+
+
+
+
+    var old_val = {};
+
+
+
+    // searchbar on text chagne
+    $(".nodeSearchBar").on("change input",function(){
+      var node_input = $(this);
+      var val = $(this).val();
+
+      if( !(node_input.attr("id") in old_val))
+      {
+        old_val[node_input.attr("id")] = ""
+      }
+
+      if(val == old_val[node_input.attr("id")])
+        return;
+
+      setTimeout(function(){
+        if(node_input.val() == val)
+        {
+          old_val[node_input.attr("id")] = val;
+
+          $.ajax({
+            method: "GET",
+            url: "{% url 'ajax-nodes' %}",
+            data: { subject: $("#id_subject").val(), text: old_val[node_input.attr("id")] }
+          })
+          .done(function( msg ) {
+            var l = JSON.parse(msg);
+            s = "";
+            //console.log(l);
+            for(i in l){
+              var s = s + '<tr class="node_item" id="'+ l[i][0] +  '"><td>' + l[i][1] +  '</td></tr>';
+
+
+            }
+            node_input.next().find("tbody").html(s);
+
+          });
+        }
+
+      }, 750);
+    })
+
+
+
+    //上传问题
+    $("#add_question").click(function(){
+      var form = $('#question_form');
+
+      form.ajaxSubmit({
+        type:'post',
+        data: {'nodes':nodes_arr, "question_id": question_id},
+        url: '{% url "ajax-upload-question" %}',
+        enctype: 'multipart/form-data',
+        processData: false,
+        success: function(data){
+          if(data == 'failed')
+            alert("题目上传失败");
+
+          q_id = data;
+          submit_answer(q_id)
+        }
+      })
+    });
+    //上传答案
+    function submit_answer(id){
+        var answer_body = $('#question_answer_body').val()
+        var answer_id = $('#question_answer_body').attr('answer_id')
+        var error_reason = $('#question_answer_error_reason').val()
+        console.log({
+          id:answer_id,
+          body:answer_body,
+          question_id:id,
+          answer_error_reason:JSON.stringify(error_reason)
+        })
+        $.post("{% url 'ajax-upload-completion-answer' %}",{
+          id:answer_id,
+          body:answer_body,
+          question_id:id,
+          answer_error_reason:JSON.stringify(error_reason)
+        },function(data,status){
+            if (data=='OK') {
+              alert('答案上传成功！')
+            }else{
+              alert('答案上传失败！')
+            }
+        })
+    }
+
+
+    // function submit_question(){
+    //   var form = $("#question_form");
+    // }
+
+    // function submit_option(orders){
+    //   if(orders.length == 0){
+    //       alert("上传完毕");
+    //       window.location.reload();
+    //       return;
+    //   }
+    //   var order = orders[0];
+    //   var form = $("#option_form_"+String(order));
+
+    //   form.ajaxSubmit({
+    //     type:'post',
+    //     data: {question: q_id, order: order, nodes: nodes_arrs[order], "question_id":question_id},
+    //     enctype: 'multipart/form-data',
+    //     processData: false,
+    //     url: '{% url "ajax-upload-option" %}',
+    //     success: function(data){
+    //       if(data != 'OK'){
+    //         alert("上传失败");
+    //       }
+    //       setTimeout(function(){
+    //         submit_option(orders.slice(1));
+    //       }, 200);
+    //     }
+    //   })
+    // }
+
+
+    //选择正确答案之后隐藏错因
+      // $(".option-iserror").click(function () {
+      //     // console.info($(this).nextAll()[2]);
+      //     var select = $(this).next().next().next();
+      //     var select_lable = $(this).next().next();
+      //     if (this.checked == true){
+      //         select.addClass("hide");
+      //         select_lable.addClass("hide");
+      //     }else{
+      //         select.removeClass("hide");
+      //         select_lable.removeClass("hide");
+      //     }
+      // });
+
+        //获取图片地址
+      var getImgUrl = function(evant,img){
+          //获取文件对象
+          let file = evant.files[0];
+          if(!file){
+              return false;
+          }
+          //获取文件阅读器
+          let reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = function(){
+              // console.info(this.result);
+              img.setAttribute("src", this.result);
+          }
+          return true;
+      };
+
+
+      //预览题目
+      $("#preview-click").click(function () {
+          $('#question-body-preview-id').html("题目："+$("#id_question_body").val());
+          if(!getImgUrl(document.getElementById("id_img"),document.getElementById("question-img-preview-id"))){
+                if($("#img-clear_id").prev('a').length != 0){
+                    $("#question-img-preview-id").attr('src',http_id+$("#img-clear_id").prev('a').text())
+                }else{
+                    $("#question-img-preview-id").addClass("hide");
+                }
+          }else{
+            if($("#question-img-preview-id").hasClass("hide")){
+                $("#question-img-preview-id").removeClass("hide");
+            }
+          }
+
+          $('#question_answer_preview').html("答案："+$("#question_answer_body").val());
+
+
+          $('#analysis-body-preview-id').html("解析："+$("#id_analysis").val());
+          if(!getImgUrl(document.getElementById("id_analysis_img"),document.getElementById("analysis-img-preview-id"))){
+              if($("#analysis_img-clear_id").prev('a').length != 0){
+                    $("#analysis-img-preview-id").attr('src',http_id+$("#analysis_img-clear_id").prev('a').text())
+                }else{
+                    $("#analysis-img-preview-id").addClass("hide");
+                }
+
+          }else{
+            if($("#analysis-img-preview-id").hasClass("hide")){
+                $("#analysis-img-preview-id").removeClass("hide");
+            }
+          }
+          MathJax.Hub.Typeset()
+
+          $("#preview-car-body").removeClass("hide");
+
+      });
+
+
+
+    // mathjax reloads preview model when body is blurred
+    $("#id_question_body").blur(function(){
+      var body = $(this).val();
+        $("#question-preview1").removeClass("hide");
+        $("#body-preview").html(body);
+        MathJax.Hub.Typeset()
+    });
+
+    $("#id_analysis").blur(function(){
+      var body = $(this).val();
+        $("#question-preview2").removeClass("hide");
+        $("#analysis-preview").html(body);
+        MathJax.Hub.Typeset()
+    });
+
+    // $("textarea[id^='id_option_body']").blur(function(){
+    //     var divPreview = $(this).parent().parent().nextAll(".option-preview-div");
+    //     var preview = divPreview.children(".option-preview");
+    //     var body = $(this).val();
+    //     divPreview.removeClass("hide");
+    //     preview.html(body);
+    //     MathJax.Hub.Typeset();
+    // });
+    //问题知识点删除
+		 $(".question_delete").click(function () {
+           var edge_id =$(this).attr('edge_id');
+           $.get("{% url 'ajax-delete-edge-question' %}?question_id="+question_id+'&edge_id='+edge_id,function(data,status){
+           		if(data=="OK"){
+           				alert('删除成功');
+                        window.location.reload();
+           		}else{
+           				alert('删除失败！')
+           		}
+           	})
+      });
+        // $(".option_delete").click(function () {
+        //    var edge_id =$(this).attr('edge_id');
+        //    var option_order=$(this).attr('option_id');
+        //    $.get("{% url 'ajax-delete-edge-question' %}?question_id="+question_id+'&edge_id='+edge_id+'&option_order='+option_order,function(data,status){
+        //    		if(data=="OK"){
+        //    				alert('删除成功！');
+        //    				window.location.reload();
+        //    		}else{
+        //    				alert('删除失败！')
+        //    		}
+        //    	})
+        // })
+  })
+</script>
+
+<script type="text/javascript">
+    //格式化页面布局
+    $(document).ready(function () {
+        $('label[for="id_question_body"]').text("请输入题干文本：");
+        $('label[for="id_subject"]').text("学科：");
+        $('label[for="id_img"]').text("上传题干图片：");
+        $('label[for="id_question_type"]').text("题目类型：");
+        $('label[for="id_analysis"]').text("解析：");
+        $('label[for="id_selected"]').text("是否为优选题：");
+        $('label[for="id_analysis_img"]').text('上传解析图片：');
+        $('#id_question_type').val('completion')
+        //$('#id_question_type').attr('disabled',"disabled")
+        // var options = ['A','B','C','D'];
+        // for(i in options){
+        //     $('label[for="id_option_img_'+options[i]+'"]').text("上传图片：");
+        //     $('label[for="id_option_body_'+options[i]+'"]').text("请输入选项文本：");
+        //     $('label[for="id_option_is_correct_'+options[i]+'"]').text("是否为正确答案：");
+        //     $('label[for="id_option_error_reason_'+options[i]+'"]').text("错误类型：");
+        // }
+
+        $('#id_selected').after("<br>");
+        $('#id_img').after("<br>");
+        $('.option_img').after("<br>");
+        $('.option-iserror').after("<br>");
+
+
+
+
+
+
+
+    })
+    
+</script>
+
+{% endblock %}

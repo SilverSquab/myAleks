@@ -1,0 +1,527 @@
+{% extends base_template %}
+
+{% load staticfiles %}
+{% block "stylesheets" %}
+<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+
+<!--<link href='https://use.fontawesome.com/releases/v5.0.6/css/all.css' rel='stylesheet'>
+<link href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' rel='stylesheet' />-->
+
+<link href="{% static 'assets/vendor/fullcalendar/core/main.css' %}" rel='stylesheet'/>
+<link href="{% static 'assets/vendor/fullcalendar/timegrid/main.css' %}" rel='stylesheet'/>
+<link href="{% static 'assets/vendor/fullcalendar/bootstrap/main.css' %}" rel='stylesheet'/>
+<link href="{% static 'assets/vendor/fullcalendar/daygrid/main.css' %}" rel='stylesheet'/>
+
+<style>
+    #calendar {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    #calendar tr {
+        height: 28px;
+    }
+
+    .hide {
+        display: none;
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block "main_content" %}
+<div>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">课程安排</h1>
+    </div>
+
+    <div class="row">
+        <!--级联选择框 -->
+        <div class="col-lg-12">
+            <div class="tile">
+                <div class="tile-body flex-row">
+                    <div style="float:left" class="input-group-btn">
+                        <input type="text" placeholder="请选择班级" class="form-control" data-toggle="dropdown"
+                               aria-haspopup="true" aria-expanded="false"
+                               style="text-align: left;width:160px;height:40px" readonly="readonly" id="classInput">
+                        <ul class="dropdown-menu dropdown-menu-left" style="max-height: 500px;overflow: auto">
+                            <li class="classCheckLi" id="select">
+                                {% for schoolClass in classList %}
+                                <div class="dropdown-item" style="cursor:hand" name="{{schoolClass.id}}">{{schoolClass.name}}</div>
+                                {% endfor %}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn btn-info btn-icon-split btn-sm" style="margin-left: 10px" id="checkButton">
+                        <span class="text" id="query_learning" name="checkStudyState">查询学情状况</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4 classFontSize hide" id="calendarBox">
+        <div class="card-header py-3">
+            <span class="m-0 font-weight-bold text-primary">课程安排</span>
+            <div class="btn btn-info btn-sm"  style="float: right">
+                <span class="text lookClass">查看班级课表</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <div id="calendar">
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+{% endblock %}
+
+
+{% block "scripts" %}
+
+<script src="{% static 'assets/vendor/fullcalendar/core/main.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/interaction/main.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/daygrid/main.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/timegrid/main.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/bootstrap/main.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/core/locales/zh-cn.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/interaction/main.js' %}"></script>
+<script src="{% static 'assets/js/jquery.addSchedule.js' %}"></script>
+
+
+<script type="text/javascript">
+    var newClassId = '';
+    var event_list = [];
+    var isLookClass = false;
+    //班级的点击事件
+    $(document).on('click', '.dropdown-item', function () {
+        var id = $(this).attr('name');
+        var name = $(this).text();
+        $("#classInput").attr('name', id);
+        $("#classInput").val(name);
+    });
+
+    $(document).on('click', '#checkButton', function () {
+        var classId = $('#classInput').attr('name');
+        if (!classId) {
+            alert("未选择班级");
+            return
+        }
+        newClassId = classId;
+        if ($('#calendarBox').hasClass("hide")) {
+            $('#calendarBox').removeClass("hide");
+        } else {
+            $('#calendar').empty()
+        }
+        createCalendar();
+    });
+
+    $(document).on('click', '.lookClass', function () {
+        $('#calendar').empty();
+        if (isLookClass) {
+            createCalendar();
+            $('.lookClass').html('查看班级课表');
+        } else {
+            clickClassCalendar();
+            $('.lookClass').html('指定课程安排');
+        }
+        isLookClass = !isLookClass;
+    });
+
+
+    var createCalendar = function () {
+        //指定位置
+        var calendarEl = document.getElementById('calendar');
+        //calendar是日历对象
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            plugins: ['timeGrid', 'dayGrid', 'bootstrap', 'interaction'],
+            themeSystem: 'bootstrap',
+            locale: 'zh-cn',
+            header: {
+                left: '',
+                center: '',
+                right: ''
+            },
+
+            //以2020年1月6号为默认展示的背景
+            defaultDate: '2020-01-06',
+            timeGridEventMinHeight: 20,
+            allDaySlot: false,
+            slotEventOverlap: false,
+            slotDuration: '00:30:00',
+            minTime: "07:00:00",
+            maxTime: '22:00:00',
+            selectable: true,
+            selectMirror: true,
+            //查找事件
+            events:
+                function (start, callback) {
+                    $.ajax({
+                        url: "{% url 'ajax-get-schedule-by-school' %}",
+                        data: {cls_id: newClassId},
+                        dataType: 'json',
+                        type: 'post',
+                        success: function (result) {
+                            var events = [];
+                            event_list = result;
+                            for (var index in event_list) {
+                                events.push({
+                                    id: event_list[index].id,
+                                    title: event_list[index].title,
+                                    start: event_list[index].start,
+                                    end: event_list[index].end
+                                });
+                            }
+                            callback(events);
+                        }
+                    });
+                },
+            //添加事件
+            select: function (arg) {
+                var start = arg.start.Format("yyyy-MM-dd hh:mm:ss");
+                var end = arg.end.Format("yyyy-MM-dd hh:mm:ss");
+                var weekday = arg.start.getDay();
+                $.AddSchedule.Confirm('课表添加', "添加",isLookClass,null, function () {
+                    var title = $("input[name='title']").val();
+                    var description = $("input[name='description']").val();
+                    var startTime = $("input[name='startTime']").val();
+                    var endTime = $("input[name='endTime']").val();
+                    var data = {
+                        start: start,
+                        end: end,
+                        title: title,
+                        description: description,
+                        rule: "W",
+                        cls_id: newClassId,
+                        created_time: startTime,
+                        end_recurring_period: endTime,
+                        weekday: weekday,
+                    };
+                    $.post("{% url 'ajax-add-schedule-event'%}", data, function (data, status) {
+                        var json = JSON.parse(data);
+                        if (json.status == "OK") {
+                            alert("添加成功");
+                            // calendar.addEvent({
+                            //     id: json.id,
+                            //     title: title,//填入的信息
+                            //     start: start,//开始时间
+                            //     end: end,//结束时间
+                            // });
+                            // $.post("{% url 'ajax-get-schedule-by-school' %}", {cls_id: newClassId}, function (result) {
+                            //     event_list = JSON.parse(result);
+                            // })
+                            $('#calendar').empty();
+                            createCalendar();
+                        } else {
+                            alert("创建课程失败！")
+                        }
+                    })
+                }, null);
+            },
+            //编辑事件&删除事件
+            eventClick: function (info) {
+                var eventId = info.event.id;
+                var eventData = {};
+                for (var i in event_list) {
+                    if (event_list[i].id == eventId) {
+                        eventData = event_list[i];
+                    }
+                }
+                $.AddSchedule.Confirm('课表编辑', "编辑",isLookClass, eventData,
+                    function () {//编辑事件
+                        var title = $("input[name='title']").val();
+                        var description = $("input[name='description']").val();
+                        var startTime = $("input[name='startTime']").val();
+                        var endTime = $("input[name='endTime']").val();
+                        var updateInformation = {
+                            id: eventId,
+                            title: title,
+                            description: description,
+                            created_time: startTime,
+                            end_recurring_period: endTime,
+                        };
+                        $.post('{% url "ajax-update-schedule-event" %}', updateInformation, function (result) {
+                            if (result == "OK") {
+                                alert("编辑成功")
+                                /*$.post("{% url 'ajax-get-schedule-by-school' %}", {cls_id: newClassId}, function (result) {
+                                    event_list = JSON.parse(result);
+                                    info.event.remove();
+                                    var event_new = {};
+                                    for (var i in event_list) {
+                                        if (event_list[i].id == eventId) {
+                                            event_new = event_list[i];
+                                        }
+                                    }
+                                    calendar.addEvent({
+                                        id: event_new.id,
+                                        title: event_new.title,
+                                        start: event_new.start,
+                                        end: event_new.end,
+                                    })
+                                })*/
+                                $('#calendar').empty();
+                                createCalendar();
+                            } else {
+                                alert("编辑失败")
+                            }
+                        })
+                    }, function () { //删除请求
+                        var msg = "您确定要删除本节课程吗？";
+                        if (confirm(msg) == true) {
+                            //删除请求
+                            $.get('{% url "ajax-delete-schedule-by-id" %}?schedule_id=' + eventId, function (data) {
+                                if (data == "OK") {
+                                    alert("删除成功");
+                                    info.event.remove();
+                                } else {
+                                    alert(data);
+                                }
+                            })
+                        }
+                    });
+            },
+
+            columnHeaderText: function (date) {
+                switch (date.getDay()) {
+                    case 1:
+                        return "周一";
+                        break;
+                    case 2:
+                        return "周二";
+                        break;
+                    case 3:
+                        return "周三";
+                        break;
+                    case 4:
+                        return "周四";
+                        break;
+                    case 5:
+                        return "周五";
+                        break;
+                    case 6:
+                        return "周六";
+                        break;
+                    case 0:
+                        return "周日";
+                        break;
+                }
+            },
+        });
+        calendar.render();
+    };
+
+
+    var clickClassCalendar = function () {
+        //指定位置
+        var calendarEl = document.getElementById('calendar');
+        //calendar是日历对象
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            plugins: ['timeGrid', 'dayGrid', 'bootstrap', 'interaction'],
+            themeSystem: 'bootstrap',
+            locale: 'zh-cn',
+            header: {
+                left: '',
+                center: 'title',
+                right: 'prev,next'
+            },
+            buttonText: {
+                prev: '上周',
+                next: '下周',
+            },
+            timeGridEventMinHeight: 20,
+            allDaySlot: false,
+            slotEventOverlap: false,
+            slotDuration: '00:30:00',
+            minTime: "07:00:00",
+            maxTime: '22:00:00',
+            selectable: true,
+            selectMirror: true,
+            editable: true,
+            dragOpacity: 0.5,
+            eventDurationEditable:false,
+            //查找事件
+            events:
+                function (start, callback) {
+                    var startTime = start.start.Format('yyyy-MM-dd');
+                    var endTime = start.end.Format('yyyy-MM-dd');
+                    var data = {
+                        cls_id: newClassId,
+                        start: startTime,
+                        end: endTime
+                    };
+                    $.ajax({
+                        url: "{% url 'ajax-get-schedule-occurrence-by-class' %}",
+                        data: data,
+                        dataType: 'json',
+                        type: 'post',
+                        success: function (result) {
+                            var events = [];
+                            event_list = result;
+                            for (var index in event_list) {
+                                events.push({
+                                    id: event_list[index].id,
+                                    title: event_list[index].title,
+                                    start: event_list[index].start,
+                                    end: event_list[index].end
+                                });
+                            }
+                            callback(events);
+                        }
+                    });
+                },
+            //添加事件
+            select: function (arg) {
+                var start = arg.start.Format("yyyy-MM-dd hh:mm:ss");
+                var end = arg.end.Format("yyyy-MM-dd hh:mm:ss");
+                $.AddSchedule.Confirm('课表添加', "添加",isLookClass, null, function () {
+                    var title = $("input[name='title']").val();
+                    var description = $("input[name='description']").val();
+                    var data = {
+                        start: start,
+                        end: end,
+                        title: title,
+                        description: description,
+                        cls_id: newClassId,
+                    };
+                    $.post("{% url 'ajax-add-schedule-occurrence'%}", data, function (data, status) {
+                        var json = JSON.parse(data);
+                        if (json.status == "OK") {
+                            alert("添加成功");
+                            $('#calendar').empty();
+                            clickClassCalendar();
+                        } else {
+                            alert("创建课程失败！")
+                        }
+                    })
+                }, null);
+            },
+            //编辑事件&删除事件
+            eventClick: function (info) {
+                var eventId = info.event.id;
+                var eventData = {};
+                for (var i in event_list) {
+                    if (event_list[i].id == eventId) {
+                        eventData = event_list[i];
+                    }
+                }
+                $.AddSchedule.Confirm('课表编辑', "编辑",isLookClass, eventData,
+                    function () {//编辑事件
+                        var title = $("input[name='title']").val();
+                        var description = $("input[name='description']").val();
+                        var updateInformation = {
+                            id: eventId,
+                            title: title,
+                            description: description,
+                        };
+                        $.post('{% url "ajax-update-schedule-occurrence" %}', updateInformation, function (result) {
+                            if (result == "OK") {
+                                alert("编辑成功");
+                                // $.post("{% url 'ajax-get-schedule-occurrence-by-class' %}", {cls_id: newClassId}, function (result) {
+                                //     event_list = JSON.parse(result);
+                                //     info.event.remove();
+                                //     var event_new = {};
+                                //     for (var i in event_list) {
+                                //         if (event_list[i].id == eventId) {
+                                //             event_new = event_list[i];
+                                //         }
+                                //     }
+                                //     calendar.addEvent({
+                                //         id: event_new.id,
+                                //         title: event_new.title,
+                                //         start: event_new.start,
+                                //         end: event_new.end,
+                                //     })
+                                // })
+                                $('#calendar').empty();
+                                clickClassCalendar();
+                            } else {
+                                alert("编辑失败")
+                            }
+                        })
+                    }, function () { //删除请求
+                        var msg = "您确定要删除本节课程吗？";
+                        if (confirm(msg) == true) {
+                            //删除请求
+                            $.get('{% url "ajax-delete-schedule-occurrence" %}?occurrence_id=' + eventId, function (data) {
+                                if (data == "OK") {
+                                    alert("删除成功");
+                                    info.event.remove();
+                                } else {
+                                    alert(data)
+                                }
+                            })
+                        }
+                    });
+            },
+            //移动事件
+            eventDrop : function( event, dayDelta, revertFunc ) {
+                var data = {
+                    id:event.event.id,
+                    start:event.event.start.Format("yyyy-MM-dd hh:mm:ss"),
+                    end:event.event.end.Format("yyyy-MM-dd hh:mm:ss")
+                };
+                $.post('{% url "ajax-update-schedule-occurrence" %}', data, function (result) {
+                    if (result == "OK") {
+                        alert("移动成功");
+                        $('#calendar').empty();
+                        clickClassCalendar();
+                    } else {
+                        alert("移动失败")
+                    }
+                })
+
+
+            },
+
+        });
+        calendar.render();
+    };
+
+
+    //获得本周的开端日期
+    function getWeekStartDate(sendTime) {
+        var weekStartDate = new Date(sendTime.getFullYear(), sendTime.getMonth() - 1, sendTime.getDate() - sendTime.getDay() + 1);
+        return weekStartDate.Format('yyyy-MM-dd');
+    };
+
+    //获得本周的停止日期
+    function getWeekEndDate(sendTime) {
+        var weekEndDate = new Date(sendTime.getFullYear(), sendTime.getMonth() - 1, sendTime.getDate() + (7 - sendTime.getDay()));
+        return weekEndDate.Format('yyyy-MM-dd');
+    };
+
+    Date.prototype.Format = function (fmt) {
+        var o = {
+            "M+": this.getMonth() + 1, //月份
+            "d+": this.getDate(), //日
+            "h+": this.getHours(), //小时
+            "m+": this.getMinutes(), //分
+            "s+": this.getSeconds(), //秒
+            "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+            "S": this.getMilliseconds() //毫秒
+        };
+        if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o) {
+            if (new RegExp("(" + k + ")").test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            }
+        }
+        return fmt;
+    };
+
+
+    $(document).ready(function () {
+        $('#classInput').val(" ")
+    })
+
+
+</script>
+{% endblock %}

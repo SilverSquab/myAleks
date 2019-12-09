@@ -19,14 +19,22 @@
     .hide{
         display: none;
     }
+	.img-profile{
+		width: 100px;
+		height: 100px;
+	}
     .jumpText{
         color:#1FC88D;
         cursor: pointer;
     }
+    #imgUpload{
+        width: 100px;
+        height: 100px;
+    }
     td form{
         position: relative;
-        width: 200px;
-        height: 200px;
+        width: 150px;
+        height: 110px;
     }
     input[type="file"]{
         position: absolute;
@@ -63,6 +71,9 @@
         font-weight: 700;
         margin-bottom: .363636rem;
     }
+	.height-500{
+		height: 500px;
+	}
 
 
 </style>
@@ -70,144 +81,135 @@
 
 
 {% block "main_content" %}
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">机构信息</h1>
+<div class="app-title">
+    <h4 class="h4">首页</h4>
 </div>
-
-<table border="0" width="800" height="800" align="center" cellpadding="0" cellspacing="0">
-    <tr>
-        <td width="260" border="1" valign="top">
-            <table >
-                <tr height="100">
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-
-                    <td width="230" align="right">
+<!-- 个人信息 -->
+<div class="row">
+    <div class="col-lg-6">
+        <div class="tile mb-4">
+            <div class="tile-title-w-btn border-bottom pb-2">
+              <h5 class="h5 text-success">机构信息</h5>
+                <a href="#" id="updateClick">修改</a>
+                <a href='#' id="affirmClick" class="hide">保存</a>
+            </div>
+            <div class="tile-body height-500">
+                <!-- <div class="row">
+                    <div class="col-lg-2">
                         <form id="myForm">
-                            <input type="file" id="imgUpload" name="imgUpload" accept=".png,.jpg,.jpeg" onchange="prev(this)" class="hide">
+                            <div class="uploadImg">
+                            <input type="file" id="imgUpload" name="imgUpload"
+                                accept=".png,.jpg,.jpeg" onchange="prev(this)"
+                                class="hide">
                             {% if schoolProfile.school.img %}
-                            <img id="imgUpdate" class="img-profile rounded-circle" src="{{HTTP_IP}}/abc/media/{{schoolProfile.school.img}}" style="height: 200px;width:200px">
+                            <img id="imgUpdate" class="img-profile rounded-circle teacherImg"
+                                src="{{HTTP_IP}}/abc/media/{{schoolProfile.school.img}}">
                             {% else %}
-                            <img id="imgUpDown" class="img-profile rounded-circle" src="{% static 'assets/img/user.jpg' %}" style="height: 200px">
+                            <img id="imgUpDown" class="img-profile rounded-circle teacherImg" src="{%
+                                static 'assets/img/user.jpg' %}">
                             {% endif %}
-                            <span id="submitSpan" class="hide">点击图片更换机构logo<input id="submitBtn" type="submit" value="提交"></span>
+                            </div>
+                            <br>
+                            <span id="submitSpan" class="hide"><input id="submitBtn"
+                                    type="submit" value="提交"></span>
                         </form>
-                    </td>
-
-                    <td width="30">
-
-                    </td>
-
-                </tr>
-            </table>
-
-
-        </td>
-        <td width="30"></td>
-
-        <td width="480" valign="top">
-            <div style="height: 55px"></div>
-            <table border="0" cellpadding="0" cellspacing="0" width="480">
-                <tr height="20">
-                    <td align="right">
-                    </td>
-                </tr>
-            </table>
-
-            <hr>
-            <table border="0" cellpadding="0" cellspacing="0" width="480">
-                <tr height="30">
-                    <td></td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <span style="font-weight:bold;" schoolId="{{schoolProfile.school.id}}" id="profileSpan">机构情况</span>&nbsp;&nbsp;
-                        <span class="jumpText" id="updateClick">修改信息</span>
-                        <span class="hide jumpText" id="affirmClick">保存</span>&nbsp;&nbsp;<span class="hide jumpText" id="cancelClick">取消</span>
-                    </td>
-                </tr>
-                <tr>
-                <tr height="10"><td></td></tr>
-                <td width="50%">机构名称 : <span><input readonly id="name" class="myInput" value="{{schoolProfile.school.name}}"></span></td>
-                </tr>
-                <tr>
-                <tr height="10"><td></td></tr>
-                <td width="50%">电话 : <span style="color: #000000"><input readonly id="phone" class="myInput" value="{{schoolProfile.school.phone}}"></span></td>
-                </tr>
-
-                <tr>
-                <tr height="10"><td></td></tr>
-                <td width="50%">机构地址 : <span style="color: #000000"><input readonly id="location" class="myInput" value="{{schoolProfile.school.location}}"></span></td>
-                </tr>
-
-                <tr>
-                <tr height="10"><td></td></tr>
-                <td width="50%">机构余额 : <span style="color: #000000">{{schoolProfile.school.account}}</span></td>
-                </tr>
-
-                <tr>
-                <tr height="10"><td></td></tr>
-                <td width="50%">老师数量 : <span style="color: #000000">{{schoolProfile.teacher}}</span></td>
-                </tr>
-
-                <tr>
-                <tr height="10"><td></td></tr>
-                <td width="50%">班级数量 : <span style="color: #000000">{{schoolProfile.classes}}</span></td>
-                </tr>
-
-                <tr>
-                <tr height="10"><td></td></tr>
-                <td width="50%">套餐 : <span style="color: #000000">试用套餐</span></td>
-                </tr>
-
-
-            </table>
-
-
-        </td>
-    </tr>
-    <tr>
-        <td colspan="3">
-            <div data-v-5ae4297d="" class="register-title">相关班级</div>
-            <div class="myClassBox">
-
-                <table border="0" cellpadding="0" cellspacing="0" id="classTable" style="margin-left: 20px">
+                    </div>
+                </div> -->
+                <div class="row">
+                    <div class="col-12">
+						<table class="table table-bordered" schoolId="{{schoolProfile.school.id}}" id="profileSpan">
+							<tbody>
+								<tr>
+									<td>
+                                    <form id="myForm" >
+                                        <input type="file" id="imgUpload" name="imgUpload" accept=".png,.jpg,.jpeg" onchange="prev(this)" class="hide">
+                                        {% if schoolProfile.school.img %}
+                                        <img id="imgUpdate" class="img-profile rounded-circle "  src="{{HTTP_IP}}/abc/media/{{schoolProfile.school.img}}">
+                                        {% else %}
+                                        <img id="imgUpDown" class="img-profile rounded-circle " src="{% static 'assets/img/user.jpg' %}">
+                                        {% endif %}
+                                        <p id="submitSpan" class="hide" style="font-size:10px;color: red; margin-left: 20px ">点击图片即可修改</p>
+                                    </form>
+									<!-- {% if schoolProfile.school.img %}
+										<img id="imgUpdate" class="img-profile rounded-circle teacherImg"
+											src="{{HTTP_IP}}/abc/media/{{schoolProfile.school.img}}">
+									{% else %}
+										<img id="imgUpDown" class="img-profile rounded-circle teacherImg" src="{%
+										static 'assets/img/user.jpg' %}">
+									{% endif %} -->
+									</td>
+								</tr>
+						<tr>
+							<td>机构名称 : 
+                                <span>
+                                    <input readonly id="name" class="form-control width-300 myInput" style="display: inline-block;width: 30%;background-color:#FFF; " value="{{schoolProfile.school.name}}" type="text"/>
+                                </span>
+                            </td>
+						</tr>
+						<tr>
+							<td>电话 : <span style="color: #000000">
+                                <input readonly id="phone" class="form-control width-300 myInput"
+                                    style="display: inline-block;width: 30%;background-color:#FFF; " value="{{schoolProfile.school.phone}}" type="text" />
+                            </span></td>
+						</tr>
+						<tr>
+							<td>机构地址 : <span style="color: #000000">
+                                <input readonly id="location" class="form-control width-300 myInput" style="display: inline-block;width: 30%;background-color:#FFF; " value="{{schoolProfile.school.location}}" type="text" />
+                            </span></td>
+						</tr>
+						<tr>
+							<td>机构余额 : <span>{{schoolProfile.school.account}}</span></td>
+						</tr>
+						<tr>
+							<td>教师数量 : <span style="color: #000000">{{schoolProfile.teacher}}</span></td>
+						</tr>
+						<tr>
+							<td>班级数量 : <span style="color: #000000">{{schoolProfile.classes}}</span></td>
+						</tr>
+						<tr>
+							<td>套餐 : <span style="color: #000000">试用套餐</span></td>
+						</tr>
+							</tbody>
+						</table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="tile">
+            <div class="tile-title border-bottom pb-2">
+                <h5 class="h5 text-info">相关班级</h5>
+            </div>
+            <div class="tile-body table-responsive height-500">
+                <table class="table table-hover table-bordered" cellpadding="0" cellspacing="0">
+                    <thead>
+                        <th><span style="font-weight:bold;">年级</span></th>
+                        <th colspan="2"><span style="font-weight:bold;">班级</span></th>
+                    </tr>
+                    {% if schoolProfile.classesList %}
                     {% for cls in schoolProfile.classesList %}
-                    {% if forloop.counter|divisibleby:2 == 1 %}
-                        <td>
-                            <span style="margin-right: 10px" class="classGrade mySpan">{{cls.grade}}</span>
-                            <span>
-                                <a href="{%url 'school-get-class-detail'%}?clsId={{cls.id}}">{{cls.name}}</a>
-                            </span>
+                    <tr>
+                        <td><span style="margin-right: 10px" class="classGrade mySpan">{{cls.grade}}</span>
+                        </td>
+                        <td colspan="2">
+                            <span><a href="{%url 'school-get-class-detail'%}?clsId={{cls.id}}&template=school/school_base.html">{{cls.name}}</a></span></td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr class="text-center">
+                        <td colspan="2">
+                            <div class="p-3 red">您还没有班级，快去添加吧~</div>
                         </td>
                     </tr>
                     {% endif %}
-                    {% if forloop.counter|divisibleby:2 == 0 %}
-                    <tr>
-                        <td>
-                            <span style="margin-right: 10px" class="classGrade mySpan">{{cls.grade}}</span>
-                            <span>
-                                <a href="{%url 'school-get-class-detail'%}?clsId={{cls.id}}">{{cls.name}}</a>
-                            </span>
-                        </td>
-                    {% endif %}
-
-                    {% endfor %}
                 </table>
             </div>
-        </td>
-
-    </tr>
-
-</table>
-
-
-
-
-
-
+        </div>
+    </div>
+    <div class="col-lg-6">
+    </div>
+</div>
 
 {% endblock %}
 
@@ -221,18 +223,18 @@
 
     var gradeUpdate = function(grade){
         switch (parseInt(grade)) {
-            case 1 : return "小学一年级--------";
-            case 2 : return "小学二年级--------";
-            case 3 : return "小学三年级--------";
-            case 4 : return "小学四年级--------";
-            case 5 : return "小学五年级--------";
-            case 6 : return "小学六年级--------";
-            case 7 : return "初中一年级--------";
-            case 8 : return "初中二年级--------";
-            case 9 : return "初中三年级--------";
-            case 10 : return "高中一年级--------";
-            case 11 : return "高中二年级--------";
-            case 12 : return "高中三年级--------";
+            case 1 : return "小学一年级";
+            case 2 : return "小学二年级";
+            case 3 : return "小学三年级";
+            case 4 : return "小学四年级";
+            case 5 : return "小学五年级";
+            case 6 : return "小学六年级";
+            case 7 : return "初中一年级";
+            case 8 : return "初中二年级";
+            case 9 : return "初中三年级";
+            case 10 : return "高中一年级";
+            case 11 : return "高中二年级";
+            case 12 : return "高中三年级";
         }
     };
 
@@ -278,37 +280,28 @@
                 alert("修改失败");
             }
         })
-
-    });
-    //上传图片
-    $('#submitBtn').on('click', function () {
         var data = new FormData();
-        if(!$('#imgUpload')[0].files[0]){
-            alert("请先选择图片");
-            return
-        }
-        data.append('img', $('#imgUpload')[0].files[0]);
-        data.append('school_id',$("#profileSpan").attr("schoolId"));
-        $.ajax({
-            type:"POST",
-            url:"{% url 'upload-school-img' %}",
-            data:data,
-            // dataType:"json",
-            cache: false,
-            processData: false,
-            contentType: false,
-            success:function (res) {
-                alert(res);
-                console.info(res);
-                if(res == "OK"){
-                    alert("上传成功");
-                    //window.location.reload();
-                }else{
-                    alert(res)
+        if($('#imgUpload')[0].files[0]){
+            data.append('img', $('#imgUpload')[0].files[0]);
+            data.append('school_id',$("#profileSpan").attr("schoolId"));
+            $.ajax({
+                type:"POST",
+                url:"{% url 'upload-school-img' %}",
+                data:data,
+                // dataType:"json",
+                cache: false,
+                processData: false,
+                contentType: false,
+                success:function (res) {
+                    if(res == "OK"){
+                        // alert("上传成功");
+                        //window.location.reload();
+                    }else{
+                        alert(res)
+                    }
                 }
-            }
-        })
-
+            })
+        }
 
     });
     //修改展示图片
@@ -338,8 +331,6 @@
         var width = $(".myClassBox").width() - 40;
         $("#classTable").attr("width",width)
 
-
-        // console.info(graderList);
     });
 
 

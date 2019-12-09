@@ -11,31 +11,18 @@
         width:100%;
         height:100%;
     }
-    .myContainer{
-        width:80%;
-        margin:0 auto;
-        margin-bottom: 20px;
-        margin-top:30px;
-        /*border:1px solid #dddddd;*/
-        /*border-radius:1px;*/
-        border:5px solid #1d8ce0;
-        border-radius:30px;
-        padding: 30px 10px;
-
-    }
     input{
         display:none;
     }
     label{
-        display:block;
-        background-color: #F5F5F5;
-        width:98%;
-        height:40px;
-        margin:0 auto;
-        border-radius:5px;
-        border:1px solid #dddddd;
-        margin-top:10px;
-        line-height: 40px;
+        display: block;
+    background-color: #F5F5F5;
+    height: 40px;
+    margin: 0 auto;
+    border: 1px solid #dddddd;
+    margin-top: 10px;
+    line-height: 40px;
+    cursor: pointer;
     }
     .gradeText{
         margin-left: 20px;
@@ -46,10 +33,10 @@
         margin-right: 5px;
     }
     .context{
-        width:96%;
         margin:0 auto;
         border:1px solid #dddddd;
-        border-radius:2px;
+		border-top:1px solid #dddddd;
+        border-radius:0 2px 2 0px;
         transition:height 0.5s linear;
         -webkit-transition:height 0.5s linear;
         -moz-transition:height 0.5s linear;
@@ -80,10 +67,18 @@
 {% block "main_content" %}
 
     <!-- Page Heading -->
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-  <h1 class="h3 mb-0 text-gray-800">我的试卷</h1>
-</div>
-    <div class="myContainer"></div>
+	<div class="app-title">
+  <h4 class="h4">我的试卷</h4>
+	</div>
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="tile">
+				<div class="tile-body">
+    <div id="myContainer"></div>
+				</div>
+			</div>
+		</div>
+	</div>
 
 {% endblock %}
 
@@ -95,7 +90,7 @@
         $(document).on('click',"div[name='quiz']",function () {
             var quizId= $(this).attr("id")
             //console.log(quizId)
-            $(location).attr('href', "{% url "quiz-page" %}?quizId="+quizId);
+            $(location).attr('href', "{% url "quiz-page" %}?quizId="+quizId+'&template=teacher/teacher_base.html');
         })
         var subjectUpdate = function(subject){
             console.info("-----"+subject)
@@ -136,7 +131,7 @@
                     subject = subjectUpdate(item);
                     htmlString += '<label onclick="subjectClick('+item+')" ><span class="gradeText"><img src="{% static "assets/img/add.png" %}"  grade_num="'+item+'"  class="imgClass" >'+subject+'</span></label><div  grade_num="'+item+'"  class="context hiddenDiv hide">' ;
                     for(var value in  quizInformation[item]){
-                        htmlString += '<div style="margin: 5px">\n' +
+                        htmlString += '<div class="m-1">\n' +
                             '                <div class="card mb-4" id="'+quizInformation[item][value].id+'" style="cursor:pointer" name="quiz">\n' +
                             '                  <div class="card-header">\n' +
                             '                    <h6 class="m-0 font-weight-bold text-primary">'+quizInformation[item][value].info.title+'</h6>  \n' +
@@ -151,7 +146,7 @@
                     }
                     htmlString += "</div>"
                 }
-                $('.myContainer').html(htmlString);
+                $('#myContainer').html(htmlString);
             })
         })
 	</script>

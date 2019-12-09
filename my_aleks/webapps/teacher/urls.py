@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     url(r'^index/', views.index, name='teacher-index'),
-    url(r'^view-student/', views.view_student, name='view-student'),
+    #url(r'^view-student/', views.view_student, name='view-student'),
     url(r'^view-class/', views.view_class, name='view-class'),
     url(r'^my-classes/', views.my_classes, name='my-classes'),
     url(r'^view-teacher-profile/', views.view_teacher_profile, name='my-teacher_profile'),
@@ -17,5 +17,10 @@ urlpatterns = [
     url(r'^ajax-update-teacher-profile',views.ajax_update_teacher_profile,name='ajax-update-teacher'), 
     url(r'^upload-teacher-img', views.upload_teacher_img, name='upload-teacher-img'),
     url(r'^ajax-get-user-img',views.ajax_get_user_img,name='ajax-get-user-img'),
-    url(r'^ajax-upload-teacherfile',views.upload_teacherfile,name='ajax-upload-teacherfile')
+    url(r'^ajax-upload-teacherfile',views.upload_teacherfile,name='ajax-upload-teacherfile'),
+
+    url(r"^teacher-login", views.teacher_login, name="teacher-login"),
+    url(r'^ajax-teacher-profile', views.ajax_teacher_profile,name="ajax_teacher_profile"),
+    url(r'^student-tuition', views.student_tuition,name="student-tuition"),
+    url(r'^my-schedule', views.my_schedule,name="my-schedule"),
 ]

@@ -21,7 +21,7 @@ class Question(models.Model):
     #id = models.CharField(primary_key=True, default=uuid.uuid4, editable=False, max_length=40)
     body = models.TextField(max_length=3000, blank=False, null=False)
     subject = models.CharField(max_length=20, db_index=True, blank=False, null=False)
-    question_type = models.CharField(max_length=20, default='multi-choice')
+    question_type = models.CharField(max_length=20, default='single-choice')
 
     knowledge_node = models.ManyToManyField('knowledge_space.KnowledgeNode', blank=False)
     img = models.ImageField(blank=True, null=True, upload_to='question_imgs')
@@ -152,3 +152,10 @@ class QuizRecordPaper(models.Model):
     pdf_uri = models.CharField(max_length=150, blank=False, null=False)
     html_uri = models.CharField(max_length=150, blank=False, null=False)
     quiz_record = models.ForeignKey(QuizRecord, blank=True, null=True)
+
+class CompletionAnswer(models.Model):
+    body = models.CharField(max_length=100, blank=False, null=False)
+    question = models.ForeignKey(Question, blank=False, null=False, related_name='CompletionAnswer')
+    error_reason = models.ManyToManyField('knowledge_space.ErrorReason', blank=True)
+    def __str__(self):
+        return str(self.body)

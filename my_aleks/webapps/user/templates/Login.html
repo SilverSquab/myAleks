@@ -12,59 +12,171 @@
 	<link rel="stylesheet" href="{% static "assets/vendor/font-awesome/css/font-awesome.min.css" %}">
 	<link rel="stylesheet" href="{% static "assets/vendor/linearicons/style.css" %}">
 	<!-- MAIN CSS -->
-	<link rel="stylesheet" href="{% static "assets/css/main.css" %}">
+	<!-- <link rel="stylesheet" href="{% static "assets/css/main.css" %}"> -->
+	<link href="{% static "assets/css/custom-style.css" %}" rel="stylesheet">
 	<!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
 	<!-- <link rel="stylesheet" href="assets/css/demo.css"> -->
 	<!-- ICONS -->
-	<style type="text/css">
-		.auth-box{
-			width: 500px;
-		}
-		.form-group input,.auth-box button,.clearfix{
-			width:70%;
-			margin: 0 auto;
-		}
-	</style>
 </head>
 
 <body>
 	<!-- WRAPPER -->
 	<div id="wrapper">
-		<div class="vertical-align-wrap">
-			<div class="vertical-align-middle">
-				<div class="auth-box ">
+		<section class="material-half-bg">
+			<div class="cover"></div>
+		</section>
+
+		<section class="login-content">
+				<div class="logo">
+					<h1>指针教育系统</h1>
+				</div>
+				<div class="login-box ">
 					<!-- <div class="left"> -->
 						<div class="content">
-							<div class="header">
-								<p class="lead">指针教育用户登录</p>
-							</div>
-							<form class="form-auth-small" action="/abc/login/{{next}}" method="post">
+							<form class="login-form" action="{% url "login" %}{{next}}" method="post">
+							<h3 class="login-head title-font">
+								<i class="fa fa-lg fa-fw fa-user"></i>
+								用户登录
+							</h3>
                                 {% csrf_token %}
                                 <div class="form-group">
-									<label for="Username" class="control-label sr-only">Username</label>
-									<input type="text" class="form-control" id="Username" value="" placeholder="账号/用户名" name="username"><!--zhou zzpzzp123-->
+									<label for="Username" class="control-label font">账号/用户名</label>
+									<input type="text" class="form-control font" id="Username" value="" placeholder="请输入账号/用户名" name="username"><!--zhou zzpzzp123-->
 								</div>
 								<div class="form-group">
-									<label for="Password" class="control-label sr-only">Password</label>
-									<input type="password" class="form-control" id="Password" value="" placeholder="密码" name="password">
+									<label for="Password" class="control-label font">密码</label>
+									<input type="password" class="form-control font" id="Password" value="" placeholder="请输入密码" name="password">
 								</div>
-								<div class="form-group clearfix">
-									<label class="fancy-checkbox element-left">
-										<input type="checkbox">
-										<span>记住密码</span>
+                                {% if error %}
+								<div class="form-group">
+									<label class="fancy-checkbox element-left font">
+										<!--<input type="checkbox">-->
+										<span style='color:red'>账号或密码错误！</span>
 								</div>
-								<button type="submit" class="btn btn-primary btn-lg btn-block">登录</button>
+                                {% endif %}
+								<div class="form-group btn-container" style="margin-top:30px">
+									<button type="submit" class="btn btn-primary btn-block font"><i class="fa fa-sign-in fa-lg fa-fw"></i>登录</button>
+								</div>
 								<!--<div class="bottom">
 									<span class="helper-text"><i class="fa fa-lock"></i> <a href="#">忘记密码?</a></span>
 								</div>-->
 							</form>
 						</div>
 					<div class="clearfix"></div>
-				</div>
 			</div>
 		</div>
+		</section>
 	</div>
 	<!-- END WRAPPER -->
 </body>
+<style>
+.login-content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  min-height: 100vh;
+}
 
+.login-content .logo {
+  margin-bottom: 40px;
+  font-family: "Niconne";
+  color: #fff;
+}
+
+.login-content .logo h1 {
+  font-size: 52px;
+  font-weight: 400;
+}
+
+.login-content .login-box {
+  position: relative;
+  min-width: 350px;
+  min-height: 390px;
+  background-color: #fff;
+  -webkit-box-shadow: 0px 29px 147.5px 102.5px rgba(0, 0, 0, 0.05), 0px 29px 95px 0px rgba(0, 0, 0, 0.16);
+          box-shadow: 0px 29px 147.5px 102.5px rgba(0, 0, 0, 0.05), 0px 29px 95px 0px rgba(0, 0, 0, 0.16);
+  -webkit-perspective: 800px;
+          perspective: 800px;
+}
+
+.login-content .login-box .login-head {
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.login-content .login-box label {
+  color: #666;
+  font-weight: 700;
+}
+
+.login-content .login-box .utility {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 1px;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.login-content .login-box .btn-container {
+  margin-bottom: 0;
+}
+
+.login-content .login-box .login-form, .login-content .login-box .forget-form {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 40px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.login-content .login-box .forget-form {
+  opacity: 0;
+  -webkit-transform: rotateY(180deg);
+          transform: rotateY(180deg);
+}
+
+.login-content .login-box.flipped {
+  min-height: 300px;
+}
+
+.login-content .login-box.flipped .login-form {
+  opacity: 0;
+  -webkit-transform: rotateY(-180deg);
+          transform: rotateY(-180deg);
+}
+
+.login-content .login-box.flipped .forget-form {
+  opacity: 1;
+  -webkit-transform: rotateY(0deg);
+          transform: rotateY(0deg);
+}
+
+.font{
+    font-size:1.5rem
+}
+.title-font{
+    font-size:1.9rem
+}
+</style>
 </html>

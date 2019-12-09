@@ -36,8 +36,8 @@
 <!-- Page Heading -->
 	<!--试卷信息-->
 {% if not quizInfo %}
-	<div class="d-sm-flex align-items-center justify-content-between mb-4">
-		 <h1 class="h3 mb-0 text-gray-800">试卷批改</h1>
+	<div class="app-title">
+		 <h3 class="h3 text-gray-800">试卷批改</h3>
 	</div>
 	<form action="{% url 'mark-quiz' %}" method="get" >
 		<div class="quiz-record-input">
@@ -75,26 +75,49 @@
 				{% for question in quizInfo.questions|dictsort:"question.order" %}
 				<tr>
 					<td>
-						<p>{{question.question.order}} {{question.question.body}}</p>
+						<p>{{question.question.order}}、
+						{% if question.question.type == 'multi-choice' %}
+						（单选题）
+						{% endif %}
+						{% if question.question.type == 'completion' %}
+						（填空题）
+						{% endif %}
+						{{question.question.body}}</p>
+
 						{% if question.question.image %}
 						<div style="margin-left: 80px">
-							<img src="{{TEMPLATES_IP}}/evaluation-img/{{question.question.image}}">
+							<img class="question_img" src="{{TEMPLATES_IP}}/evaluation-img/{{question.question.image}}">
 						</div>
 						{% endif %}
 						{% for o in question.options %}
 						<div style="float:left;padding-right:50px;padding-left:50px">
 							<p>{{o.order}}.{{o.body}} </p>
 							{% if o.image %}
-							<img src="{{TEMPLATES_IP}}/evaluation-img/{{o.image}}">
+							<img class="question_img" src="{{TEMPLATES_IP}}/evaluation-img/{{o.image}}">
 							{% endif %}
 						</div>
 						{% endfor %}
+						{% if question.question.type == 'completion' %}
+							正确答案：{{question.answer}}
+						{% endif %}
 
 					</td>
 					<td >
 						<div style="text-align:center;height: 100%;line-height:100px">
 							<div style="display:inline-block">
-								学生选择：<input type="text" style="text-transform: uppercase;display:inline;width: 30%" maxlength="1" order_id="{{question.question.order}}" class="form-control bg-light border-1 small scoreInput" placeholder="输入结果" id="{{question.question_id}}" aria-label="Search" aria-describedby="basic-addon2"><br>
+								{% if question.question.type == 'multi-choice' %}
+								学生选择：
+								<input type="text" style="text-transform: uppercase;display:inline;width: 30%" maxlength="1" order_id="{{question.question.order}}" class="form-control bg-light border-1 small scoreInput {{question.question.order}}" placeholder="输入结果" id="{{question.question_id}}" aria-label="Search" aria-describedby="basic-addon2"><br>
+								{% endif %}
+
+								{% if question.question.type == 'completion' %}
+								学生选择：
+								<select class="form-control" order_id="{{question.question.order}}" id="{{question.question_id}}" class="scoreSelect {{question.question.order}}" style="display: inline;width: 50%"><br>
+									<option value="false" class = "option_false" question_id="{{question.question_id}}" order_id="{{question.question.order}}">错误</option>
+									<option value="true" class = "option_true" question_id="{{question.question_id}}" order_id="{{question.question.order}}">正确</option>
+									<option value="" selected hidden></option>
+								</select>
+								{% endif %}
 							</div>
 						</div>
 					</td>
@@ -135,32 +158,33 @@
         }
     });
 </script>
+<script src="{% static "assets/js/image.js" %}" type="text/javascript"></script>
+<script type="text/javascript">
+	//图片大小设定
+    $(document).ready(function() {
+    	changeImageSize()
+    })
+</script>
 <script src="{% static "assets/js/jquery.etui.msgbox.js" %}" type="text/javascript"></script>
 <script type="text/javascript" src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.js"></script>
 <script type="text/javascript">
   	$(document).ready(function() {
 		$("input").val("");
-		//console.log({{json_data|safe}});
 		var quizInfo = {{json_data | safe}};
-		//console.log(quizInfo);
-		//console.log(typeof(quizInfo));
-		//console.log(quizInfo);
 		var answer = {};
 		var score = 0;
 		var quizRecordId = quizInfo.quizRecordId;
 		var questions = quizInfo.questions;
-		//console.log(type(questions));
-		//console.log(JSON.parse(questions));
-		/*每次输入信息后，判断答案是否正确，计算分数返回*/
+		
+		/*每次单选题输入信息后，判断答案是否正确，计算分数返回*/
 		$(".scoreInput").blur(function () {
 			//alert("test")
 			var id = $(this).attr("id")
 			if (id != 'studentId') {
 				var options = []
 				var q_score = 0
+
 				//获取对应的题目信息
-				//console.log('id'+id)
-				//console.log(questions)
 				for (q in questions) {
 					if (id == questions[q].question_id) {
 						options = questions[q].options
@@ -168,8 +192,7 @@
 						break;
 					}
 				}
-				//console.log(options)
-				//console.log('分值：'+q_score)
+	
 				//获取题目对应的正确答案
 				var true_option = ''
 				for (option in options) {
@@ -177,7 +200,7 @@
 						true_option = options[option]['order']
 					}
 				}
-				//console.log('正确答案'+true_option)
+				
 				//判断答案是否正确
 				var value = $(this).val();
 				//console.log(value)
@@ -192,19 +215,100 @@
 				}
 
 				value = value.toUpperCase()
-				//console.log('选择答案：'+value)
 				if (id in answer) {
 					if (answer[id] == true_option && value != true_option) {
 						score = score - q_score
-						//console.log('由正到错：'+score)
 					} else if (answer[id] != true_option && value == true_option) {
 						score = score + q_score
-						//console.log('由错到正：'+score)
 					}
 				} else {
 					if (value == true_option) {
 						score = score + q_score
-						//console.log('由无到有：'+score)
+					}
+				}
+				answer[id] = value
+				$("#total_score").html(score);
+			}
+		});
+		//填空题错误点击事件
+		$(".option_false").click(function(){
+			//获取对应的题目的分数
+			var id = $(this).attr('question_id')
+			var value = "F"
+			for (q in questions) {
+				if (id == questions[q].question_id) {
+					q_score = questions[q].question.score
+					break;
+				}
+			}
+			console.log(value)
+			if (id in answer) {
+				if (answer[id] == "T") {
+					score = score - q_score
+				}
+			}
+			answer[id] = value
+			console.log(answer)
+			$("#total_score").html(score);
+
+			var order_id = $(this).attr("order_id");
+			order_id = parseInt(order_id) + 1;
+			var str = "." + order_id ;
+			$(str).focus();
+		});
+
+		//填空题正确点击事件
+		$(".option_true").click(function(){
+			var id = $(this).attr('question_id')
+			var value = "T"
+			for (q in questions) {
+				if (id == questions[q].question_id) {
+					q_score = questions[q].question.score
+					break;
+				}
+			}
+			if (id in answer) {
+				if (answer[id] == "F") {
+					score = score + q_score
+				}
+			} else {
+				score = score + q_score
+			}
+			answer[id] = value
+			console.log(answer)
+			$("#total_score").html(score);
+
+			var order_id = $(this).attr("order_id");
+			order_id = parseInt(order_id) + 1;
+			var str = "." + order_id ;
+			$(str).focus();
+		})
+		/*每次填空题输入信息后，计算分数返回*/
+		$(".scoreSelect").blur(function () {
+			var id = $(this).attr("id")
+			if (id != 'studentId') {
+				var q_score = 0
+
+				//获取对应的题目的分数
+				for (q in questions) {
+					if (id == questions[q].question_id) {
+						q_score = questions[q].question.score
+						break;
+					}
+				}
+				
+				//判断答案是否正确
+				var value = $(this).val();
+				console.log(value)
+				if (id in answer) {
+					if (answer[id] == true) {
+						score = score - q_score
+					} else if (answer[id] == false) {
+						score = score + q_score
+					}
+				} else {
+					if (value == true) {
+						score = score + q_score
 					}
 				}
 				answer[id] = value
@@ -321,7 +425,7 @@
 				})
 			}
 		});
-
+		//焦点跳转
 		$(".scoreInput").keyup(function () {
 			var value = $(this).val();
 			console.log(value);
@@ -334,8 +438,9 @@
 					}else {
 						var order_id = $(this).attr("order_id");
 						order_id = parseInt(order_id) + 1;
-						var str = "input[order_id='" + order_id + "']";
-						//console.log(str);
+						//var str = "input[order_id='" + order_id + "']";
+						//$(str).focus();
+						var str = "." + order_id ;
 						$(str).focus();
 					}
 				} else {

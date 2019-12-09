@@ -12,7 +12,7 @@
         _html += '<div id="mb_box"></div><div id="mb_con" style="padding-top:20px;max-width:400px"><span id="mb_tit" fontSize="30px">' + title + '</span>';
         _html += ' <form id="addform">'
 			    		+'<div style="margin:0 auto; width: 90%; padding-top:40px" > '
-			            	+'<input type="text" style="width: 100%;height:40px" fontSize="16px"; name="name" Placeholder="班级名称"  required="" />'
+			            	+'<input type="text" style="width: 100%;height:40px" fontSize="16px"; name="name" minlength="1"  Placeholder="请输入班级名称"  required="" />'
 			            +'</div>'
                         +'<div style="margin:0 auto; width: 90%; padding-top:20px" >'
                         +'<select id="subject" style="width: 100%;padding-top: 10px; min-height:40px" fontSize="16px" onmousedown="if(this.options.length>3){this.size=3}" onblur="this.size=0" onchange="this.size=0" required="">'
@@ -66,9 +66,9 @@
         $("#mb_con").css({ zIndex: '999999', width: '80%', position: 'fixed',//弹框的宽
             backgroundColor: 'White', borderRadius: '15px'
         });
-        $("#mb_tit").css({ display: 'block', fontSize: '20px', color: '#1fc88d', padding: '10px 15px',//字体颜色
+        $("#mb_tit").css({ display: 'block', fontSize: '20px', color: '#009688', padding: '10px 15px',//字体颜色
             backgroundColor: 'white', borderRadius: '15px 15px 0 0',//顶部title颜色
-            borderBottom: '3px solid #1fc88d', fontWeight: 'bold'//线条颜色
+            borderBottom: '3px solid #009688', fontWeight: 'bold'//线条颜色
         });
         $("#mb_msg").css({ padding: '20px', lineHeight: '20px',
             borderBottom: '1px dashed #DDD', fontSize: '13px'//虚线分界线颜色

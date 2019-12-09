@@ -12,26 +12,15 @@
         width:100%;
         height:100%;
     }
-    .myContainer{
-        width:80%;
-        margin:0 auto;
-        margin-bottom: 20px;
-        margin-top:30px;
-        border:5px solid #1d8ce0;
-        border-radius:30px;
-        padding: 30px 10px;
-
-    }
     label{
         display:block;
         background-color: #F5F5F5;
-        width:98%;
         height:40px;
         margin:0 auto;
-        border-radius:5px;
         border:1px solid #dddddd;
         margin-top:10px;
         line-height: 40px;
+		cursor: pointer;
     }
     .gradeText{
         margin-left: 20px;
@@ -42,10 +31,10 @@
         margin-right: 5px;
     }
     .context{
-        width:96%;
         margin:0 auto;
         border:1px solid #dddddd;
-        border-radius:2px;
+		border-top:none;
+        border-radius:0 2px 2 0px;
         transition:height 0.5s linear;
         -webkit-transition:height 0.5s linear;
         -moz-transition:height 0.5s linear;
@@ -60,7 +49,7 @@
     }
 
     @media screen and (max-width: 500px)  {
-        .myContainer{
+        /* .myContainer{
             width: 100%;
             margin:0 auto;
             margin-bottom: 20px;
@@ -69,7 +58,7 @@
             border-radius:30px;
             padding: 30px 10px;
 
-        }
+        } */
     }
 
 
@@ -82,21 +71,29 @@
 
 {% block "main_content" %}
 
-          <!-- Page Heading -->
-          <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">我的班级</h1>
-
-           <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-target="#createClassModal" data-toggle="modal"><i class="fas fa-download fa-sm text-white-50"></i> 新建班级</a>-->
-          </div>
-
-
-<div class="myContainer">
-
-
-</div>
-
-
-
+          	<!-- Page Heading -->
+          	<div class="app-title">
+            	<h4 class="h4">我的班级</h4>
+          	</div>
+		  	<div class="row">
+			  	<div class="col-lg-12">
+				  	<div class="tile">
+					  	<div class="tile-body">
+							  <table class="table table-hover table-bordered" cellpadding="0" cellspacing="0">
+								  <thead>
+									  <th class="h6">班级</th>
+									  <th class="h6">学科</th>
+									  <th class="h6">人数</th>
+									  <th class="h6">年级</th>
+									  <th class="h6">操作</th>
+								  </thead>
+								  <tbody class="myContainer">
+								  </tbody>
+							  </table>
+				  		</div>
+					</div>
+			  	</div>
+		  	</div>
 
 {% endblock %}
 
@@ -122,7 +119,7 @@
 
         var gradeClick = function(grade){
             // $(".hiddenDiv").addClass("hide");
-            console.info($('div[grade_num="'+grade+'"]').hasClass("hide"))
+            // console.info($('div[grade_num="'+grade+'"]').hasClass("hide"))
             if($('div[grade_num="'+grade+'"]').hasClass("hide")){
                 $('div[grade_num="'+grade+'"]').removeClass("hide");
                 $('img[grade_num="'+grade+'"]').attr('src', "{% static "assets/img/down.png" %}");
@@ -133,11 +130,12 @@
         };
 
 
-        //卡片点击事件
-        $(document).on("click","div[name='Cls']",function () {
-            var clsId = $(this).parent().attr("id")
-            $(location).attr('href', '{% url "school-get-class-detail" %}?clsId=' + clsId);
-        });
+        // //卡片点击事件
+        // $(document).on("click",$(".btn .btn-link .text-success .p-0"),function () {
+		// 	debugger
+        //     var clsId = $(this).parent().attr("id")
+        //     $(location).attr('href', '{% url "school-get-class-detail" %}?clsId=' + clsId);
+        // });
 
 
         $(document).ready(function () {
@@ -152,25 +150,26 @@
                 }
                 var htmlString = '';
                 var grade = 0;
+				
+					if(Object.keys(classInformation).length){
                 for(var item in classInformation){
                     grade = gradeUpdate(item);
-                    htmlString += '<label onclick="gradeClick('+item+')" ><span class="gradeText"><img src="{% static "assets/img/add.png" %}"  grade_num="'+item+'"  class="imgClass" >'+grade+'</span></label><div  grade_num="'+item+'"  class="context hiddenDiv hide">' ;
+					// htmlString += '<label onclick="gradeClick('+item+')" ><span class="gradeText"><img src="{% static "assets/img/add.png" %}"  grade_num="'+item+'"  class="imgClass" >'+grade+'</span></label><div  grade_num="'+item+'"  class="context hiddenDiv hide pt-1">' ;
                     for(var value in  classInformation[item]){
-                        htmlString += '<div style="margin: 5px">\n' +
-                            '                <div class="card mb-4" id="'+classInformation[item][value].id +'">\n' +
-                            '                  <div class="card-header">\n' +
-                            '                    <h6 class="m-0 font-weight-bold text-primary">'+classInformation[item][value].name+'</h6>  \n' +
-                            '                  </div>\n' +
-                            '                  <div class="card-body" name="Cls" style="cursor: pointer">\n' +
-                            '                    <p>人数：'+classInformation[item][value].num +'</p>\n' +
-                            '                    <p>学科：'+classInformation[item][value].subject +'</p>\n' +
-
-                            '                  </div>\n' +
-                            '                </div>\n' +
-                            '              </div>'
+                        htmlString += '<tr class="p-0 text-muted">\n' +
+                            '                <td id="'+classInformation[item][value].id +'">' +classInformation[item][value].name+'</td>\n'+
+							'                <td>' +classInformation[item][value].subject+'</td>\n'+
+							'                <td>' +classInformation[item][value].num+'</td>\n'+
+							'                <td>' +gradeUpdate(item)+'</td>\n'+
+							'                <td><a class="sbtn btn-link text-succes p-0" href="{% url "school-get-class-detail" %}?clsId='+classInformation[item][value].id+'">查看详情</a></td>\n'+
+							'				 </tr>'
                     }
-                    htmlString += "</div>"
                 }
+					}else{
+						htmlString += '<tr class="p-0 text-muted">\n' +
+						'<td colspan="5" class="text-center">暂时没有数据，快去添加吧!</td>' +
+						'</tr>'
+					}
                 $('.myContainer').html(htmlString);
             })
         })

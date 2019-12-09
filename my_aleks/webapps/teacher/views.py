@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from webapps.school.models import Cls
 from webapps.quiz.models import Quiz
+from webapps.quiz.models import Question
 from webapps.parent.models import ParentProfile
 from webapps.quiz.models import QuizRecord
 from webapps.quiz.models import QuizRecordPaper
@@ -15,6 +16,7 @@ from webapps.student.models import StudentProfile,StudentReportPaper,StudentQuiz
 from .models import *
 # Create your views here.
 import time
+from django.contrib.auth import authenticate, login
 
 
 @login_required
@@ -25,6 +27,7 @@ def index(request):
             return render(request,'teacher/errorPage.html',{"errorType":"用户权限不足","particulars":"fault:user is not a teacher"})
         class_id = request.GET.get('classId', '')
         student_id = request.GET.get('studentId', '')
+        base_template = request.GET.get('template','')
         try:
             classes = user.teacherprofile.classes.filter(deleted=False)
             class_dics = list(classes.values('id', 'name'))
@@ -32,10 +35,11 @@ def index(request):
             class_dics=[]
             # return render(request,'teacher/errorPage.html',{"errorType":"用户数据不全","particulars":"fault:user has not class"})
         if class_id and student_id:
-            if user.groups.filter(name="TEACHER").exists():
-                base_template='teacher/teacher_base.html'
-            if user.groups.filter(name="SCHOOL_MANAGER").exists():
-                base_template='school/school_base.html'
+            if not base_template:
+                if user.groups.filter(name="TEACHER").exists():
+                    base_template='teacher/teacher_base.html'
+                if user.groups.filter(name="SCHOOL_MANAGER").exists():
+                    base_template='school/school_base.html'
             try:
                 student=StudentProfile.objects.get(pk=student_id)
             except:
@@ -78,8 +82,9 @@ def index(request):
             students_list = []
             for student_profile in student_profiles:
                 try:
-                    student_quiz_record = StudentQuizRecord.objects.get(student=student_profile,quiz_record__cls=cls)
-                    is_join = True
+                    is_join = False
+                    if StudentQuizRecord.objects.filter(student=student_profile,quiz_record__cls=cls).exists():
+                        is_join = True
                 except:
                     is_join = False
                 students_list.append({"student_no" : student_profile.student_no, "name" : student_profile.name, "id" : student_profile.pk,"is_join" : is_join})
@@ -331,7 +336,15 @@ def view_teacher_profile(request):
      #   teacherFileList = TeacherFile.object.filter(teacher=teacher)
     #except:
     #     return render(request,'teacher/errorPage.html',{"errorType":"查询错误","particulars":"fault:system error"})
-    return render(request, 'teacher/teacher_profile.html', {'teacherProfile':{'teacher':teacher,'subject':subject,'classes':classes.all(),'school':school,'teacherFiles':teacherFileList.all()}})
+    menuNum = {}
+    menuNum['classNum'] = len(classes.all())
+    quizList = Quiz.objects.filter(generator=user)
+    menuNum['quizNum'] = len(quizList)
+    questionList = Question.objects.filter(uploader=user)
+    menuNum['questionNum'] = len(questionList)
+    favorites = Favorites.objects.filter(teacher=teacher)
+    menuNum['favorites'] = len(favorites.first().questions.all())
+    return render(request, 'teacher/teacher_profile.html', {'teacherProfile':{'menuNum':menuNum,'teacher':teacher,'subject':subject,'classes':classes.all(),'school':school,'teacherFiles':teacherFileList.all()}})
 
 
 
@@ -372,9 +385,9 @@ def my_classes(request):
 
 
 
-@login_required
-def view_student(request):
-    return render(request, 'teacher/student.html')
+#@login_required
+#def view_student(request):
+#    return render(request, 'teacher/student.html')
 
 @login_required
 @csrf_exempt
@@ -417,3 +430,118 @@ def upload_teacherfile(request):
     
     if request.method == 'GET':
         return HttpResponse('wrong method, should be POST')
+ 
+@csrf_exempt
+def teacher_login(request):
+    if request.method == "POST":
+        body = request.body.decode('utf-8')
+        username = json.loads(body)['username']
+        password = json.loads(body)['password']
+        user = authenticate(request = request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            request.session['username']=username
+            teacher = user.teacherprofile
+            school = teacher.school
+            img = ''
+            if teacher.img:
+                img = teacher.img.url
+            return HttpResponse(json.dumps({"status":True,"teacher":{"id":teacher.id, "img":img, "name":teacher.name, "info":teacher.info, "phone":teacher.phone, "subject":teacher.subject.chinese_name, "user_id":user.id,"school":{"id":school.id, "name":school.name}}}))
+        else:
+            return HttpResponse(json.dumps({"status":False}))
+@login_required
+@csrf_exempt
+def ajax_teacher_profile(request):
+    if request.method == 'POST':
+        return HttpResponse('wrong method, should be GET')
+
+    user = request.user
+    if not user.groups.filter(name='TEACHER').exists():
+        return HttpResponse('user is not a teacher')
+
+    try:
+        teacher = user.teacherprofile
+    except:
+        return HttpResponse("fault:teacher profile not existed")
+        
+    try:
+        subject=Subject.objects.get(name=teacher.subject_id).chinese_name
+    except:
+        return HttpResponse("fault:subject not existed")
+    try:
+        school = teacher.school
+    except:
+        return HttpResponse("fault:school not existed")
+    img = ''
+    if teacher.img:
+        img = teacher.img.url
+    return HttpResponse(json.dumps({"id":teacher.id, "img":img, "info":teacher.info, "name":teacher.name, "phone":teacher.phone, "school":school.name, "user_id":user.id,"school":{"id":school.id, "name":school.name},"subject":subject}))
+
+@login_required
+@csrf_exempt
+def student_tuition(request):
+    if request.method == 'POST':
+        return HttpResponse('wrong method, should be GET')
+    model = request.GET.get('model','')
+    user = request.user
+    cls_id = request.GET.get('cls_id','')
+    if user.groups.filter(name="SCHOOL_MANAGER").exists():
+        base_template='school/school_base.html'
+        school = user.school
+        classes = school.classes
+    else:
+        if user.groups.filter(name="TEACHER").exists():
+            try:
+                base_template='teacher/teacher_base.html'
+                classes = user.teacherprofile.classes
+                classes = classes.filter(deleted=False)
+            except:
+                return HttpResponse("fault:class not existed")
+        else:
+            return HttpResponse("user not teacher or school")
+    class_dicts = classes.all()
+    if model != '':
+        if model == 'teacher':
+            base_template='teacher/teacher_base.html'
+        else:
+            base_template='school/school_base.html'
+    if cls_id :
+        try:
+            cls = classes.get(pk = cls_id)
+            subject = Subject.objects.get(pk = cls.subject).chinese_name
+            teacher = cls.teacher.name
+        except:
+            return HttpResponse("fault:class_id not existed")
+        students = json.loads(cls.students)
+        student_profiles = StudentProfile.objects.filter(student_no__in=students)
+        return render(request, 'teacher/student_tuition.html',{'base_template':base_template,'classList':class_dicts,'ClassInformation':student_profiles,'nowClass':cls,'subject':subject,'teacher':teacher});
+    return render(request, 'teacher/student_tuition.html',{'base_template':base_template,'classList':class_dicts});
+
+
+
+@login_required
+@csrf_exempt
+def my_schedule(request):
+    if request.method == 'POST':
+        return HttpResponse('wrong method, should be GET')
+    user = request.user
+    cls_id = request.GET.get('cls_id','')
+    if user.groups.filter(name="SCHOOL_MANAGER").exists(): 
+        base_template='school/school_base.html'
+        school = user.school
+        classes = school.classes
+        class_dicts = classes.all()
+        return render(request, 'school/class_schedule.html',{'base_template':base_template,'classList':class_dicts});
+    else:
+        if user.groups.filter(name="TEACHER").exists():
+            base_template='teacher/teacher_base.html'
+            try:
+                classes = user.teacherprofile.classes
+                classes = classes.filter(deleted=False)
+            except:
+                return HttpResponse("fault:class not existed")
+        else:
+            return HttpResponse("user not teacher or school")
+        class_dicts = classes.all()
+        return render(request, 'teacher/my_schedule.html',{'base_template':base_template,'classList':class_dicts});
+

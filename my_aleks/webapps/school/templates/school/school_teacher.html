@@ -23,29 +23,36 @@
 
 <!-- Page Heading -->
 <!--试卷信息-->
-<div class="col-xl-6 col-md-6 mb-4">
-	<div class="d-sm-flex align-items-center justify-content-between mb-4">
-  		<h1 class="h3 mb-0 text-gray-800">师资力量</h1>
+<div class="app-title">
+	<h4>师资力量</h4>
+</div>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="tile">
+			<div class="tile-body">
+		
+		<table class="table table-hover table-bordered">
+			<thead>
+				<th class="h6">教师姓名</th>
+				<th class="h6">教学科目</th>
+				<th class="h6">联系方式</th>
+				<th class="h6">操作</th>
+			</thead>
+			<tbody>
+				{% for t in teachers %}
+				<tr class="text-muted">
+					<td>{{t.name}}</td>
+					<td>{{t.subject.chinese_name}}</td>
+					<td>{{t.phone}}</td>
+					<td><button class="btn btn-link p-0 text-primary" onclick="clickTeacher({{t.id}})">查看详情</button></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+			</div>
+		</div>
 	</div>
 </div>
-
-<!--题目卡片-->
-<div class="row" id="question-container">
-{% for t in teachers %}
-    <div class="col-lg-6" onclick="clickTeacher({{t.id}})" style="cursor:pointer;" >
-    	<!-- Default Card Example -->
-    	<div class="card mb-4">
-     	 	<div class="card-header">
-        	<h6 class="m-0 font-weight-bold text-primary" style="line-height: 1.5rem;">姓名:{{t.name}}</h6>
-        </div>
-    		<div class="card-body">
-      		<!--<p>姓名：{{t.name}}</p>-->
-         <p>教学科目：{{t.subject.chinese_name}}</p>
-      		<p>联系方式：{{t.phone}}</p>
-    		</div>
-    	</div>
-	</div>
-{% endfor %}
 </div>
 <!-- /.container-fluid -->
 {% endblock %}

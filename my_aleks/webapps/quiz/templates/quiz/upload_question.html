@@ -50,24 +50,31 @@
 
 
 {% block "main_content" %}
-
+<div class="app-title">
+	<h4>编辑题目</h4>
+  <a href="{% url 'upload-completion' %}">上传填空题</a>
+</div>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="tile">
+			<div class="tile-body">
 <div class="myBody">
 <p>公式录入： <span id="math-field" style="width:300px;" class="lineInput"></span></p>
 <p>LaTeX代码(不换行)： <span id="latex"></span></p>
 <p>LaTeX代码(换行)： <span id="latexBr"></span></p>
 
-<a href="https://www.cnblogs.com/caomingpei/p/9760652.html">latex 常见公式语法查询</a>
-    <h1>题目录入</h1>
+<a href="https://www.cnblogs.com/caomingpei/p/9760652.html" class="btn btn-link">latex 常见公式语法查询</a>
+    <h4>题目录入</h4>
 <form id="question_form">
     <hr>
-    <h2>题干</h2>
+    <h5>题干</h5>
     <div class="questionBody">
         <div class="col-xl-12" style="position:relative;">
             {{question_form}}
         </div>
 
       <div class="col-xl-12" style="position:relative;">
-          <span>搜索知识点(可添加多个知识点，所有知识点会在下方列出)：</span><span id="copyNodeSpan" style="cursor:pointer;color:#91cc8d;float: right;margin-right: 10%">将知识点复制给全部选项</span>
+          <span>搜索知识点(可添加多个知识点，所有知识点会在下方列出)：</span><span id="copyNodeSpan" style="cursor:pointer;color:#009688;float: right;margin-right: 10%">将知识点复制给全部选项</span>
         <input type="text" id="knowledge_node_searchbar" class="nodeSearchBar form-control bg-light line-bottom blockInput">
         <div class="hint" id="hint1" style="border:1px solid black; display:none; z-index:1000; position:absolute; background:white; width:90%;margin-left: 40px;">
           <table id="table1" style="width:100%;">
@@ -84,7 +91,7 @@
 
             {% if knowledge_nodes %}
             {% for l in knowledge_nodes %}
-            <tr class="node_item" id="question_{{l.0}}'" style="margin-bottom: 8px;display: block;margin-left: 10px"><td></td><td style="margin-left: 10px">{{l.1}}  &nbsp;&nbsp;  <a edge_id="{{l.0}}" class= "question_delete" style="cursor:pointer;color:#91cc8d">删除</a></td></tr>
+            <tr class="node_item" id="question_{{l.0}}'" style="margin-bottom: 8px;display: block;margin-left: 10px"><td></td><td style="margin-left: 10px">{{l.1}}  &nbsp;&nbsp;  <a edge_id="{{l.0}}" class= "question_delete" style="cursor:pointer;color:#009688">删除</a></td></tr>
             {% endfor %}
             {% endif %}
 
@@ -108,7 +115,7 @@
 
 
   {% for option_form in option_forms %}
-    <h2>选项 {{ option_form.order_of_option }}</h2>
+    <h6 class="h6">选项 {{ option_form.order_of_option }}</h6>
     <div class="questionBody">
    <div class="col-xl-12" style="position:relative;">
     <form id="option_form_{{option_form.order_of_option}}">
@@ -134,7 +141,7 @@
           {%if nodes_arrs|get_item:option_form.order_of_option %}
 
             {% for l in nodes_arrs|get_item:option_form.order_of_option %}
-        <tr class="node_item" id="option_node_{{l.0}}" style="margin-bottom: 8px;display: block;margin-left: 10px"><td></td></td><td >{{l.1}}  &nbsp;&nbsp; <a edge_id="{{l.0}}" option_id="{{option_form.order_of_option}}" class='option_delete' style="cursor:pointer;color:#91cc8d" >删除</a></td></tr>
+        <tr class="node_item" id="option_node_{{l.0}}" style="margin-bottom: 8px;display: block;margin-left: 10px"><td></td></td><td >{{l.1}}  &nbsp;&nbsp; <a edge_id="{{l.0}}" option_id="{{option_form.order_of_option}}" class='option_delete' style="cursor:pointer;color:#009688" >删除</a></td></tr>
 
             {% endfor %}
 
@@ -157,7 +164,7 @@
 
     <!--题目预览-->
     <div>
-        <h2>题目预览</h2>
+        <h4>题目预览</h4>
         <div class="card mb-4">
             <div class="card-header">
                 <span id="preview-click" style="cursor: pointer;color: #000000">点击预览题目</span>
@@ -203,12 +210,12 @@
 
 
 
-<br><br>
 <button id="add_question" class="btn btn-primary">添加题目</button>
 </div>
-
-
-
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock %}
 {% block "scripts" %}
 <script type="text/javascript" async
@@ -582,6 +589,7 @@ var mathField = MQ.MathField(mathFieldSpan, {
         $('label[for="id_analysis"]').text("解析：");
         $('label[for="id_selected"]').text("是否为优选题：");
         $('label[for="id_analysis_img"]').text('上传解析图片：');
+        $('#id_question_type').attr('disabled',"disabled");
         var options = ['A','B','C','D'];
         for(i in options){
             $('label[for="id_option_img_'+options[i]+'"]').text("上传图片：");

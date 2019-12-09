@@ -95,16 +95,23 @@ def quiz_page(request):
             question = Question.objects.get(pk = quiz_body[body][0])
         except:
             return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:question not exsited"})
-        try:
-            options = question.options.all().order_by('order')
-        except:
-            return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
-        options_dicts = list(options.values('body','order','img','is_correct'))
-        for option in options_dicts:
-            if option["is_correct"]:
-                true_option=option['order']
         knowledge_node = KnowledgeNode.objects.filter(question=question)
-        questions.append({'question':question,'options':options,"knowledge_nodes":knowledge_node,'true_option':true_option,"correct_rate":correct_rate})
+        if question.question_type == 'multi-choice':
+            try:
+                options = question.options.all().order_by('order')
+            except:
+                return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
+            options_dicts = list(options.values('body','order','img','is_correct'))
+            for option in options_dicts:
+                if option["is_correct"]:
+                    true_option=option['order']
+            questions.append({'question':question,'options':options,"knowledge_nodes":knowledge_node,'true_option':true_option,"correct_rate":correct_rate})
+        if question.question_type == 'completion':
+            try:
+                completion_answer = CompletionAnswer.objects.get(question=question)
+            except:
+                return render(request,'teacher/errorPage.html',{"errorType":"缺失答案","particulars":"fault:completion answer not exsited"})
+            questions.append({'question':question,'answer':completion_answer,"knowledge_nodes":knowledge_node,"correct_rate":correct_rate})
     return render(request, 'quiz/quiz_detail.html',{"quizInfo":quiz,'questions':questions,'quiz_paper_url':quiz_paper_url,"info":info,"quiz_record_id":quiz_record_id,'school':school_name})
 
 @login_required
@@ -118,7 +125,7 @@ def quiz_records(request):
         return render(request,'teacher/errorPage.html',{"errorType":"用户权限不足","particulars":"fault:user is not a teacher"})
     #teacher=user.teacher
     #quiz_records=teacher.quizrecord_set.all()
-    quiz_records=QuizRecord.objects.filter(teacher__user=user,cls__deleted=False)
+    quiz_records=QuizRecord.objects.filter(teacher__user=user,cls__deleted=False).order_by('-id')
     quiz=[]
     for quiz_record in quiz_records:
         subject=Subject.objects.get(name=quiz_record.quiz.subject).chinese_name
@@ -134,19 +141,6 @@ def quiz_records(request):
         except:
             non_participants_num=0
         quiz.append({"cls":cls,"id":quiz_record.id,"generator":generator,"info":info,"subject":subject,"quiz":quiz_record.quiz,"non_participants_num":non_participants_num})
-    #try:
-        #quiz = user.quiz_set.all()
-    #except:
-        #return render(request, 'teacher/my_quizes.html')
-    #quiz_dicts = list(quiz.values('id', 'info', 'subject', 'generator'))
-    #for dic in quiz_dicts:
-        #try:
-            #dic['subject'] = Subject.objects.get(name=dic['subject']).chinese_name
-            #dic['generator'] = user.username
-            #dic['info']=json.loads(dic['info'])
-       # except:
-            #pass
-    
     return render(request, 'quiz/my_quiz_records.html',{"quizInfo":quiz})
 
 @login_required
@@ -205,6 +199,7 @@ def quiz_record(request):
                 time = '——'
                 score = '——'
                 student_quiz_record_id=''
+        #print(student_id)
         student = StudentProfile.objects.get(student_no = student_id)
         rank = '——'
         student_info.append({'id':student.pk,'student_no':student.student_no,'student_quiz_record_id':student_quiz_record_id,'status':status,'time':time,'score':score,'name':student.name,'rank':rank})
@@ -304,12 +299,22 @@ def compose_quiz(request):
     post data: subject, info, body, marking, public
     '''
     #posting
+    requestBody = request.body.decode('utf-8')
+    requestBody = json.loads(requestBody);
+    subject = requestBody['subject']
+    info = requestBody['info']
+    body = requestBody['body']
+    marking = requestBody['marking']
+    public = requestBody['public']
+    quiz_type = requestBody['quiz_type']
+    '''
     subject = request.POST.get('subject', '')
     info = request.POST.get('info', '{}')
     body = request.POST.get('body', '')
     marking = request.POST.get('marking', '')
     public = request.POST.get('public', '')
     quiz_type = request.POST.get('quiz_type','')
+    '''
     if not body:
         return HttpResponse('quiz body not found')
 
@@ -581,53 +586,61 @@ def mark_quiz(request):
             return render(request, 'quiz/mark_quiz.html')
         else:
             try:
-                quiz_record=QuizRecord.objects.get(pk=quiz_record_id,cls__deleted=False)
+                quiz_record = QuizRecord.objects.get(pk=quiz_record_id,cls__deleted=False)
             except:
                 return render(request,'teacher/errorPage.html',{"errorType":"该测评记录不存在","particulars":"fault:quizRecord not exsited"})
-            user=request.user
-            if user!=quiz_record.teacher.user:
+            user = request.user
+            if user != quiz_record.teacher.user:
                 return render(request,'teacher/errorPage.html',{"errorType":"该用户没有此测评","particulars":"fault:user not having quizRecord"})
-            quiz=quiz_record.quiz
-            cls=quiz_record.cls.name
+            quiz = quiz_record.quiz
+            cls = quiz_record.cls.name
             try:
-                title=json.loads(quiz.info)['title']
+                title = json.loads(quiz.info)['title']
             except:
                 pass
+
             quiz_body = json.loads(quiz.body)
-            quiz_body_key_int=[]
+            quiz_body_key_int = []
             for key in quiz_body:
                 quiz_body_key_int.append(int(key))
             quiz_body_key_int.sort()
-            questions =[]
-            questions_json=[]
-            #print(quiz_body)
+
+            questions = []
+            questions_json = []
             for body in quiz_body_key_int:
-                #print(body)
                 try:
                     question = Question.objects.get(pk = quiz_body[str(body)][0])
-                    #print(str(question.img))
-                    question_info={"body":question.body,"image":question.img.name,"score":quiz_body[str(body)][1],"order":body}
-                    question_info_json={"body":question.body,"score":quiz_body[str(body)][1],"order":body}
+                    question_info = {"body":question.body,"image":question.img.name,"score":quiz_body[str(body)][1],"order":body,'type':question.question_type}
+                    question_info_json = {"body":question.body,"score":quiz_body[str(body)][1],"order":body,'type':question.question_type}
                 except:
                     return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:question not exsited"})
-                try:
-                    options = question.options.all().order_by('order')
-                except:
-                    return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
-                options_dicts = list(options.values('body','order','img','is_correct'))
-                option_dicts=[]
-                for option in  options_dicts:
-                    option_dicts.append({"body":option["body"],"order":option["order"],"image":option["img"],"is_correct":option["is_correct"]})
+
                 knowledge_node = KnowledgeNode.objects.filter(question=question)
                 knowledge_nodes = []
                 for kn in knowledge_node:
                     knowledge_nodes.append(kn.title)
-                questions.append({"question_id":question.id,"question":question_info,"options":option_dicts,"knowledge_nodes":knowledge_nodes})
-                questions_json.append({"question_id":question.id,"question":question_info_json,"options":option_dicts})
+
+                if question.question_type == 'multi-choice':
+                    try:
+                        options = question.options.all().order_by('order')
+                    except:
+                        return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
+                    options_dicts = list(options.values('body','order','img','is_correct'))
+                    option_dicts = []
+                    for option in  options_dicts:
+                        option_dicts.append({"body":option["body"],"order":option["order"],"image":option["img"],"is_correct":option["is_correct"]})
+                
+                    questions.append({"question_id":question.id,"question":question_info,"options":option_dicts,"knowledge_nodes":knowledge_nodes})
+                    questions_json.append({"question_id":question.id,"question":question_info_json,"options":option_dicts})
+                if question.question_type == 'completion':
+                    try:
+                        completion_answer = CompletionAnswer.objects.get(question=question)
+                    except:
+                        return render(request,'teacher/errorPage.html',{"errorType":"缺失答案","particulars":"fault:completion answer not exsited"})
+                    questions.append({"question_id":question.id,"question":question_info,"answer":completion_answer.body,"knowledge_nodes":knowledge_nodes})
+                        
             quiz_info={"cls":cls,"title":title,"quizRecordId":quiz_record_id,"questions":questions}
-            #print(quiz_info)
-            json_data=json.dumps({"cls":cls,"title":title,"quizRecordId":quiz_record_id,"questions":questions_json})
-            #print(json_data)
+            json_data=json.dumps({"cls":cls,"title":title,"quizRecordId":quiz_record_id,"questions":questions})
             return render(request, 'quiz/mark_quiz.html', {'quizInfo': quiz_info, 'json_data':json_data})
     
     '''
@@ -1016,13 +1029,31 @@ def ajax_get_questions(request):
         questions = paginator.page(page)
     except:
         return HttpResponse('error')
+    try:
+        teacher_profile = user.teacherprofile
+    except:
+        return render(request,'teacher/errorPage.html',{"errorType":"该用户不是老师","particulars":"fault:user not having teacher profile"})
+    try:
+        favorites = Favorites.objects.get(teacher=teacher_profile)
+        favorites_questions = favorites.questions.all()
+    except:
+        favorites_questions = None
+
     d = {}
     for question in questions:
         val = {}
         val['body'] = question.body
         val['analysis'] = question.analysis
+        val['type'] = question.question_type
         if question.img:
             val['img_url'] = question.img.url
+        try:
+            val['favorite'] = False
+            if favorites_questions.filter(id=question.id).exists():
+                val['favorite'] = True
+        except:
+            val['favorite'] = False
+
         options = {}
         for option in question.options.all():
             option_dic = {}
@@ -1206,6 +1237,31 @@ def upload_question(request):
         option_forms.append(OptionForm(order='C'))
         option_forms.append(OptionForm(order='D'))
         return render(request, 'quiz/upload_question.html', {'nodes_arrs': None, 'question_form': question_form, 'option_forms': option_forms})
+
+@login_required
+def upload_completion(request):
+    question_id = request.GET.get('question_id', '')
+    error_reasons = ErrorReason.objects.filter()
+    if question_id:
+        try:
+            q = Question.objects.get(pk=question_id,question_type='completion')
+        except:
+            return HttpResponse('question not exited')
+
+        question_form = QuestionForm(instance=q)
+        knowledge_nodes = list(q.knowledge_node.all().values_list('id', 'description'))
+        knowledge_nodes = [list(map(str, l)) for l in knowledge_nodes]
+        try:
+            completion_answer = CompletionAnswer.objects.get(question=q)
+            answer_error_reason = completion_answer.error_reason.all()
+        except:
+            completion_answer = None
+            answer_error_reason =[]
+        #print(question_form) 
+        return render(request, 'quiz/upload_completion.html', {'knowledge_nodes': knowledge_nodes, 'question_id':question_id, 'question_form': question_form, 'completion_answer':completion_answer,'error_reasons':error_reasons,'answer_error_reasons':answer_error_reason})
+    else:
+        question_form = QuestionForm()
+        return render(request, 'quiz/upload_completion.html', {'question_form': question_form, 'error_reasons':error_reasons})
 
 @login_required
 def upload_quiz_question_answer(request):
@@ -1406,6 +1462,16 @@ def ajax_save_quiz_record(request):
 @csrf_exempt
 def ajax_save_quiz_and_publish(request):
     user=request.user
+    requestBody = request.body.decode('utf-8')
+    requestBody = json.loads(requestBody)
+    subject_id = requestBody['subject']
+    info = requestBody['info']
+    body = requestBody['body']
+    marking = requestBody['marking']
+    public = requestBody['public']
+    quiz_type = requestBody['quiz_type']
+    cls_id = requestBody['cls_id']
+    '''
     subject_id = request.POST.get('subject', '')
     info = request.POST.get('info', '{}')
     body = request.POST.get('body', '')
@@ -1413,6 +1479,7 @@ def ajax_save_quiz_and_publish(request):
     public = request.POST.get('public', '')
     quiz_type = request.POST.get('quiz_type','')
     cls_id=request.POST.get('cls_id','')
+    '''
     if not body:
         return HttpResponse('quiz body not found')
     if marking == 'true':
@@ -1473,6 +1540,7 @@ def ajax_get_questions_by_section(request):
     page = request.GET.get('page', '1')
     selected = request.GET.get('selected','')
     page = int(page)
+    user = request.user
 
     if not section_id:
         return HttpResponse('failed: section_id missing')
@@ -1495,12 +1563,29 @@ def ajax_get_questions_by_section(request):
     except:
         questions = paginator.page(1)
 
+    try:
+        teacher_profile = user.teacherprofile
+    except:
+        return render(request,'teacher/errorPage.html',{"errorType":"该用户不是老师","particulars":"fault:user not having teacher profile"})
+    try:
+        favorites = Favorites.objects.get(teacher=teacher_profile)
+        favorites_questions = favorites.questions.all()
+    except:
+        favorites_questions = None
+
     d = {}
     for question in questions:
         val = {}
         val['body'] = question.body
+        val['type'] = question.question_type
         if question.img:
             val['img_url'] = question.img.url
+        try:
+            val['favorite'] = False
+            if favorites_questions.filter(id=question.id).exists():
+                val['favorite'] = True
+        except:
+            val['favorite'] = False
         options = {}
         for option in question.options.all():
             option_dic = {}
@@ -1639,18 +1724,35 @@ def ajax_get_questions_by_chapter(request):
     page = int(page)
     
     paginator = Paginator(questions, 25)
-
+    user = request.user
     try:
         questions = paginator.page(page)
     except:
         questions = paginator.page(1)
+    try:
+        teacher_profile = user.teacherprofile
+    except:
+        return render(request,'teacher/errorPage.html',{"errorType":"该用户不是老师","particulars":"fault:user not having teacher profile"})
+    try:
+        favorites = Favorites.objects.get(teacher=teacher_profile)
+        favorites_questions = favorites.questions.all()
+    except:
+        favorites_questions = None
 
     d = {}
     for question in questions:
         val = {}
         val['body'] = question.body
+        val['type'] = question.question_type
         if question.img:
             val['img_url'] = question.img.url
+        try:
+            val['favorite'] = False
+            if favorites_questions.filter(id=question.id).exists():
+                val['favorite'] = True
+        except:
+                val['favorite'] = False
+
         options = {}
         for option in question.options.all():
             option_dic = {}
@@ -1714,7 +1816,10 @@ def get_class_quiz_report(request):
     keys = ["average_score", "highest_score", "lowest_score"]
     for key in keys:
         if key in info:
-            quiz_result[key] = info[key]*100
+            if info[key] < 1:
+                quiz_result[key] = info[key] * 100
+            else:
+                quiz_result[key] = info[key]
 
     non_participants = info.get('non_participants', [])
     participants = info.get('participants', [])
@@ -1756,6 +1861,8 @@ def get_class_quiz_report(request):
     if nodes_data['status'] == False:
         return HttpResponse('failed: cannot generate nodes dictionary')
     
+    #print(nodes_data)
+
     nodes_dic = nodes_data['nodes_dic']
     node_score_dic = nodes_data['node_score_dic']
     node_question_dic = nodes_data['node_question_dic']
@@ -1811,8 +1918,8 @@ def get_class_quiz_report(request):
 
         question_dic['knowledge_nodes'] = list(question.knowledge_node.all().values_list('title', flat=True))
 
-        if question.pk in correct_count and correct_count[question.pk]['count'] > 0:
-            question_dic['accuracy'] = correct_count[question.pk]['correct'] / correct_count[question.pk]['count']
+        if str(question.pk) in correct_count and correct_count[str(question.pk)]['count'] > 0:
+            question_dic['accuracy'] = correct_count[str(question.pk)]['correct'] / correct_count[str(question.pk)]['count']
         else:
             question_dic['accuracy'] = 0
 
@@ -1845,19 +1952,22 @@ def get_class_quiz_report(request):
     if len(quiz_values) > 8:
         quiz_values = quiz_values[0:8]
 
-    score=[]
-    time=[]
+    scores=[]
+    times=[]
 
     for r in quiz_values:
         try:
-            score.append(json.loads(r['info'])['average_score'])
+            score = json.loads(r['info'])['average_score']
+            if score <= 1:
+                score = score *100
+            scores.append(score)
         except:
             continue
-        time.append(r['datetime'].strftime('%Y-%m-%d'))
-    time.reverse()
-    score.reverse()
+        times.append(r['datetime'].strftime('%Y-%m-%d'))
+    times.reverse()
+    scores.reverse()
    
-    dic['image2']={"x":time,"y1":score}
+    dic['image2']={"x":times,"y1":scores}
 
     last_rankings = {}
     if len(quiz_records) > 0:
@@ -1945,9 +2055,12 @@ def check_questions(request):
     '''
     if request.method =='GET':
         user = request.user
+        if not user.groups.filter(name='MANAGER').exists():
+            return render(request,'teacher/errorPage.html',{"errorType":"用户权限不足","particulars":"fault:user is not a manager"})
+
         page = request.GET.get('page','1')
-        #questions = Question.objects.filter(id__in=['1010','266'])
         questions = Question.objects.filter(authenticated = 'U')
+
         max_page = int((len(questions.all()) + 24)/25)
         if int(page) > max_page:
             page = 1
@@ -1961,26 +2074,34 @@ def check_questions(request):
 
         questions_list = []
         for question in questions:
-            # print(quiz_body[body][0])
-            try:
-                options = question.options.all().order_by('order')
-            except:
-                return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
-            options_dict = list(options.values('body','order','img','is_correct'))
-            error_reasons = []
-            options_knowledge_nodes = []
-            true_option=''
-            for option in options:
-                if option.is_correct:
-                    true_option=option.order
-                else:
-                    error_reason = ErrorReason.objects.filter(option=option)
-                    error_reasons.append({'option':option.order,"error_reason":error_reason})
-                option_knowledge_node = KnowledgeNode.objects.filter(option=option)
-                options_knowledge_nodes.append({'option':option.order,"knowledge_nodes":option_knowledge_node})
             knowledge_nodes = KnowledgeNode.objects.filter(question=question)
-            questions_list.append({'question':question,'options':options,"knowledge_nodes":knowledge_nodes,'true_option':true_option,'option_konwledge_nodes':options_knowledge_nodes,'error_reasons':error_reasons})
+            error_reasons = []
+            if question.question_type == 'multi-choice':
+                try:
+                    options = question.options.all().order_by('order')
+                except:
+                    return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
+                options_dict = list(options.values('body','order','img','is_correct'))
+                options_knowledge_nodes = []
+                true_option=''
+                for option in options:
+                    if option.is_correct:
+                        true_option=option.order
+                    else:
+                        error_reason = ErrorReason.objects.filter(option=option)
+                        error_reasons.append({'option':option.order,"error_reason":error_reason})
+                    option_knowledge_node = KnowledgeNode.objects.filter(option=option)
+                    options_knowledge_nodes.append({'option':option.order,"knowledge_nodes":option_knowledge_node})
+                questions_list.append({'question':question,'options':options,"knowledge_nodes":knowledge_nodes,'true_option':true_option,'option_konwledge_nodes':options_knowledge_nodes,'error_reasons':error_reasons})
+            if question.question_type == 'completion':
+                try:
+                    completion_answer = CompletionAnswer.objects.get(question = question)
+                    error_reasons = list(completion_answer.error_reason.all().values('description'))
+                    questions_list.append({'question':question,'answer':completion_answer,"knowledge_nodes":knowledge_nodes,'error_reasons':error_reasons})
+                except:
+                    questions_list.append({'question':question,"knowledge_nodes":knowledge_nodes})
         return render(request, 'quiz/check_questions.html',{'questions':questions_list,'page':page,'max_page':max_page})
+
     question_id = request.POST.get('questions_id','')
     status = request.POST.get('status','')
     question = Question.objects.get(pk = question_id)
@@ -2001,11 +2122,11 @@ def my_questions(request):
         user = request.user
         status = request.GET.get('status','all')
         page = request.GET.get('page','1')
-        questions = Question.objects.filter(uploader=user).order_by("id")
+        questions = Question.objects.filter(uploader=user).order_by("-id")
         if status == 'on':
-            questions = questions.filter(authenticated='U').order_by("id")
+            questions = questions.filter(authenticated='U').order_by("-id")
         if status == 'failed':
-            questions = questions.filter(authenticated='R').order_by("id")
+            questions = questions.filter(authenticated='R').order_by("-id")
         max_page = int((len(questions.all()) + 24)/25)
         if int(page) > max_page:
             page = 1
@@ -2019,26 +2140,33 @@ def my_questions(request):
 
         questions_list = []
         for question in questions:
-            # print(quiz_body[body][0])
-            try:
-                options = question.options.all().order_by('order')
-            except:
-                return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
-            options_dict = list(options.values('body','order','img','is_correct'))
-            error_reasons = []
-            options_knowledge_nodes = []
-            true_option=''
-            for option in options:
-                if option.is_correct:
-                    true_option=option.order
-                else:
-                    error_reason = ErrorReason.objects.filter(option=option)
-                    error_reasons.append({'option':option.order,"error_reason":error_reason})
-                option_knowledge_node = KnowledgeNode.objects.filter(option=option)
-                options_knowledge_nodes.append({'option':option.order,"knowledge_nodes":option_knowledge_node})
             knowledge_nodes = KnowledgeNode.objects.filter(question=question)
-            questions_list.append({'question':question,'options':options,"knowledge_nodes":knowledge_nodes,'true_option':true_option,'option_konwledge_nodes':options_knowledge_nodes,'error_reasons':error_reasons})
-        #print(questions_list)
+            error_reasons = []
+            if question.question_type == 'multi-choice':
+                try:
+                    options = question.options.all().order_by('order')
+                except:
+                    return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
+                options_dict = list(options.values('body','order','img','is_correct'))
+                options_knowledge_nodes = []
+                true_option=''
+                for option in options:
+                    if option.is_correct:
+                        true_option=option.order
+                    else:
+                        error_reason = ErrorReason.objects.filter(option=option)
+                        error_reasons.append({'option':option.order,"error_reason":error_reason})
+                    option_knowledge_node = KnowledgeNode.objects.filter(option=option)
+                    options_knowledge_nodes.append({'option':option.order,"knowledge_nodes":option_knowledge_node})
+                questions_list.append({'question':question,'options':options,"knowledge_nodes":knowledge_nodes,'true_option':true_option,'option_konwledge_nodes':options_knowledge_nodes,'error_reasons':error_reasons})
+            if question.question_type == 'completion':
+                try:
+                    completion_answer = CompletionAnswer.objects.get(question = question)
+                    error_reasons = list(completion_answer.error_reason.all().values('description'))
+                    questions_list.append({'question':question,'answer':completion_answer,"knowledge_nodes":knowledge_nodes,'error_reasons':error_reasons})
+                except:
+                    questions_list.append({'question':question,"knowledge_nodes":knowledge_nodes})
+
         return render(request, 'quiz/my_questions.html',{'questions':questions_list, 'status': status, 'page':page, 'max_page':max_page})
     return render(request, 'quiz/my_questions.html')
 
@@ -2048,27 +2176,30 @@ def add_favorites(request):
     if request.method == "POST":
         user = request.user
         question_id = request.POST.get('question_id','')
-        try:
-            question = Question.objects.get(pk=question_id)
-        except:
-            return HttpReponse('question not having')
-        try:
-            teacher_profile = user.teacherprofile
-        except:
-            return HttpResponse('user not having teacher profile')
-        try:
-            favorite = Favorites.objects.get(teacher=teacher_profile)
-            question = favorite.questions.all().filter(pk=question_id)
-            if len(question) > 0:
-                return HttpResponse('favorites having this question')
-            favorite.questions.add(question_id)
-        except:
-            favorite = Favorites(teacher=teacher_profile)
-            #favorite.questions.add(question_id)
-            favorite.save()
-            favorite.questions.add(question_id)
-        return HttpResponse('OK')
-    return HttpResponse('error method')
+    else:
+        question_id = request.GET.get('question_id','')
+    user = request.user
+    try:
+        question = Question.objects.get(pk=question_id)
+    except:
+        return HttpResponse('question not having')
+    try:
+        teacher_profile = user.teacherprofile
+    except:
+        return HttpResponse('user not having teacher profile')
+    try:
+        favorite = Favorites.objects.get(teacher=teacher_profile)
+        question = favorite.questions.all().filter(pk=question_id)
+        if len(question) > 0:
+            return HttpResponse('favorites having this question')
+        favorite.questions.add(question_id)
+    except:
+        favorite = Favorites(teacher=teacher_profile)
+        #favorite.questions.add(question_id)
+        favorite.save()
+        favorite.questions.add(question_id)
+    return HttpResponse('OK')
+    #return HttpResponse('error method')
 
 @login_required
 def my_favorites(request):
@@ -2078,7 +2209,7 @@ def my_favorites(request):
         try:
             teacher_profile = user.teacherprofile
         except:
-            return HttpResponse('user not having teacher profile')
+            return render(request,'teacher/errorPage.html',{"errorType":"该用户不是老师","particulars":"fault:user not having teacher profile"})
         try:
             favorites = Favorites.objects.get(teacher=teacher_profile)
         except:
@@ -2098,15 +2229,23 @@ def my_favorites(request):
 
         questions_list=[]
         for question in questions:
-            try:
-                options = question.options.all().order_by('order')
-            except:
-                return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
-            for option in options:
-                if option.is_correct:
-                    true_option=option.order
             knowledge_nodes = KnowledgeNode.objects.filter(question=question)
-            questions_list.append({'question':question,'options':options,"knowledge_nodes":knowledge_nodes,'true_option':true_option})
+            if question.question_type == 'multi-choice':
+                try:
+                    options = question.options.all().order_by('order')
+                except:
+                    return render(request,'teacher/errorPage.html',{"errorType":"数据紊乱","particulars":"fault:option not exsited"})
+                for option in options:
+                    if option.is_correct:
+                        true_option=option.order
+                questions_list.append({'question':question,'options':options,"knowledge_nodes":knowledge_nodes,'true_option':true_option})
+            if question.question_type == 'completion':
+                try:
+                    completion_answer = CompletionAnswer.objects.get(question = question)
+                    questions_list.append({'question':question,'answer':completion_answer,"knowledge_nodes":knowledge_nodes})
+                except:
+                    questions_list.append({'question':question,"knowledge_nodes":knowledge_nodes})
+
         return render(request, 'quiz/my_favorite.html',{'questions':questions_list,'page':page,'max_page':max_page})
     return render(request, 'quiz/my_favorite.html')
     
@@ -2115,20 +2254,89 @@ def my_favorites(request):
 @csrf_exempt
 def remove_favorites(request):
     if request.method == "POST":
-        user = request.user
-        try:
-            teacher_profile = user.teacherprofile
-        except:
-            return HttpResponse('user not having teacher profile')
-
         question_id = request.POST.get('question_id','')
+    else:
+        question_id = request.GET.get('question_id','')
+    user = request.user
+    try:
+        teacher_profile = user.teacherprofile
+    except:
+        return HttpResponse('user not having teacher profile')
+    try:
+        favorite = Favorites.objects.get(teacher=teacher_profile)
+    except:
+        return HttpReponse('favorite not having')
+    favorite.questions.remove(question_id)
+    return HttpResponse('OK')
+    #return HttpResponse('error method')
 
+@login_required
+@csrf_exempt
+def ajax_get_quiz_questions_information(request):
+    '''
+    
+    '''
+    if request.method =='POST':
+        user = request.user
+        #id_list = request.POST.get('id_list','[]')
+        id_list = json.loads(request.body.decode('utf-8'))
+        questions = Question.objects.filter(id__in=id_list)
+        questions = questions.filter(authenticated = 'P')
+        questions_list = []
+        #print(questions)
+        for question in questions:
+            # print(quiz_body[body][0])
+            try:
+                options = question.options.all().order_by('order')
+            except:
+                return HttpResponse("fault:option not exsited")
+            options_dict = list(options.values('body','order','img','is_correct'))
+            error_reasons = []
+            options_knowledge_nodes = []
+            true_option=''
+            option_list = []
+            for option in options:
+                option_img = ''
+                if option.img:
+                    option_img = option.img.url
+                option_list.append({'order':option.order, "img":option_img, "body":option.body})
+                if option.is_correct:
+                    true_option=option.order
+                else:
+                    error_reason = list(ErrorReason.objects.filter(option=option).values('description'))
+                    error_reasons.append({'option':option.order,"error_reason":error_reason})
+                option_knowledge_node = list(KnowledgeNode.objects.filter(option=option).values('title'))
+                options_knowledge_nodes.append({'option':option.order,"knowledge_nodes":option_knowledge_node})
+            knowledge_nodes = list(KnowledgeNode.objects.filter(question=question).values('title'))
+            img = ''
+            if question.img:
+                img = question.img.url
+            analysis_img = ''
+            if question.analysis_img:
+                analysis_img = question.analysis_img.url
+            questions_list.append({'question':{'body':question.body, 'id':question.id, "img":img, "analysis":question.analysis, "analysis_img":analysis_img}, 
+                                    'options':option_list, "knowledge_nodes":knowledge_nodes, 'true_option':true_option, 'option_konwledge_nodes':options_knowledge_nodes, 'error_reasons':error_reasons})
+        return HttpResponse(json.dumps({'questions':questions_list}))
+
+@login_required
+@csrf_exempt
+def ajax_upload_completion_answer(request):
+    if request.method == 'POST':
+        id = request.POST.get('id','')
+        body = request.POST.get('body','')
+        error_reason = request.POST.get('answer_error_reason',[])
+        question_id = request.POST.get('question_id','') 
         try:
-            favorite = Favorites.objects.get(teacher=teacher_profile)
+            question = Question.objects.get(pk=question_id)
         except:
-            return HttpReponse('favorite not having')
-        favorite.questions.remove(question_id)
+            return HttpRequest('question not exsited')
+        if id:
+            completion_answer = CompletionAnswer.objects.get(pk = id)
+            completion_answer.body = body
+        else: 
+            completion_answer = CompletionAnswer(body = body, question=question)
+        completion_answer.save()
+        completion_answer.error_reason.set(json.loads(error_reason))
+
         return HttpResponse('OK')
     return HttpResponse('error method')
-
-

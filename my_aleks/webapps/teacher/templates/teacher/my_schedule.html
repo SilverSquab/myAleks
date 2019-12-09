@@ -1,0 +1,227 @@
+{% extends base_template %}
+
+{% load staticfiles %}
+{% block "stylesheets" %}
+<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+
+<!--<link href='https://use.fontawesome.com/releases/v5.0.6/css/all.css' rel='stylesheet'>
+<link href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' rel='stylesheet' />-->
+
+<link href="{% static 'assets/vendor/fullcalendar/core/main.css' %}" rel='stylesheet'/>
+<link href="{% static 'assets/vendor/fullcalendar/timegrid/main.css' %}" rel='stylesheet'/>
+<link href="{% static 'assets/vendor/fullcalendar/bootstrap/main.css' %}" rel='stylesheet'/>
+<link href="{% static 'assets/vendor/fullcalendar/daygrid/main.css' %}" rel='stylesheet'/>
+
+<style>
+    #calendar {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    #calendar tr{
+        height: 28px;
+    }
+
+    .hide{
+        display: none;
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block "main_content" %}
+<div>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">课程安排</h1>
+    </div>
+
+    <div class="row">
+        <!--级联选择框 -->
+        <div class="col-lg-12">
+            <div class="tile">
+                <div class="tile-body flex-row">
+                    <div style="float:left" class="input-group-btn">
+                        <input type="text" placeholder="请选择班级" class="form-control" data-toggle="dropdown"
+                               aria-haspopup="true" aria-expanded="false"
+                               style="text-align: left;width:160px;height:40px" readonly="readonly" id="classInput">
+                        <ul class="dropdown-menu dropdown-menu-left" style="max-height: 500px;overflow: auto">
+                            <li class="classCheckLi" id="select">
+                                {% for schoolClass in classList %}
+                                <div class="dropdown-item" style="cursor:hand" name="{{schoolClass.id}}">{{schoolClass.name}}</div>
+                                {% endfor %}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn btn-info btn-icon-split btn-sm" style="margin-left: 10px" id="checkButton">
+                        <span class="text" id="query_learning" name="checkStudyState">查询学情状况</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4 classFontSize hide" id="calendarBox">
+        <div class="card-header py-3">
+            <!--<h6 class="m-0 font-weight-bold text-primary" classId="{{nowClass.id}}">{{nowClass.name}}</h6>-->
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <div id="calendar">
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</div>
+{% endblock %}
+
+
+{% block "scripts" %}
+
+<script src="{% static 'assets/vendor/fullcalendar/core/main.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/interaction/main.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/daygrid/main.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/timegrid/main.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/bootstrap/main.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/core/locales/zh-cn.js' %}"></script>
+<script src="{% static 'assets/vendor/fullcalendar/interaction/main.js' %}"></script>
+<script src="{% static 'assets/js/jquery.showSChedule.msgbox.js' %}"></script>
+
+
+
+
+<script type="text/javascript">
+    var newClassId = '';
+    var thisDate = new Date();
+    var event_list = [];
+    //班级的点击事件
+    $(document).on('click', '.dropdown-item', function () {
+        var id = $(this).attr('name');
+        var name = $(this).text();
+        $("#classInput").attr('name', id);
+        $("#classInput").val(name)
+    });
+
+    $(document).on('click', '#checkButton', function () {
+        var classId = $('#classInput').attr('name');
+        if (!classId) {
+            alert("未选择班级");
+            return
+        }
+        newClassId = classId;
+        if($('#calendarBox').hasClass("hide")){
+            $('#calendarBox').removeClass("hide");
+        }else{
+            $('#calendar').empty();
+        }
+        createCalendar();
+    });
+
+    var createCalendar = function () {
+        //指定位置
+        var calendarEl = document.getElementById('calendar');
+        //calendar是日历对象
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            plugins: ['timeGrid','dayGrid', 'bootstrap', 'interaction'],
+            themeSystem: 'bootstrap',
+            locale: 'zh-cn',
+            header: {
+                left: '',
+                center: 'title',
+                right: 'prev,next',
+            },
+            buttonText: {
+                prev: '上周',
+                next: '下周',
+            },
+            timeGridEventMinHeight:20,
+            allDaySlot: false,
+            slotEventOverlap: false,
+            slotDuration: '00:30:00',
+            minTime: "07:00:00",
+            maxTime: '22:00:00',
+            selectable: false,
+            selectMirror: true,
+            // selectOverlap:false,
+            events:function(start,callback){
+                var startTime = start.start.Format('yyyy-MM-dd');
+                var endTime = start.end.Format('yyyy-MM-dd');
+                var data = {
+                    cls_id: newClassId,
+                    start: startTime,
+                    end: endTime
+                };
+                //获取事件
+                $.ajax({
+                    url: "{% url 'ajax-get-schedule-occurrence-by-class' %}",
+                    data:data,
+                    dataType: 'json',
+                    type : 'post',
+                    success:function (result) {
+                        var events = [];
+                        event_list = result;
+                        for(var index in event_list){
+                            events.push({
+                                id:event_list[index].id,
+                                title: event_list[index].title,
+                                start: event_list[index].start,
+                                end: event_list[index].end,
+                                description:event_list[index].description,
+                            });
+                        }
+                        callback(events);
+                    }
+                });
+
+            },
+            //点击查看
+            eventClick: function (info) {
+                var event = {
+                  title:info.event.title,
+                  start:info.event.start.Format('yyyy-MM-dd hh:mm:ss'),
+                  end:info.event.end.Format('yyyy-MM-dd hh:mm:ss'),
+                  description:info.event.extendedProps.description,
+                };
+
+                $.ShowSchedule.Confirm('课程', event);
+            },
+
+        });
+        calendar.render();
+    };
+
+    Date.prototype.Format = function (fmt) {
+        var o = {
+            "M+": this.getMonth() + 1, //月份
+            "d+": this.getDate(), //日
+            "h+": this.getHours(), //小时
+            "m+": this.getMinutes(), //分
+            "s+": this.getSeconds(), //秒
+            "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+            "S": this.getMilliseconds() //毫秒
+        };
+        if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o){
+            if (new RegExp("(" + k + ")").test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            }
+        }
+        return fmt;
+    };
+
+
+
+
+
+
+
+
+</script>
+{% endblock %}

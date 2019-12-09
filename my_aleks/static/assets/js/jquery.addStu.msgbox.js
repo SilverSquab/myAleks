@@ -92,9 +92,9 @@
         $("#mb_con").css({ zIndex: '999999', width: '80%', position: 'fixed',//弹框的宽
             backgroundColor: 'White', borderRadius: '15px'
         });
-        $("#mb_tit").css({ display: 'block', fontSize: '20px', color: '#1fc88d', padding: '10px 15px',//字体颜色
+        $("#mb_tit").css({ display: 'block', fontSize: '20px', color: '#009688', padding: '10px 15px',//字体颜色
             backgroundColor: 'white', borderRadius: '15px 15px 0 0',//顶部title颜色
-            borderBottom: '3px solid #1fc88d', fontWeight: 'bold'//线条颜色
+            borderBottom: '3px solid #009688', fontWeight: 'bold'//线条颜色
         });
         $("#mb_msg").css({ padding: '20px', lineHeight: '20px',
             borderBottom: '1px dashed #DDD', fontSize: '13px'//虚线分界线颜色

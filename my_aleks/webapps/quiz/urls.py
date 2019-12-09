@@ -44,5 +44,9 @@ urlpatterns=[
     url(r'^my-favorites/$', views.my_favorites, name='my-favorites'),
     url(r'^remove-favorites/$', views.remove_favorites, name='remove-favorites'),
     url(r'^add-favorites/$', views.add_favorites, name='add-favorites'),
+    url(r'^ajax-get-quiz-questions-information/$', views.ajax_get_quiz_questions_information, name='ajax-get-quiz-questions-information'),
+    
+    url(r'^upload-completion',views.upload_completion, name='upload-completion'),
+    url(r'^ajax-upload-completion-answer', views.ajax_upload_completion_answer, name='ajax-upload-completion-answer')
 
 ]

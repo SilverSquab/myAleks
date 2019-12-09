@@ -17,18 +17,7 @@
         width:100%;
         height:100%;
     }
-    .myContainer{
-        width:80%;
-        margin:0 auto;
-        margin-bottom: 20px;
-        margin-top:30px;
-        /*border:1px solid #dddddd;*/
-        /*border-radius:1px;*/
-        border:5px solid #1d8ce0;
-        border-radius:30px;
-        padding: 30px 10px;
-
-    }
+   
     label{
         display:block;
         background-color: #F5F5F5;
@@ -80,13 +69,12 @@
 
 <!-- Page Heading -->
 <!--班级列表-->
-<div class="col-xl-6 col-md-6 mb-4">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">班级管理 <input id="tird" style="display: none" value="{{teacherId}}" > </h1>
-    </div>
+<div class="app-title">
+ 	<h4 style="display: inline-block;">班级管理 <input id="tird" style="display: none" value="{{teacherId}}" > </h4>
+    
     <!-- 添加班级按钮 -->
-    <div class="input-group-append" style="float: none;">
-        <button class="btn btn-primary" id="addCls" type="button">
+    <div style="float: right;">
+        <button class="btn btn-primary" id="addCls" type="button" >
             <i>添加班级</i>
         </button>
     </div>
@@ -170,7 +158,7 @@
             {
                 background:"#D7ECF1",
                 position:"absolute",
-                zIndex:10,
+                zIndex:9999999,
                 width:"380px",
                 height:"48px",
                 left:"50%",
@@ -226,7 +214,7 @@
     //卡片点击事件
     $(document).on("click","div[name='Cls']",function () {
         var clsId = $(this).parent().attr("id")
-        $(location).attr('href', '{% url "school-get-class-detail" %}?clsId=' + clsId);
+        $(location).attr('href', '{% url "school-get-class-detail" %}?clsId=' + clsId+'&template=school/school_base.html');
     });
 
     //删除事件

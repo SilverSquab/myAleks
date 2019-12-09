@@ -1,0 +1,133 @@
+{% extends base_template %}
+
+{% load staticfiles %}
+{% block "stylesheets" %}
+<link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+
+<style>
+
+</style>
+
+{% endblock %}
+
+{% block "main_content" %}
+<div>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">班级点到</h1>
+    </div>
+
+    <div class="row">
+        <!--级联选择框 -->
+        <div class="col-lg-12">
+            <div class="tile">
+                <div class="tile-body flex-row">
+                    <div style="float:left"  class="input-group-btn">
+                        <input type="text" placeholder="请选择班级" class="form-control" data-toggle="dropdown"aria-haspopup="true" aria-expanded="false" style="text-align: left;width:160px;height:40px" readonly="readonly" id="classInput" >
+                        <ul class="dropdown-menu dropdown-menu-left" style="max-height: 500px;overflow: auto">
+                            <li class="classCheckLi" id="select" >
+                                {% for schoolClass in classList %}
+                                <div class="dropdown-item" style="cursor:hand" name="{{schoolClass.id}}">{{schoolClass.name}}</div>
+                                {% endfor %}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn btn-info btn-icon-split btn-sm" style="margin-left: 10px" id="checkButton">
+                        <span class="text" id="query_learning" name="checkStudyState">查询学情状况</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% if nowClass %}
+    <div class="card shadow mb-4 classFontSize">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary" classId="{{nowClass.id}}">{{nowClass.name}}</h6>
+        </div>
+        <div style="padding-left:20px; padding-top:10px;">
+            <p>班级名称：{{nowClass.name}}</p>
+            <p>科目：{{subject}}</p>
+            <p>老师：{{teacher}}</p>
+            <p>班级人数：{{nowClass.num}}</p>
+
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th>学号</th>
+                        <th>姓名</th>
+                        <th>电话号码</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for student in ClassInformation %}
+                    <tr id="{{student.student_no}}">
+                        <th>{{student.student_no}}</th>
+                        <th>{{student.name}}</th>
+                        <th>{% if student.phone %}{{student.phone}}{% else %}——{% endif %}</th>
+                        <td class="searchTrShow hide"><span style="cursor: pointer;color: #009688" name="search">点到</span></td>
+                    </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+
+{% block "scripts" %}
+<script type="text/javascript">
+    var model = '{{base_template}}'
+
+
+
+    //班级的点击事件
+    $(document).on('click','.dropdown-item',function(){
+        var id = $(this).attr('name')
+        var name = $(this).text()
+        $("#classInput").attr('name',id)
+        $("#classInput").val(name)
+    });
+
+    //学生消课接口
+    $("span[name='search']").click(function () {
+        var stuId = $(this).parent().parent().attr("id");
+        var that = this;
+        var clsId = $('.text-primary').attr('classId');
+        $.get("{% url 'reduce-class' %}?student_no="+stuId+"&cls_id="+clsId ,function(data,status){
+            if(data == 'OK'){
+                // alert("点到成功");
+                $(that).parent().html('<span>已到</span>');
+            }else{
+                alert("该学生未支付学费，或上课次数用尽");
+            }
+        })
+    });
+
+
+
+    $(document).on('click','#checkButton',function () {
+        var classId = $('#classInput').attr('name');
+        if(!classId){
+            alert("未选择班级");
+            return
+        }
+        model_type = model.split('/')[0];
+        window.location.href = "{% url 'student-tuition' %}?cls_id=" + classId + "&model="+model_type;
+    })
+    
+
+
+</script>
+{% endblock %}
+
+

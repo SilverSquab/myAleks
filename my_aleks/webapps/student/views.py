@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
 from .models import *
+from webapps.school.models import Cls
+from .helpers import *
 
 
 # Create your views here.
@@ -158,10 +160,45 @@ def ajax_get_student_profile(request):
     dic = {'name': p.name, 'student_id': p.pk, 'age': p.age, 'phone':p.phone, 'student_no': p.student_no, 'gender': p.gender}
 
     return HttpResponse(json.dumps(dic))
+@login_required
+def ajax_get_class_student(request):
+    if request.method == "GET":
+        cls_id = request.GET.get('cls_id','')
+        try:
+            cls = Cls.objects.get(pk=cls_id)
+        except:
+            return HttpResponse("cls is not having")
+        students = StudentProfile.objects.filter(student_no__in = json.loads(cls.students))
+        student_list = []
+        for student in students:
+            img = ''
+            if student.image:
+                img = student.image.name
+            student_list.append({"id":student.id, "student_no":student.student_no, "img":img, "info":student.info, "name":student.name})
+        return HttpResponse(json.dumps(student_list))
+        
 
 @login_required
 def student_profile_tuition(request):
     return render(request, 'student/student_tuition.html')
 
 
+@login_required
+def reduce_class(request):
+    student_no = request.GET.get('student_no', '')
+    cls_id = request.GET.get('cls_id', '')
+    if not student_no or (not cls_id):
+        return HttpResponse('failed: data incomplete')
 
+    tuitions = Tuition.objects.filter(student__student_no=student_no, cls__pk=cls_id, expired=False, paid=True)
+    if len(tuitions) == 0:
+        return HttpResponse('failed: no ')
+
+    tuition = tuitions[0]
+    res = reduce_cls_wrapper(tuition.pk)
+    if res['result'] == True:
+        return HttpResponse('OK')
+
+    else:
+        return HttpResponse('faield: ' + res['reason'])
+    

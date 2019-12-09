@@ -179,6 +179,7 @@ def get_class_detail(request):
 
     user = request.user
     cls_id = request.GET.get('clsId')
+    base_template = request.GET.get('template')
     try:
         #use filter to take use of queryset's values function
         cls = Cls.objects.filter(pk=cls_id,deleted=False)
@@ -216,19 +217,23 @@ def get_class_detail(request):
         student_list.append({'stuPlanId':stuPlanId,"payStatus":payStatus,"id":student.id,"student_no":student.student_no,"name":student.name})
 
     if user.groups.filter(name='TEACHER').exists():
+        if not base_template:
+            base_template = 'teacher/teacher_base.html'
         try:
             teacher = cls.teacher.user
             if teacher == user:
-                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_list, 'clsInfo':class_info,'base_template':'teacher/teacher_base.html'})
+                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_list, 'clsInfo':class_info,'base_template':base_template})
         except:
             pass
         
 
     if user.groups.filter(name='SCHOOL_MANAGER').exists():
+        if not base_template:
+            base_template = 'school/school_base.html'
         try:
             school = user.school
             if cls.school == school:
-                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_list, 'clsInfo':class_info,'base_template':'school/school_base.html'})
+                return render(request, 'school/school_cls_detail.html', {'planInfo': plan_info, 'students': student_list, 'clsInfo':class_info,'base_template':base_template})
         except:
             pass
 
